@@ -42,8 +42,8 @@ shift_expr: arith_expr (('<<'|'>>') arith_expr)*
 arith_expr: term (('+'|'-') term)*
 term: factor (('*'|'/'|'%'|'//') factor)*
 factor: ('+'|'-'|'~') factor | power
-power: atom_expr ['**' factor]
-atom_expr: (NAME | NUMBER | STRING | 'None' | 'True' | 'False') trailer*
+power: name_expr ['**' factor]
+name_expr: (NAME | NUMBER | STRING | 'None' | 'True' | 'False') trailer*
 trailer: '(' [arglist] ')' | '[' test ']' | '.' NAME
 
 arglist: argument (',' argument)*  [',']
