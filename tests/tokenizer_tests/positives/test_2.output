@@ -1,0 +1,49 @@
+ [ 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 0, 
+			"numPos": 0, 
+			"value": "4"
+		}, 
+		{ 
+			"type": "KEYWORD", 
+			"numLine": 0, 
+			"numPos": 4, 
+			"value": "if"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 1, 
+			"numPos": 0, 
+			"value": "4"
+		}, 
+		{ 
+			"type": "KEYWORD", 
+			"numLine": 1, 
+			"numPos": 4, 
+			"value": "else"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 2, 
+			"numPos": 0, 
+			"value": "4"
+		}, 
+		{ 
+			"type": "NUMBER", 
+			"numLine": 2, 
+			"numPos": 4, 
+			"value": "8"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 3, 
+			"numPos": 0, 
+			"value": "4"
+		}, 
+		{ 
+			"type": "STRING", 
+			"numLine": 3, 
+			"numPos": 4, 
+			"value": "fff"
+		}]

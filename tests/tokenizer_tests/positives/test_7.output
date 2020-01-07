@@ -1,0 +1,43 @@
+ [ 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 0, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 0, 
+			"numPos": 0, 
+			"value": "print"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 0, 
+			"numPos": 5, 
+			"value": "("
+		}, 
+		{ 
+			"type": "STRING", 
+			"numLine": 0, 
+			"numPos": 6, 
+			"value": "\\"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 0, 
+			"numPos": 10, 
+			"value": ","
+		}, 
+		{ 
+			"type": "STRING", 
+			"numLine": 0, 
+			"numPos": 11, 
+			"value": "kek"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 0, 
+			"numPos": 16, 
+			"value": ")"
+		}]

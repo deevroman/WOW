@@ -9,7 +9,7 @@
 #include <fstream>
 #include <string>
 
-std::string readFile(const std::string& fileName) {
+std::string readFile(const std::string fileName) {
     std::ifstream f(fileName);
     std::stringstream ss;
     ss << f.rdbuf();

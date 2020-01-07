@@ -1,0 +1,5 @@
+for i in des_f_pre_test:
+    for j in feature_matrix_test.columns:
+        if i in j:
+            des_f_test.append(j)
+            feature_matrix_test[j] = feature_matrix_test[j].astype(np.int)

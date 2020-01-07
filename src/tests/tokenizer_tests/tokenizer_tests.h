@@ -5,42 +5,96 @@
 #include "../../fread/fread.h"
 #include <iostream>
 
+#include "../../../external/ThorsSerializer/ThorSerialize/Traits.h"
+#include "../../../external/ThorsSerializer/ThorSerialize/JsonThor.h"
+#include "../../../external/ThorsSerializer/ThorSerialize/SerUtil.h"
+
 class TokenizerTests {
 public:
-    int run(){
-        int failed = 0;
-        failed += run_tests();
-        return failed;
+    void run() {
+        run_tests();
     }
 
+
 private:
-    const int COUNT_TEST_P = 1;
-    const int COUNT_TEST_N = 1;
-    int run_tests(){
-        int cnt_wrong = 0;
+    // TODO
+    int COUNT_TESTS_P = 7;
+    int COUNT_TESTS_N = 2;
 
-        for(int i = 0; i < CONUT_TEST_P; i++) {
-            std::string input = readFile("../tests/tokenizer_tests/positives/test_" + std::string(i + '0') +  ".input");
+    int COUNT_FAILED_TESTS_P = 0;
+    int COUNT_FAILED_TESTS_N = 0;
+public:
+    int getCountTestsP() const {
+        return COUNT_TESTS_P;
+    }
+
+    int getCountTestsN() const {
+        return COUNT_TESTS_N;
+    }
+
+    int getCountTests() const {
+        return COUNT_TESTS_P + COUNT_TESTS_N;
+    }
+
+    int getCountFailedTestsP() const {
+        return COUNT_FAILED_TESTS_P;
+    }
+
+    int getCountFailedTestsN() const {
+        return COUNT_FAILED_TESTS_N;
+    }
+
+    int getCountFailedTests() const {
+        return COUNT_FAILED_TESTS_P + COUNT_FAILED_TESTS_N;
+    }
+
+
+private:
+    void run_tests() {
+        using ThorsAnvil::Serialize::jsonExport;
+
+        COUNT_FAILED_TESTS_P = 0;
+        for (int i = 1; i <= COUNT_TESTS_P; i++) {
+            std::string input = readFile("../tests/tokenizer_tests/positives/test_" + std::to_string(i) + ".input");
             Tokenizer tokenizer(input);
-            std::vector <std::string> result;
+            std::vector<Token> result;
             try {
                 result = tokenizer.tokenize();
+                std::string goodOutput = readFile(
+                        "../tests/tokenizer_tests/positives/test_" + std::to_string(i) + ".output");
+                std::vector<Token> goodResult;
+                std::stringstream(goodOutput) >> jsonImport(goodResult);
+                if (result == goodResult) {
+                    std::cout << "Positive test #" << i << '\n';
+                    std::cout << "OK\n";
+                } else {
+                    std::cout << "Positive test #" << i << '\n';
+                    std::cout << "Failed:\n";
+                    COUNT_FAILED_TESTS_P++;
+                }
             } catch (...) {
-
+                std::cout << "Positive test #" << i << '\n';
+                std::cout << "Failed:\n";
+                std::cout << "Crashed\n";
+                COUNT_FAILED_TESTS_P++;
             }
         }
-
-        for(int i = 0; i < CONUT_TEST_N; i++) {
-            std::string input = readFile("../tests/tokenizer_tests/negatives/test_" + std::string(i + '0') +  ".input");
+        COUNT_FAILED_TESTS_N = 0;
+        for (int i = 1; i <= COUNT_TESTS_N; i++) {
+            std::string input = readFile("../tests/tokenizer_tests/negatives/test_" + std::to_string(i) + ".input");
             Tokenizer tokenizer(input);
-            std::vector <std::string> result;
+            std::vector<Token> result;
             try {
                 result = tokenizer.tokenize();
+                std::cout << "Negative test #" << i << '\n';
+                std::cout << "Failed:\n";
+                std::cout << "Not crashed\n";
+                COUNT_FAILED_TESTS_N++;
             } catch (...) {
-
+                std::cout << "Negative test #" << i << '\n';
+                std::cout << "OK\n";
             }
         }
-        return cnt_wrong;
     }
 };
 

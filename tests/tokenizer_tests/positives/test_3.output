@@ -1,0 +1,115 @@
+ [ 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 0, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 0, 
+			"numPos": 0, 
+			"value": "a"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 0, 
+			"numPos": 2, 
+			"value": "="
+		}, 
+		{ 
+			"type": "NUMBER", 
+			"numLine": 0, 
+			"numPos": 4, 
+			"value": "4"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 1, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 1, 
+			"numPos": 0, 
+			"value": "b"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 1, 
+			"numPos": 2, 
+			"value": "="
+		}, 
+		{ 
+			"type": "NUMBER", 
+			"numLine": 1, 
+			"numPos": 4, 
+			"value": "48"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 2, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "KEYWORD", 
+			"numLine": 2, 
+			"numPos": 0, 
+			"value": "if"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 2, 
+			"numPos": 3, 
+			"value": "a"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 2, 
+			"numPos": 5, 
+			"value": "=="
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 2, 
+			"numPos": 8, 
+			"value": "b"
+		}, 
+		{ 
+			"type": "BEGIN_BLOCK", 
+			"numLine": 2, 
+			"numPos": 9, 
+			"value": ":"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 3, 
+			"numPos": 0, 
+			"value": "4"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 3, 
+			"numPos": 4, 
+			"value": "print"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 3, 
+			"numPos": 9, 
+			"value": "("
+		}, 
+		{ 
+			"type": "STRING", 
+			"numLine": 3, 
+			"numPos": 10, 
+			"value": "kek"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 3, 
+			"numPos": 15, 
+			"value": ")"
+		}]

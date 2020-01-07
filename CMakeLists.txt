@@ -6,5 +6,3 @@ set(CMAKE_CXX_STANDARD 17)
 add_executable(WOW WOW.cpp)
 
 SET( EXECUTABLE_OUTPUT_PATH "./bin")
-
-#add_subdirectory("src/tokenizer")

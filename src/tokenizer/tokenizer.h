@@ -2,9 +2,9 @@
 #define WOW_TOKENIZER_H
 
 #include "token.h"
-
 #include <vector>
 #include <string>
+
 
 class Tokenizer {
 public:
@@ -14,16 +14,16 @@ private:
     std::string input;
 
     const std::vector<std::string> keywords = {
-            "if", "while", "for", "else", "import", "break",
+            "if", "while", "for", "else", "elif", "import", "break",
             "continue", "class", "return", "def",
-            "xor", "or", "and", "not", "True",
+            "xor", "or", "and", "not", "in", "True",
             "False", "None", "del", "pass", "list"};
 
     const std::vector<std::string> operators = {"<", ">", "==", ">=", "<=", "!=",
                                                 "^", "&", "<<", ">>", "+", "-",
                                                 "%", "*", "**", "/", "//", "~",
-                                                "(", ")", "[", "]", ".",
-                                                "+=", "-=", "*=", "/=", "**=", "//="};
+                                                "(", ")", "[", "]", ".", ",",
+                                                "+=", "-=", "*=", "/=", "**=", "//=", "="};
 
     class Exception {
     public:
@@ -59,7 +59,7 @@ private:
     }
 
     void readSpaces(int &pos, int &posInLine) {
-        while (!isEnd(pos) && input[pos] != ' ') {
+        while (!isEnd(pos) && input[pos] == ' ') {
             pos++;
             posInLine++;
         }
@@ -112,11 +112,21 @@ private:
                 return subStr;
             }
         }
+        throw Exception(-1, "Bred");
     }
 
     std::string readNumber(int &pos, int &posInLine) {
         std::string num;
-        while (!isEnd(pos) && (input[pos] >= '0' && input[pos] <= '9')) {
+        int cntPoints = 0;
+        while (!isEnd(pos)
+               && ((input[pos] >= '0' && input[pos] <= '9') || input[pos] == '.')) {
+            if (input[pos] == '.') {
+                if (cntPoints == 0) {
+                    cntPoints++;
+                } else {
+                    throw Exception(3, "Invalid float number format");
+                }
+            }
             num += input[pos];
             pos++;
             posInLine++;
@@ -155,8 +165,8 @@ private:
                 posInLine = 0;
                 str += '\n';
             } else if (input[pos] == '\'') {
-                pos += 2;
-                posInLine += 2;
+                pos += 1;
+                posInLine += 1;
                 break;
             } else {
                 str += input[pos];
@@ -205,13 +215,18 @@ private:
 
     std::string readName(int &pos, int &posInLine) {
         std::string name = {input[pos]};
+        pos++;
+        posInLine++;
         while (!isEnd(pos) &&
                ((input[pos] >= 'a' && input[pos] <= 'z')
                 || (input[pos] >= 'A' && input[pos] <= 'Z')
                 || (input[pos] >= '0' && input[pos] <= '9')
                 || input[pos] == '_')) {
-
+            name += input[pos];
+            pos++;
+            posInLine++;
         }
+        return name;
     }
 
     void parse(std::vector<Token> &ans) {
@@ -221,7 +236,7 @@ private:
         try {
             while (!isEnd(pos)) {
                 int cntSpace = readBeginSpace(pos);
-                ans.push_back(Token(Token::BEGIN_BLOCK, line, 0, std::to_string(cntSpace)));
+                ans.push_back(Token(Token::BEGIN_LINE, line, 0, std::to_string(cntSpace)));
                 posInLine = cntSpace;
 
                 parseLine(pos, line, posInLine, ans);
@@ -229,7 +244,7 @@ private:
                 posInLine = 0;
             }
         } catch (Exception e) {
-            throw std::to_string(line) + ":" + std::to_string(posInLine) + "\n"
+            throw std::to_string(line + 1) + ":" + std::to_string(posInLine + 1) + "\n"
                   + e.message;
         }
     }
@@ -242,23 +257,32 @@ private:
             } else if (input[pos] == '#') {
                 readComment(pos);
             } else if (isBeginOperator(pos)) {
+                int startPosInLine = posInLine;
                 std::string op = readOperator(pos, posInLine);
-                ans.push_back(Token(Token::OPERATOR, line, posInLine, op));
+                ans.push_back(Token(Token::OPERATOR, line, startPosInLine, op));
             } else if (input[pos] >= '0' && input[pos] <= '9') {
+                int startPosInLine = posInLine;
                 std::string num = readNumber(pos, posInLine);
-                ans.push_back(Token(Token::NUMBER, line, posInLine, num));
+                ans.push_back(Token(Token::NUMBER, line, startPosInLine, num));
             } else if (input[pos] == '\'') {
+                int startPosInLine = posInLine;
                 std::string str = readString(pos, posInLine, line);
-                ans.push_back(Token(Token::STRING, line, posInLine, str));
+                ans.push_back(Token(Token::STRING, line, startPosInLine, str));
             } else if (input[pos] == ' ') {
                 readSpaces(pos, posInLine);
             } else if (isKeyword(pos)) {
+                int startPosInLine = posInLine;
                 std::string keyword = readKeyword(pos, posInLine);
-                ans.push_back(Token(Token::KEYWORD, line, posInLine, keyword));
+                ans.push_back(Token(Token::KEYWORD, line, startPosInLine, keyword));
             } else if ((input[pos] >= 'a' && input[pos] <= 'z')
                        || (input[pos] >= 'A' && input[pos] <= 'Z') || input[pos] == '_') {
+                int startPosInLine = posInLine;
                 std::string name = readName(pos, posInLine);
-                ans.push_back(Token(Token::NAME, line, posInLine, name));
+                ans.push_back(Token(Token::NAME, line, startPosInLine, name));
+            } else if (input[pos] == ':') {
+                ans.push_back(Token(Token::BEGIN_BLOCK, line, posInLine, ":"));
+                pos++;
+                posInLine++;
             } else {
                 throw Exception(2, "Invalid syntax");
             }
@@ -272,6 +296,7 @@ public:
         parse(ans);
         return ans;
     }
+
 
 };
 
