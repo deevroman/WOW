@@ -13,17 +13,26 @@ public:
 private:
     std::string input;
 
-    const std::vector <std::string> keywords = {
-            "if", "while", "for", "import", "break",
+    const std::vector<std::string> keywords = {
+            "if", "while", "for", "else", "import", "break",
             "continue", "class", "return", "def",
             "xor", "or", "and", "not", "True",
             "False", "None", "del", "pass", "list"};
 
-    const std::vector <std::string> operators = {"<", ">", "==", ">=", "<=", "!=",
-                                                 "^", "&", "<<", ">>", "+", "-",
-                                                 "%", "*", "**", "/", "//", "~",
-                                                 "(", ")", "[", "]", ".",
-                                                 "+=", "-=", "*=", "/=", "**=", "//="};
+    const std::vector<std::string> operators = {"<", ">", "==", ">=", "<=", "!=",
+                                                "^", "&", "<<", ">>", "+", "-",
+                                                "%", "*", "**", "/", "//", "~",
+                                                "(", ")", "[", "]", ".",
+                                                "+=", "-=", "*=", "/=", "**=", "//="};
+
+    class Exception {
+    public:
+        int code;
+        std::string message;
+
+        Exception(int code, std::string message) :
+                code(code), message(message) {}
+    };
 
     bool isEnd(int pos) {
         return pos >= input.size();
@@ -35,16 +44,17 @@ private:
             if (input[pos] != ' ') {
                 break;
             }
-            pos++, cntSpace++
+            pos++, cntSpace++;
         }
         return cntSpace;
     }
 
     void readComment(int &pos) {
-        for (pos; !isEnd(pos); pos++) {
+        while (!isEnd(pos)) {
             if (input[pos] == '\n') {
                 return;
             }
+            pos++;
         }
     }
 
@@ -58,26 +68,20 @@ private:
     bool isBeginOperator(int pos) {
         if (!isEnd(pos)) {
             if (!isEnd(pos + 1) && !isEnd(pos + 2)) {
-                std::string = input.substr(pos, 3);
-                for (auto now : operators) {
-                    if (std::find(operators.begin(), operators.end(), now) != operators.end()) {
-                        return true;
-                    }
+                std::string subStr = input.substr(pos, 3);
+                if (find(operators.begin(), operators.end(), subStr) != operators.end()) {
+                    return true;
                 }
             }
             if (!isEnd(pos + 1)) {
-                std::string = input.substr(pos, 2);
-                for (auto now : operators) {
-                    if (std::find(operators.begin(), operators.end(), now) != operators.end()) {
-                        return true;
-                    }
-                }
-            }
-            std::string = input.substr(pos, 1);
-            for (auto now : operators) {
-                if (std::find(operators.begin(), operators.end(), now) != operators.end()) {
+                std::string subStr = input.substr(pos, 2);
+                if (find(operators.begin(), operators.end(), subStr) != operators.end()) {
                     return true;
                 }
+            }
+            std::string subStr = input.substr(pos, 1);
+            if (find(operators.begin(), operators.end(), subStr) != operators.end()) {
+                return true;
             }
         }
         return false;
@@ -86,32 +90,26 @@ private:
     std::string readOperator(int &pos, int &posInLine) {
         if (!isEnd(pos)) {
             if (!isEnd(pos + 1) && !isEnd(pos + 2)) {
-                std::string = input.substr(pos, 3);
-                for (auto now : operators) {
-                    if (std::find(operators.begin(), operators.end(), now) != operators.end()) {
-                        pos += 3;
-                        posInLine += 3;
-                        return now;
-                    }
+                std::string subStr = input.substr(pos, 3);
+                if (find(operators.begin(), operators.end(), subStr) != operators.end()) {
+                    pos += 3;
+                    posInLine += 3;
+                    return subStr;
                 }
             }
             if (!isEnd(pos + 1)) {
-                std::string = input.substr(pos, 2);
-                for (auto now : operators) {
-                    if (std::find(operators.begin(), operators.end(), now) != operators.end()) {
-                        pos += 2;
-                        posInLine += 2;
-                        return now;
-                    }
+                std::string subStr = input.substr(pos, 2);
+                if (find(operators.begin(), operators.end(), subStr) != operators.end()) {
+                    pos += 2;
+                    posInLine += 2;
+                    return subStr;
                 }
             }
-            std::string = input.substr(pos, 1);
-            for (auto now : operators) {
-                if (std::find(operators.begin(), operators.end(), now) != operators.end()) {
-                    pos += 1;
-                    posInLine += 1;
-                    return now;
-                }
+            std::string subStr = input.substr(pos, 1);
+            if (find(operators.begin(), operators.end(), subStr) != operators.end()) {
+                pos += 1;
+                posInLine += 1;
+                return subStr;
             }
         }
     }
@@ -133,11 +131,9 @@ private:
             posInLine++;
         }
         while (!isEnd(pos)) {
-            if (input[pos] == '\'') {
+            if (input[pos] == '\\') {
                 if (isEnd(pos + 1)) {
-                    // TODO throw
-                    std::cerr << "Invalid EOF";
-                    return "";
+                    throw Exception(1, "Invalid EOF");
                 } else if (input[pos + 1] == '\'') {
                     str += '\'';
                     pos += 2;
@@ -151,7 +147,7 @@ private:
                     pos += 2;
                     posInLine = 0;
                 } else {
-                    std += '\\';
+                    str += '\\';
                 }
             } else if (input[pos] == '\n') {
                 line++;
@@ -172,32 +168,79 @@ private:
     }
 
     bool isKeyword(int pos) {
-        // TODO
+        for (const auto &now : keywords) {
+            if (!isEnd(pos + (int) now.size() - 1)) {
+                int indexNext = pos + (int) now.size();
+                if (isEnd(indexNext)
+                    || ((input[indexNext] < 'a' || input[indexNext] > 'z')
+                        && (input[indexNext] < 'A' || input[indexNext] > 'Z')
+                        && input[indexNext] != '_')) {
+                    if (now == input.substr(pos, now.size())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     std::string readKeyword(int &pos, int &posInLine) {
-
+        for (const auto &now : keywords) {
+            if (!isEnd(pos + (int) now.size() - 1)) {
+                int indexNext = pos + (int) now.size();
+                if (isEnd(indexNext)
+                    || ((input[indexNext] < 'a' || input[indexNext] > 'z')
+                        && (input[indexNext] < 'A' || input[indexNext] > 'Z')
+                        && input[indexNext] != '_')) {
+                    if (now == input.substr(pos, now.size())) {
+                        pos += now.size();
+                        posInLine += now.size();
+                        return now;
+                    }
+                }
+            }
+        }
+        throw Exception(-1, "Bred");
     }
 
-    void parse(std::vector <std::Token> &ans) {
-        int posInLine = 0;
-        int line = 0;
-        int pos = 0;
-        while (!isEnd(pos)) {
-            int cntSpace = readBeginSpace(pos);
-            ans.push_back(Token(Token::BEGIN_BLOCK, line, 0, std::to_string(cntSpace)));
-            posInLine = cntSpace;
+    std::string readName(int &pos, int &posInLine) {
+        std::string name = {input[pos]};
+        while (!isEnd(pos) &&
+               ((input[pos] >= 'a' && input[pos] <= 'z')
+                || (input[pos] >= 'A' && input[pos] <= 'Z')
+                || (input[pos] >= '0' && input[pos] <= '9')
+                || input[pos] == '_')) {
 
-            parseLine(pos, line, posInLine, ans);
-            line++;
-            posInLine = 0;
         }
     }
 
-    void parseLine(int &pos, int &line, int &posInLine, std::vector <std::Token> &ans) {
-        while (!isEnd(pos) && input[pos] != '\n') {
-            if (input[pos] == '#') {
-                readComment(pos, posInLine);
+    void parse(std::vector<Token> &ans) {
+        int posInLine = 0;
+        int line = 0;
+        int pos = 0;
+        try {
+            while (!isEnd(pos)) {
+                int cntSpace = readBeginSpace(pos);
+                ans.push_back(Token(Token::BEGIN_BLOCK, line, 0, std::to_string(cntSpace)));
+                posInLine = cntSpace;
+
+                parseLine(pos, line, posInLine, ans);
+                line++;
+                posInLine = 0;
+            }
+        } catch (Exception e) {
+            throw std::to_string(line) + ":" + std::to_string(posInLine) + "\n"
+                  + e.message;
+        }
+    }
+
+    void parseLine(int &pos, int &line, int &posInLine, std::vector<Token> &ans) {
+        while (!isEnd(pos)) {
+            if (input[pos] == '\n') {
+                pos++;
+                break;
+            } else if (input[pos] == '#') {
+                readComment(pos);
             } else if (isBeginOperator(pos)) {
                 std::string op = readOperator(pos, posInLine);
                 ans.push_back(Token(Token::OPERATOR, line, posInLine, op));
@@ -212,23 +255,22 @@ private:
             } else if (isKeyword(pos)) {
                 std::string keyword = readKeyword(pos, posInLine);
                 ans.push_back(Token(Token::KEYWORD, line, posInLine, keyword));
-            } else if (input[pos] >= "a" && input[pos] <= 'z'
-                       || input[pos] >= 'A' && input[pos] <= 'Z' || input[pos] == '_') {
+            } else if ((input[pos] >= 'a' && input[pos] <= 'z')
+                       || (input[pos] >= 'A' && input[pos] <= 'Z') || input[pos] == '_') {
                 std::string name = readName(pos, posInLine);
                 ans.push_back(Token(Token::NAME, line, posInLine, name));
             } else {
-                // TODO throw
-                std::cerr << "Invalid //TODO";
-                return;
+                throw Exception(2, "Invalid syntax");
             }
         }
     }
 
 public:
 
-    std::vector <std::Token> tokenize() {
-        std::vector <std::Token> ans;
-        parse(input, ans);
+    std::vector<Token> tokenize() {
+        std::vector<Token> ans;
+        parse(ans);
+        return ans;
     }
 
 };
