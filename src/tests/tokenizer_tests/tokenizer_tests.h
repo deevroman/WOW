@@ -69,13 +69,13 @@ private:
                     std::cout << "OK\n";
                 } else {
                     std::cout << "Positive test #" << i << '\n';
-                    std::cout << "Failed:\n";
+                    std::cout << "\x1b[31mFailed:\x1b[0m\n";
                     COUNT_FAILED_TESTS_P++;
                 }
             } catch (...) {
                 std::cout << "Positive test #" << i << '\n';
-                std::cout << "Failed:\n";
-                std::cout << "Crashed\n";
+                std::cout << "\x1b[31mFailed:\x1b[0m\n";
+                std::cout << "\x1b[31mCrashed\x1b[0m\n";
                 COUNT_FAILED_TESTS_P++;
             }
         }
@@ -87,8 +87,8 @@ private:
             try {
                 result = tokenizer.tokenize();
                 std::cout << "Negative test #" << i << '\n';
-                std::cout << "Failed:\n";
-                std::cout << "Not crashed\n";
+                std::cout << "\x1b[31mFailed:\x1b[0m\n";
+                std::cout << "\x1b[31mNot crashed\x1b[0m\n";
                 COUNT_FAILED_TESTS_N++;
             } catch (...) {
                 std::cout << "Negative test #" << i << '\n';
