@@ -16,9 +16,8 @@ int main() {
     std::cout << tokenTests.getCountTestsN() - tokenTests.getCountFailedTestsN() << "/" << tokenTests.getCountTestsN()
               << "\n";
     std::cout << "All:\n";
-    std::cout << tokenTests.getCountTestsP() - tokenTests.getCountFailedTestsP()
-                 + tokenTests.getCountTestsN() - tokenTests.getCountFailedTestsN()
-              << "/" << tokenTests.getCountTestsP() + tokenTests.getCountTestsN() << "\n";
+    std::cout << tokenTests.getCountTests() - tokenTests.getCountFailedTests() << "/" << tokenTests.getCountTests()
+              << "\n";
     std::cout << "Ended tests";
     return 0;
 }
