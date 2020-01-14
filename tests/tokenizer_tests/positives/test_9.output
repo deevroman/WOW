@@ -1,0 +1,187 @@
+ [ 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 0, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 0, 
+			"numPos": 0, 
+			"value": "a"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 0, 
+			"numPos": 2, 
+			"value": "="
+		}, 
+		{ 
+			"type": "STRING", 
+			"numLine": 0, 
+			"numPos": 4, 
+			"value": "first line\nsecond line\nlast line\n"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 5, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 6, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 6, 
+			"numPos": 0, 
+			"value": "b"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 6, 
+			"numPos": 2, 
+			"value": "="
+		}, 
+		{ 
+			"type": "STRING", 
+			"numLine": 6, 
+			"numPos": 4, 
+			"value": "first line\nsecond line\\\nlast line\n"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 10, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 11, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "KEYWORD", 
+			"numLine": 11, 
+			"numPos": 0, 
+			"value": "for"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 11, 
+			"numPos": 4, 
+			"value": "i"
+		}, 
+		{ 
+			"type": "KEYWORD", 
+			"numLine": 11, 
+			"numPos": 6, 
+			"value": "in"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 11, 
+			"numPos": 9, 
+			"value": "a"
+		}, 
+		{ 
+			"type": "BEGIN_BLOCK", 
+			"numLine": 11, 
+			"numPos": 10, 
+			"value": ":"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 12, 
+			"numPos": 0, 
+			"value": "4"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 12, 
+			"numPos": 4, 
+			"value": "print"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 12, 
+			"numPos": 9, 
+			"value": "("
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 12, 
+			"numPos": 10, 
+			"value": "i"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 12, 
+			"numPos": 11, 
+			"value": ")"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 13, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "KEYWORD", 
+			"numLine": 13, 
+			"numPos": 0, 
+			"value": "if"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 13, 
+			"numPos": 3, 
+			"value": "a"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 13, 
+			"numPos": 5, 
+			"value": "!="
+		}, 
+		{ 
+			"type": "STRING", 
+			"numLine": 13, 
+			"numPos": 8, 
+			"value": "ok"
+		}, 
+		{ 
+			"type": "BEGIN_BLOCK", 
+			"numLine": 13, 
+			"numPos": 12, 
+			"value": ":"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 14, 
+			"numPos": 0, 
+			"value": "4"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 14, 
+			"numPos": 4, 
+			"value": "a"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 14, 
+			"numPos": 6, 
+			"value": "="
+		}, 
+		{ 
+			"type": "STRING", 
+			"numLine": 14, 
+			"numPos": 8, 
+			"value": "bad"
+		}]

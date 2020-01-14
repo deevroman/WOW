@@ -1,0 +1,15 @@
+a = 'first line
+second \
+line
+last line
+'
+
+b = 'first line
+second line\\
+last line
+' # comment
+
+for i in a:
+    print(i)
+if a != 'ok':
+    a = 'bad'

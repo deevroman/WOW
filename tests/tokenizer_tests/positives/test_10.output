@@ -1,0 +1,217 @@
+ [ 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 0, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 0, 
+			"numPos": 0, 
+			"value": "a"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 0, 
+			"numPos": 2, 
+			"value": "="
+		}, 
+		{ 
+			"type": "NUMBER", 
+			"numLine": 0, 
+			"numPos": 4, 
+			"value": "3"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 1, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 1, 
+			"numPos": 0, 
+			"value": "ifa"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 1, 
+			"numPos": 4, 
+			"value": "="
+		}, 
+		{ 
+			"type": "NUMBER", 
+			"numLine": 1, 
+			"numPos": 6, 
+			"value": "3"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 2, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 2, 
+			"numPos": 0, 
+			"value": "forik"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 2, 
+			"numPos": 6, 
+			"value": "="
+		}, 
+		{ 
+			"type": "NUMBER", 
+			"numLine": 2, 
+			"numPos": 8, 
+			"value": "3"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 3, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 3, 
+			"numPos": 0, 
+			"value": "forifka"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 3, 
+			"numPos": 8, 
+			"value": "="
+		}, 
+		{ 
+			"type": "NUMBER", 
+			"numLine": 3, 
+			"numPos": 10, 
+			"value": "5"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 4, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 4, 
+			"numPos": 0, 
+			"value": "ok"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 4, 
+			"numPos": 3, 
+			"value": "="
+		}, 
+		{ 
+			"type": "NUMBER", 
+			"numLine": 4, 
+			"numPos": 5, 
+			"value": "3.4"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 5, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 5, 
+			"numPos": 0, 
+			"value": "iff"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 5, 
+			"numPos": 4, 
+			"value": "="
+		}, 
+		{ 
+			"type": "NUMBER", 
+			"numLine": 5, 
+			"numPos": 6, 
+			"value": "3"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 6, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 6, 
+			"numPos": 0, 
+			"value": "deff"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 6, 
+			"numPos": 5, 
+			"value": "="
+		}, 
+		{ 
+			"type": "NUMBER", 
+			"numLine": 6, 
+			"numPos": 7, 
+			"value": "2"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 7, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 7, 
+			"numPos": 0, 
+			"value": "returnn"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 7, 
+			"numPos": 8, 
+			"value": "="
+		}, 
+		{ 
+			"type": "NUMBER", 
+			"numLine": 7, 
+			"numPos": 10, 
+			"value": "3"
+		}, 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 8, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 8, 
+			"numPos": 0, 
+			"value": "kek"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 8, 
+			"numPos": 4, 
+			"value": "="
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 8, 
+			"numPos": 6, 
+			"value": "returnn"
+		}]

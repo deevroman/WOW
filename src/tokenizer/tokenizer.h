@@ -267,8 +267,9 @@ private:
                 ans.push_back(Token(Token::NUMBER, line, startPosInLine, num));
             } else if (input[pos] == '\'') {
                 int startPosInLine = posInLine;
+                int startLine = line;
                 std::string str = readString(pos, posInLine, line);
-                ans.push_back(Token(Token::STRING, line, startPosInLine, str));
+                ans.push_back(Token(Token::STRING, startLine, startPosInLine, str));
             } else if (input[pos] == ' ') {
                 readSpaces(pos, posInLine);
             } else if (isKeyword(pos)) {
