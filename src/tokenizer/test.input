@@ -1,13 +1,14 @@
-print('begin')
-def KUQU (a, b):
-    if (a & b / 5.0 * b ^ a) == 48:
-        a //= 3
-        b %= 4
-        a *= b
-    elif a + b == 0:
-        print(4)
-    else:
-        a &= 4
-    return a - b
-
-a = KUQU(48, 42)
+x&=2
+x|=2
+x^=1
+x<<=2
+x>>=2
+x+=48
+x-=42
+x*=0
+x//=3
+y=3.4
+y/=2.0
+x%=2
+x=2
+x**=3
