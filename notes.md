@@ -1,5 +1,32 @@
 В корне будет итоговый интерпретатор.
-В папке tokenizer файл run_tokenize.cpp запускает токенизатор.
-Тесты -- позже.
-У класса Tokenizer главный публичный метод tokenize.
-Подумаю как нормально сделать тесты.
+
+Пример кода
+```
+# comment
+a = input()
+arr = list(a)
+for i in arr:
+    print(i)
+s = 'fir\
+st
+second
+'
+
+a = 'qwerty'
+for i in a:
+    print(a*2)
+
+class Test:
+    value = 0
+    def __init__(a):
+       value = a
+
+val = Test(3)
+print(val.value)
+
+def sq(x):
+    return x*x
+
+print(sq(x))
+
+```

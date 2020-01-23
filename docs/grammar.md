@@ -41,7 +41,7 @@ shift_expr: arith_expr (('<<' | '>>') arith_expr)*
 arith_expr: term (('+'|'-') term)*
 term: factor (('*'|'/'|'%'|'//') factor)*
 factor: ('+'|'-'|'~') factor | power
-power: name_expr ['**' factor]
+power: name_expr ('**' factor)*
 name_expr: ('(' test ')' | NAME | NUMBER | STRING | 'None' | 'True' | 'False') trailer*
 trailer: '(' [arglist] ')' | '[' test ']' | '.' NAME
 

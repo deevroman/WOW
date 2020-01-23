@@ -141,6 +141,7 @@ private:
             pos++;
             posInLine++;
         }
+        bool ended = false;
         while (!isEnd(pos)) {
             if (input[pos] == '\\') {
                 if (isEnd(pos + 1)) {
@@ -168,6 +169,7 @@ private:
             } else if (input[pos] == '\'') {
                 pos += 1;
                 posInLine += 1;
+                ended = true;
                 break;
             } else {
                 str += input[pos];
@@ -175,6 +177,8 @@ private:
                 posInLine++;
             }
         }
+        if(!ended)
+            throw Exception(1, "Invalid EOF");
         return str;
     }
 
