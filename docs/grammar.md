@@ -6,8 +6,7 @@ parameters: '(' [funcargslist] ')'
 funcargslist: NAME (',' NAME)*
 
 stmt: simple_stmt | compound_stmt
-simple_stmt: small_stmt NEWLINE
-small_stmt: (expr_stmt | del_stmt | pass_stmt | flow_stmt | import_stmt)
+simple_stmt: (expr_stmt | del_stmt | pass_stmt | flow_stmt | import_stmt) NEWLINE
 expr_stmt: test (augassign (test) | [('=' test)+] )
 augassign: ('+='|'-='|'*='|'/='|'%='|'**='|'//='|'&='|'|='|'^='|'<<='|'>>=')
 

@@ -1,6 +1,7 @@
 #ifndef WOW_TOKENIZER_H
 #define WOW_TOKENIZER_H
 
+#include "../exception/exception.h"
 #include "token.h"
 #include <vector>
 #include <string>
@@ -25,15 +26,6 @@ private:
                                                 "(", ")", "[", "]", ".", ",",
                                                 "+=", "-=", "*=", "/=", "%=", "**=", "//=", "=",
                                                 "&=", "|=", "^=", "<<=", ">>="};
-
-    class Exception {
-    public:
-        int code;
-        std::string message;
-
-        Exception(int code, std::string message) :
-                code(code), message(message) {}
-    };
 
     bool isEnd(int pos) {
         return pos >= input.size();
@@ -177,7 +169,7 @@ private:
                 posInLine++;
             }
         }
-        if(!ended)
+        if (!ended)
             throw Exception(1, "Invalid EOF");
         return str;
     }
