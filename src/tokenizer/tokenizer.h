@@ -105,7 +105,7 @@ private:
                 return subStr;
             }
         }
-        throw Exception(-1, "Bred");
+        throw Exception("Bred");
     }
 
     std::string readNumber(int &pos, int &posInLine) {
@@ -117,7 +117,7 @@ private:
                 if (cntPoints == 0) {
                     cntPoints++;
                 } else {
-                    throw Exception(3, "Invalid float number format");
+                    throw Exception("Invalid float number format");
                 }
             }
             num += input[pos];
@@ -137,7 +137,7 @@ private:
         while (!isEnd(pos)) {
             if (input[pos] == '\\') {
                 if (isEnd(pos + 1)) {
-                    throw Exception(1, "Invalid EOF");
+                    throw Exception("Invalid EOF");
                 } else if (input[pos + 1] == '\'') {
                     str += '\'';
                     pos += 2;
@@ -170,7 +170,7 @@ private:
             }
         }
         if (!ended)
-            throw Exception(1, "Invalid EOF");
+            throw Exception("Invalid EOF");
         return str;
     }
 
@@ -207,7 +207,7 @@ private:
                 }
             }
         }
-        throw Exception(-1, "Bred");
+        throw Exception("Bred");
     }
 
     std::string readName(int &pos, int &posInLine) {
@@ -282,7 +282,7 @@ private:
                 pos++;
                 posInLine++;
             } else {
-                throw Exception(2, "Invalid syntax");
+                throw Exception("Invalid syntax");
             }
         }
     }

@@ -11,10 +11,10 @@ public:
 
     void check() {
         nowToken = 0;
-        levels = {-1};
+        levels = {0};
         file_input_parse();
     }
-
+// Tip в классе Exception есть поля строка и позиция
 private:
     std::vector<int> levels;
     int nowToken{};
@@ -24,7 +24,7 @@ private:
             int level = std::stoi(tokens[nowToken].value);
             if (needMore) {
                 if (level <= levels.back()) {
-                    throw Exception(1, "invalid begin line");
+                    throw Exception( "invalid begin line");
                 }
             } else {
                 while (levels.back() <= level) {
@@ -32,10 +32,13 @@ private:
                 }
             }
             levels.push_back(level);
-
         } else {
-            throw Exception(1, "invalid begin line");
+            throw Exception( "invalid begin line");
         }
+    }
+
+    bool nextTokenIsNewline(){
+        return nowToken + 1 < tokens.size() && tokens[nowToken+1].type == Token::BEGIN_LINE;
     }
 
     void readStmt() {
@@ -46,6 +49,9 @@ private:
         while (nowToken < tokens.size()) {
             readBeginLine();
             readStmt();
+        }
+        if(levels.size() > 1){
+            throw Exception( "invalid EOF");
         }
     }
 };
