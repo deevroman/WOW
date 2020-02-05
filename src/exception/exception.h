@@ -9,7 +9,9 @@ public:
     int line, posInLine;
 
     Exception(std::string message) :
-            message(message) {}
+            message(message) {};
+    Exception(std::string Message, int Line, int Pos):
+        message(Message), line(Line), posInLine(Pos){};
 };
 
 #endif //WOW_EXCEPTION_H

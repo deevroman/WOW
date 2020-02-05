@@ -1,17 +1,17 @@
 ```
 file_input: (NEWLINE | stmt)* ENDMARKER
 
-funcdef: 'def' NAME parameters ':' func_body_suite
+funcdef: 'def' NAME parameters ':' suite
 parameters: '(' [funcargslist] ')'
 funcargslist: NAME (',' NAME)*
 
 stmt: simple_stmt | compound_stmt
 simple_stmt: (expr_stmt | del_stmt | pass_stmt | flow_stmt | import_stmt) NEWLINE
-expr_stmt: test (augassign (test) | [('=' test)+] )
+expr_stmt: test (augassign test | ('=' test)* )
 augassign: ('+='|'-='|'*='|'/='|'%='|'**='|'//='|'&='|'|='|'^='|'<<='|'>>=')
 
 del_stmt: 'del' expr
-pass_stmt: 'pass'
+pass_stmt: 'pass'or_test
 flow_stmt: break_stmt | continue_stmt | return_stmt
 break_stmt: 'break'
 continue_stmt: 'continue'
@@ -24,10 +24,9 @@ if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
 while_stmt: 'while' test ':' suite ['else' ':' suite]
 for_stmt: 'for' NAME 'in' test ':' suite ['else' ':' suite]
 
-suite: simple_stmt | NEWLINE stmt
+suite: (NEWLINE stmt)+
 
-test: or_test
-or_test: and_test ('or' and_test)*
+test: and_test ('or' and_test)*
 and_test: not_test ('and' not_test)*
 not_test: 'not' not_test | comparison
 comparison: expr (comp_op expr)*
@@ -48,7 +47,5 @@ arglist: argument (',' argument)*
 argument: test
 
 classdef: 'class' NAME ':' suite
-
-func_body_suite: simple_stmt | NEWLINE stmt
 
 ```
