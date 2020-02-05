@@ -15,6 +15,8 @@ public:
         file_input_parse();
     }
 // Tip в классе Exception есть поля строка и позиция
+// TODO обернуть всё в try чтобы ловить случайные вылеты на границу tokens
+// или хз
 private:
     std::vector<int> levels;
     int nowToken{};
@@ -41,53 +43,169 @@ private:
         }
     }
 
-    bool nextTokenIsNewline() {
-        return nowToken + 1 < tokens.size() && tokens[nowToken + 1].type == Token::BEGIN_LINE;
+    bool readTest() {
+        if (!readAndTest())
+            return false;
+        while (!isEnd() && tokens[nowToken].type != Token::BEGIN_LINE) {
+            if (tokens[nowToken].value == "or") {
+                getToken();
+                if (!readAndTest()) {
+                    throw Exception("Invalid and expression",
+                                    tokens[nowToken].numLine,
+                                    tokens[nowToken].numPos);
+                }
+            } else {
+                break;
+            }
+        }
+        return true;
     }
 
-    bool readTestStmt(){
-        readOrTest();
+    bool readCompOp() {
+        if (tokens[nowToken].value == "<"
+            || tokens[nowToken].value == ">"
+            || tokens[nowToken].value == "=="
+            || tokens[nowToken].value == ">="
+            || tokens[nowToken].value == "<="
+            || tokens[nowToken].value == "!=") {
+            getToken();
+            return true;
+        }
+        return false;
     }
 
-    bool readOrTest(){
-        readAndTest();
-        if(){
-            
+    bool readComparison() {
+        if (!readExpr()) {
+            return false;
+        }
+        if (!isEnd() && readCompOp()) {
+            if (!readExpr()) {
+                throw Exception("invalid compare expression",
+                                tokens[nowToken].numLine,
+                                tokens[nowToken].numPos);
+            }
         }
     }
- 
+
+    bool readNotTest() {
+        if (tokens[nowToken].value == "not") {
+            getToken();
+            if (!readNotTest()) {
+                throw Exception("invalid not expression",
+                                tokens[nowToken].numLine, tokens[nowToken].numPos);
+            }
+        } else {
+            if (!readComparison()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool readAndTest() {
+        if (!readNotTest())
+            return false;
+        while (!isEnd() && tokens[nowToken].type != Token::BEGIN_LINE) {
+            if (tokens[nowToken].value == "and") {
+                getToken();
+                if (!readNotTest()) {
+                    throw Exception("Invalid not expression",
+                                    tokens[nowToken].numLine,
+                                    tokens[nowToken].numPos);
+                }
+            } else {
+                break;
+            }
+        }
+        return true;
+    }
+
     bool readStmt() {
         if (readCompoundStmt())
             return true;
         return readSimpleStmt();
     }
 
+
+    bool readDelStmt() {
+        if (tokens[nowToken].value == "del") {
+            getToken();
+            if (!readExpr()) {
+                throw Exception("invalid delete stmt",
+                                tokens[nowToken].numLine,
+                                tokens[nowToken].numPos); // FIXME stmt
+            }
+        }
+    }
+
+    bool readPassStmt() {
+        if (tokens[nowToken].value == "pass") {
+            getToken();
+            if (!readExpr()) {
+                throw Exception("invalid pass stmt",
+                                tokens[nowToken].numLine,
+                                tokens[nowToken].numPos); // FIXME stmt
+            }
+        }
+    }
+
+    bool nowImportStmt() {
+        if (tokens[nowToken].value == "import") {
+            getToken();
+            if (tokens[nowToken].type != Token::NAME) {
+                throw Exception("invalid import stmt",
+                                tokens[nowToken].numLine,
+                                tokens[nowToken].numPos);
+            }
+            if (!isEnd()) {
+                if ()
+            }
+        }
+    }
+
+    bool readBreakStmt() {
+        if(tokens[nowToken].value == "break"){
+            getToken();
+            return true;
+        }
+        return false;
+    }
+
+    bool readContinueStmt() {
+        if(tokens[nowToken].value == "continue"){
+            getToken();
+            return true;
+        }
+        return false;
+    }
+
+    bool readReturnStmt() {
+        if(tokens[nowToken].value == "return"){
+            getToken();
+            readTest();
+            return true;
+        }
+        return false;
+    }
+
+    bool readFlowStmt() {
+        return (readBreakStmt() || readContinueStmt() || readReturnStmt());
+    }
+
     bool readSimpleStmt() {
-        if (readDelStmt())
-            return true;
-        if (readPassStmt())
-            return true;
-        if (nowImportStmt())
-            return true;
-        if (readFlowStmt())
-            return true;
-        return readExprStmt();
+        return readDelStmt() || readPassStmt()
+               || nowImportStmt() || readFlowStmt()
+               || readExpr();
     }
 
     bool readCompoundStmt() {
-        if (readIfStmt())
-            return true;
-        if (readWhileStmt())
-            return true;
-        if (readForStmt())
-            return true;
-        if (readFuncdefStmt())
-            return true;
-        return (readClassdefStmt());
+        return readIfStmt() || readWhileStmt()
+               || readForStmt() || readFuncdefStmt()
+               || readClassdefStmt();
     }
 
-    bool readSuiteStmt() {
-        if(readSimpleStmt())
+    bool readSuite() {
+        if (readSimpleStmt())
             return true;
         return readStmt();
     }
@@ -96,7 +214,7 @@ private:
         if (tokens[nowToken].value != "if")
             return false;
         getToken();
-        if (!readTestStmt())
+        if (!readTest())
             throw Exception("invalid if condition", tokens[nowToken].numLine,
                             tokens[nowToken].numPos);
         if (tokens[nowToken].value != ":") {
@@ -105,25 +223,25 @@ private:
         }
         getToken();
         readBeginLine(true);
-        readSuiteStmt();
+        readSuite();
         while (tokens[nowToken].value == "elif") {
             getToken();
-            if (!readTestStmt())
+            if (!readTest())
                 throw Exception("invalid if condition", tokens[nowToken].numLine,
                                 tokens[nowToken].numPos);
             if (tokens[nowToken].value != ":")
                 throw Exception("expected : after elif statements", tokens[nowToken].numLine,
-                                      tokens[nowToken].numPos);
+                                tokens[nowToken].numPos);
             getToken();
             readBeginLine(true);
         }
-        if (tokens[nowToken].value == "else"){
+        if (tokens[nowToken].value == "else") {
             getToken();
             if (tokens[nowToken].value != ":")
                 throw Exception("expected : after else statements", tokens[nowToken].numLine,
                                 tokens[nowToken].numPos);
             readBeginLine(true);
-            readSuiteStmt();
+            readSuite();
         }
     }
 
@@ -137,10 +255,14 @@ private:
         }
     }
 
+    bool isEnd() {
+        return nowToken >= tokens.size();
+    }
+
     Token getToken() {
         if (nowToken + 1 < tokens.size())
             nowToken++;
-        throw Exception("invalid EOL")
+        throw Exception("invalid EOL");
     }
 };
 

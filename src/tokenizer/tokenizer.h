@@ -15,7 +15,7 @@ private:
     std::string input;
 
     const std::vector<std::string> keywords = {
-            "if", "while", "for", "else", "elif", "import", "break",
+            "if", "while", "for", "else", "elif", "import", "as", "break",
             "continue", "class", "return", "def",
             "xor", "or", "and", "not", "in", "True",
             "False", "None", "del", "pass", "list"};

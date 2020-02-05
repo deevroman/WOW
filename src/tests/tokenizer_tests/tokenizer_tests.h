@@ -18,7 +18,7 @@ public:
 
 private:
     // TODO
-    int COUNT_TESTS_P = 11;
+    int COUNT_TESTS_P = 12;
     int COUNT_TESTS_N = 4;
 
     int COUNT_FAILED_TESTS_P = 0;
