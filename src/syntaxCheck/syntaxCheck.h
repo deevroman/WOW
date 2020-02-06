@@ -21,7 +21,9 @@ private:
     std::vector<int> levels;
     int nowToken{};
 
-    void readBeginLine(int needMore = false) {
+    bool readBeginLine(int needMore = false) {
+        if (isEnd() || tokens[nowToken].type != Token::BEGIN_LINE)
+            return false;
         if (tokens[nowToken].type == Token::BEGIN_LINE) {
             int level = std::stoi(tokens[nowToken].value);
             if (needMore) {
@@ -41,12 +43,14 @@ private:
         } else {
             throw Exception("invalid begin line");
         }
+        getToken();
+        return true;
     }
 
     bool readTest() {
         if (!readAndTest())
             return false;
-        while (!isEnd() && tokens[nowToken].type != Token::BEGIN_LINE) {
+        while (!isEnd()) {
             if (tokens[nowToken].value == "or") {
                 getToken();
                 if (!readAndTest()) {
@@ -72,6 +76,182 @@ private:
             return true;
         }
         return false;
+    }
+
+
+    bool readExpr() {
+        if (!readXorExpr())
+            return false;
+        while (!isEnd()) {
+            if (tokens[nowToken].value == "|") {
+                getToken();
+                if (!readXorExpr()) {
+                    throw Exception("Invalid or expression",
+                                    tokens[nowToken].numLine,
+                                    tokens[nowToken].numPos);
+                }
+            } else {
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool readXorExpr() {
+        if (!readAndExpr())
+            return false;
+        while (!isEnd()) {
+            if (tokens[nowToken].value == "^") {
+                getToken();
+                if (!readAndExpr()) {
+                    throw Exception("Invalid xor expression",
+                                    tokens[nowToken].numLine,
+                                    tokens[nowToken].numPos);
+                }
+            } else {
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool readAndExpr() {
+        if (!readShiftExpr())
+            return false;
+        while (!isEnd()) {
+            if (tokens[nowToken].value == "&") {
+                getToken();
+                if (!readShiftExpr()) {
+                    throw Exception("Invalid and expression",
+                                    tokens[nowToken].numLine,
+                                    tokens[nowToken].numPos);
+                }
+            } else {
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool readShiftExpr() {
+        if (!readArithExpr())
+            return false;
+        while (!isEnd()) {
+            if (tokens[nowToken].value == "<<" || tokens[nowToken].value == ">>") {
+                getToken();
+                if (!readArithExpr()) {
+                    throw Exception("Invalid shift expression",
+                                    tokens[nowToken].numLine,
+                                    tokens[nowToken].numPos);
+                }
+            } else {
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool readArithExpr() {
+        if (!readTermExpr())
+            return false;
+        while (!isEnd()) {
+            if (tokens[nowToken].value == "+" || tokens[nowToken].value == "-") {
+                getToken();
+                if (!readTermExpr()) {
+                    throw Exception("Invalid arith expression",
+                                    tokens[nowToken].numLine,
+                                    tokens[nowToken].numPos);
+                }
+            } else {
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool readTermExpr() {
+        if (!readFactorExpr())
+            return false;
+        while (!isEnd()) {
+            if (tokens[nowToken].value == "*" || tokens[nowToken].value == "/" ||
+                tokens[nowToken].value == "%" || tokens[nowToken].value == "//") {
+                getToken();
+                if (!readFactorExpr()) {
+                    throw Exception("Invalid arith expression",
+                                    tokens[nowToken].numLine,
+                                    tokens[nowToken].numPos);
+                }
+            } else {
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool readFactorExpr() {
+        while (!isEnd()) {
+            if (tokens[nowToken].value == "-" || tokens[nowToken].value == "+" ||
+                tokens[nowToken].value == "~") {
+                getToken();
+                if (!(readFactorExpr() || readPowerExpr())) {
+                    throw Exception("Invalid factor expression",
+                                    tokens[nowToken].numLine,
+                                    tokens[nowToken].numPos);
+                }
+            } else {
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool readPowerExpr() {
+        if (!readNameExpr())
+            return false;
+        while (!isEnd()) {
+            if (tokens[nowToken].value == "**") {
+                getToken();
+                if (!readNameExpr()) {
+                    throw Exception("Invalid power expression",
+                                    tokens[nowToken].numLine,
+                                    tokens[nowToken].numPos);
+                }
+            } else {
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool readNameExpr() {
+        if (tokens[nowToken].value == "(") {
+            getToken();
+            if (!readTest()) {
+                throw Exception("Invalid brackets statement expression",
+                                tokens[nowToken].numLine, tokens[nowToken].numPos);
+            }
+            if (tokens[nowToken].value != ")") {
+                throw Exception("Invalid brackets statement expression",
+                                tokens[nowToken].numLine, tokens[nowToken].numPos);
+            }
+            getToken();
+        } else if (tokens[nowToken].type == Token::NAME
+                   || tokens[nowToken].type == Token::NUMBER
+                   || tokens[nowToken].type == Token::STRING
+                   || tokens[nowToken].value == "None"
+                   || tokens[nowToken].value == "True"
+                   || tokens[nowToken].value == "False")
+                getToken();
+        else
+            throw Exception("Invalid name expression",
+                                  tokens[nowToken].numLine, tokens[nowToken].numPos);
+        while(readTrailer());
+    }
+
+    bool readTraile(){
+        if (tokens[nowToken].value != "(")
+            return false;
+        getToken();
     }
 
     bool readComparison() {
@@ -105,7 +285,7 @@ private:
     bool readAndTest() {
         if (!readNotTest())
             return false;
-        while (!isEnd() && tokens[nowToken].type != Token::BEGIN_LINE) {
+        while (!isEnd()) {
             if (tokens[nowToken].value == "and") {
                 getToken();
                 if (!readNotTest()) {
@@ -141,11 +321,6 @@ private:
     bool readPassStmt() {
         if (tokens[nowToken].value == "pass") {
             getToken();
-            if (!readExpr()) {
-                throw Exception("invalid pass stmt",
-                                tokens[nowToken].numLine,
-                                tokens[nowToken].numPos); // FIXME stmt
-            }
         }
     }
 
@@ -214,8 +389,15 @@ private:
     }
 
     bool readSuite() {
-        if (readSimpleStmt())
-            return true;
+        if (!readBeginLine(true)) {
+            return false;
+        }
+        while (readBeginLine()) {
+            while (readBeginLine()) {}
+
+            if (!readSimpleStmt())
+                return false;
+        }
         return readStmt();
     }
 

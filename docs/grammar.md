@@ -6,12 +6,12 @@ parameters: '(' [funcargslist] ')'
 funcargslist: NAME (',' NAME)*
 
 stmt: simple_stmt | compound_stmt
-simple_stmt: (expr_stmt | del_stmt | pass_stmt | flow_stmt | import_stmt) NEWLINE
+simple_stmt: expr_stmt | del_stmt | pass_stmt | flow_stmt | import_stmt
 expr_stmt: test (augassign test | ('=' test)* )
 augassign: ('+='|'-='|'*='|'/='|'%='|'**='|'//='|'&='|'|='|'^='|'<<='|'>>=')
 
 del_stmt: 'del' expr
-pass_stmt: 'pass'or_test
+pass_stmt: 'pass'
 flow_stmt: break_stmt | continue_stmt | return_stmt
 break_stmt: 'break'
 continue_stmt: 'continue'
@@ -24,7 +24,7 @@ if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
 while_stmt: 'while' test ':' suite ['else' ':' suite]
 for_stmt: 'for' NAME 'in' test ':' suite ['else' ':' suite]
 
-suite: (NEWLINE stmt)+
+suite: (NEWLINE+ stmt)+
 
 test: and_test ('or' and_test)*
 and_test: not_test ('and' not_test)*
