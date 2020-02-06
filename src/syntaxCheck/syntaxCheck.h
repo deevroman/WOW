@@ -158,13 +158,22 @@ private:
                                 tokens[nowToken].numPos);
             }
             if (!isEnd()) {
-                if ()
+                if (tokens[nowToken].value == "import") {
+                    getToken();
+                    if (tokens[nowToken].type == Token::NAME) {
+                        getToken();
+                    } else {
+                        throw Exception("invalid import alias",
+                                        tokens[nowToken].numLine,
+                                        tokens[nowToken].numPos);
+                    }
+                }
             }
         }
     }
 
     bool readBreakStmt() {
-        if(tokens[nowToken].value == "break"){
+        if (tokens[nowToken].value == "break") {
             getToken();
             return true;
         }
@@ -172,7 +181,7 @@ private:
     }
 
     bool readContinueStmt() {
-        if(tokens[nowToken].value == "continue"){
+        if (tokens[nowToken].value == "continue") {
             getToken();
             return true;
         }
@@ -180,7 +189,7 @@ private:
     }
 
     bool readReturnStmt() {
-        if(tokens[nowToken].value == "return"){
+        if (tokens[nowToken].value == "return") {
             getToken();
             readTest();
             return true;
