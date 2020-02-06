@@ -248,11 +248,61 @@ private:
         while(readTrailer());
     }
 
-    bool readTraile(){
-        if (tokens[nowToken].value != "(")
-            return false;
-        getToken();
+    bool readTrailer(){
+        if (tokens[nowToken].value == "("){
+            getToken();
+            readArglist();
+            if (tokens[nowToken].value == ")") {
+                getToken();
+                return true;
+            }
+            else
+                throw Exception("Invalid trailer",
+                                tokens[nowToken].numLine, tokens[nowToken].numPos);
+        }
+        if (tokens[nowToken].value == "["){
+            getToken();
+            readTest();
+            if (tokens[nowToken].value == "]") {
+                getToken();
+                return true;
+            }
+            else
+                throw Exception("Invalid trailer",
+                                tokens[nowToken].numLine, tokens[nowToken].numPos);
+        }
+        if (tokens[nowToken].value == "."){
+            getToken();
+            if (tokens[nowToken].type != Token::NAME){
+                throw Exception("Invalid trailer",
+                                tokens[nowToken].numLine, tokens[nowToken].numPos);
+            } else{
+                getToken();
+                return true;
+            }
+        }
+        return false;
     }
+
+    bool readArglist() {
+        if (!readTest())
+            return false;
+        while (!isEnd()) {
+            if (tokens[nowToken].value == ",") {
+                getToken();
+                if (!readTest()) {
+                    throw Exception("Invalid arglist",
+                                    tokens[nowToken].numLine,
+                                    tokens[nowToken].numPos);
+                }
+            } else {
+                break;
+            }
+        }
+        return true;
+    }
+
+
 
     bool readComparison() {
         if (!readExpr()) {
@@ -436,6 +486,17 @@ private:
         }
     }
 
+    bool readClassdef() {
+        if (tokens[nowToken].value != "class")
+            return false;
+        getToken();
+        if (tokens[nowToken].type != Token::NAME)
+            throw Exception("expected class name", tokens[nowToken].numLine,
+                            tokens[nowToken].numPos);
+        getToken();
+        if (tokens[nowToken].value != ":")
+    }
+
     void file_input_parse() {
         while (nowToken < tokens.size()) {
             readBeginLine();
@@ -450,7 +511,7 @@ private:
         return nowToken >= tokens.size();
     }
 
-    Token getToken() {
+    void getToken() {
         if (nowToken + 1 < tokens.size())
             nowToken++;
         throw Exception("invalid EOL");

@@ -43,8 +43,7 @@ power: name_expr ('**' factor)*
 name_expr: ('(' test ')' | NAME | NUMBER | STRING | 'None' | 'True' | 'False') trailer*
 trailer: '(' [arglist] ')' | '[' test ']' | '.' NAME
 
-arglist: argument (',' argument)*
-argument: test
+arglist: test (',' test)*
 
 classdef: 'class' NAME ':' suite
 
