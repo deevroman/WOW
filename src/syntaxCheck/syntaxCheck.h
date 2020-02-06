@@ -7,10 +7,13 @@
 class SyntaxCheck {
     std::vector<Token> tokens;
 public:
-    explicit SyntaxCheck(std::vector<Token> &v) : tokens(v) {}
+    explicit SyntaxCheck(std::vector<Token> &v) : tokens(v) {
+        v.push_back(Token(Token::ENDMARKER, -1, -1, ""));
+    }
 
     void check() {
-        nowToken = 0;
+        indexNowToken = 0;
+        nowToken = &tokens[0];
         levels = {0};
         file_input_parse();
     }
@@ -19,30 +22,27 @@ public:
 // или хз
 private:
     std::vector<int> levels;
-    int nowToken{};
+    int indexNowToken{};
+    Token *nowToken;
 
     bool readBeginLine(int needMore = false) {
-        if (isEnd() || tokens[nowToken].type != Token::BEGIN_LINE)
+        if (nowToken->type != Token::BEGIN_LINE)
             return false;
-        if (tokens[nowToken].type == Token::BEGIN_LINE) {
-            int level = std::stoi(tokens[nowToken].value);
-            if (needMore) {
-                if (level <= levels.back()) {
-                    throw Exception("invalid begin line");
-                }
-            } else {
-                if (level > levels.back()) {
-                    throw Exception("Invalid in begin of line", tokens[nowToken].numLine,
-                                    tokens[nowToken].numPos);
-                }
-                while (levels.back() <= level) {
-                    levels.pop_back();
-                }
+        int level = std::stoi(nowToken->value);
+        if (needMore) {
+            if (level <= levels.back()) {
+                throw Exception("invalid begin line");
             }
-            levels.push_back(level);
         } else {
-            throw Exception("invalid begin line");
+            if (level > levels.back()) {
+                throw Exception("Invalid in begin of line", nowToken->numLine,
+                                nowToken->numPos);
+            }
+            if (levels.back() < level) {
+                return false;
+            }
         }
+        levels.push_back(level);
         getToken();
         return true;
     }
@@ -51,12 +51,12 @@ private:
         if (!readAndTest())
             return false;
         while (!isEnd()) {
-            if (tokens[nowToken].value == "or") {
+            if (nowToken->value == "or") {
                 getToken();
                 if (!readAndTest()) {
                     throw Exception("Invalid and expression",
-                                    tokens[nowToken].numLine,
-                                    tokens[nowToken].numPos);
+                                    nowToken->numLine,
+                                    nowToken->numPos);
                 }
             } else {
                 break;
@@ -66,12 +66,12 @@ private:
     }
 
     bool readCompOp() {
-        if (tokens[nowToken].value == "<"
-            || tokens[nowToken].value == ">"
-            || tokens[nowToken].value == "=="
-            || tokens[nowToken].value == ">="
-            || tokens[nowToken].value == "<="
-            || tokens[nowToken].value == "!=") {
+        if (nowToken->value == "<"
+            || nowToken->value == ">"
+            || nowToken->value == "=="
+            || nowToken->value == ">="
+            || nowToken->value == "<="
+            || nowToken->value == "!=") {
             getToken();
             return true;
         }
@@ -83,12 +83,12 @@ private:
         if (!readXorExpr())
             return false;
         while (!isEnd()) {
-            if (tokens[nowToken].value == "|") {
+            if (nowToken->value == "|") {
                 getToken();
                 if (!readXorExpr()) {
                     throw Exception("Invalid or expression",
-                                    tokens[nowToken].numLine,
-                                    tokens[nowToken].numPos);
+                                    nowToken->numLine,
+                                    nowToken->numPos);
                 }
             } else {
                 break;
@@ -101,12 +101,12 @@ private:
         if (!readAndExpr())
             return false;
         while (!isEnd()) {
-            if (tokens[nowToken].value == "^") {
+            if (nowToken->value == "^") {
                 getToken();
                 if (!readAndExpr()) {
                     throw Exception("Invalid xor expression",
-                                    tokens[nowToken].numLine,
-                                    tokens[nowToken].numPos);
+                                    nowToken->numLine,
+                                    nowToken->numPos);
                 }
             } else {
                 break;
@@ -119,12 +119,12 @@ private:
         if (!readShiftExpr())
             return false;
         while (!isEnd()) {
-            if (tokens[nowToken].value == "&") {
+            if (nowToken->value == "&") {
                 getToken();
                 if (!readShiftExpr()) {
                     throw Exception("Invalid and expression",
-                                    tokens[nowToken].numLine,
-                                    tokens[nowToken].numPos);
+                                    nowToken->numLine,
+                                    nowToken->numPos);
                 }
             } else {
                 break;
@@ -137,12 +137,12 @@ private:
         if (!readArithExpr())
             return false;
         while (!isEnd()) {
-            if (tokens[nowToken].value == "<<" || tokens[nowToken].value == ">>") {
+            if (nowToken->value == "<<" || nowToken->value == ">>") {
                 getToken();
                 if (!readArithExpr()) {
                     throw Exception("Invalid shift expression",
-                                    tokens[nowToken].numLine,
-                                    tokens[nowToken].numPos);
+                                    nowToken->numLine,
+                                    nowToken->numPos);
                 }
             } else {
                 break;
@@ -155,12 +155,12 @@ private:
         if (!readTermExpr())
             return false;
         while (!isEnd()) {
-            if (tokens[nowToken].value == "+" || tokens[nowToken].value == "-") {
+            if (nowToken->value == "+" || nowToken->value == "-") {
                 getToken();
                 if (!readTermExpr()) {
                     throw Exception("Invalid arith expression",
-                                    tokens[nowToken].numLine,
-                                    tokens[nowToken].numPos);
+                                    nowToken->numLine,
+                                    nowToken->numPos);
                 }
             } else {
                 break;
@@ -173,13 +173,13 @@ private:
         if (!readFactorExpr())
             return false;
         while (!isEnd()) {
-            if (tokens[nowToken].value == "*" || tokens[nowToken].value == "/" ||
-                tokens[nowToken].value == "%" || tokens[nowToken].value == "//") {
+            if (nowToken->value == "*" || nowToken->value == "/" ||
+                nowToken->value == "%" || nowToken->value == "//") {
                 getToken();
                 if (!readFactorExpr()) {
                     throw Exception("Invalid arith expression",
-                                    tokens[nowToken].numLine,
-                                    tokens[nowToken].numPos);
+                                    nowToken->numLine,
+                                    nowToken->numPos);
                 }
             } else {
                 break;
@@ -190,13 +190,13 @@ private:
 
     bool readFactorExpr() {
         while (!isEnd()) {
-            if (tokens[nowToken].value == "-" || tokens[nowToken].value == "+" ||
-                tokens[nowToken].value == "~") {
+            if (nowToken->value == "-" || nowToken->value == "+" ||
+                nowToken->value == "~") {
                 getToken();
                 if (!(readFactorExpr() || readPowerExpr())) {
                     throw Exception("Invalid factor expression",
-                                    tokens[nowToken].numLine,
-                                    tokens[nowToken].numPos);
+                                    nowToken->numLine,
+                                    nowToken->numPos);
                 }
             } else {
                 break;
@@ -209,12 +209,12 @@ private:
         if (!readNameExpr())
             return false;
         while (!isEnd()) {
-            if (tokens[nowToken].value == "**") {
+            if (nowToken->value == "**") {
                 getToken();
                 if (!readNameExpr()) {
                     throw Exception("Invalid power expression",
-                                    tokens[nowToken].numLine,
-                                    tokens[nowToken].numPos);
+                                    nowToken->numLine,
+                                    nowToken->numPos);
                 }
             } else {
                 break;
@@ -224,59 +224,58 @@ private:
     }
 
     bool readNameExpr() {
-        if (tokens[nowToken].value == "(") {
+        if (nowToken->value == "(") {
             getToken();
             if (!readTest()) {
                 throw Exception("Invalid brackets statement expression",
-                                tokens[nowToken].numLine, tokens[nowToken].numPos);
+                                nowToken->numLine, nowToken->numPos);
             }
-            if (tokens[nowToken].value != ")") {
+            if (nowToken->value != ")") {
                 throw Exception("Invalid brackets statement expression",
-                                tokens[nowToken].numLine, tokens[nowToken].numPos);
+                                nowToken->numLine, nowToken->numPos);
             }
             getToken();
-        } else if (tokens[nowToken].type == Token::NAME
-                   || tokens[nowToken].type == Token::NUMBER
-                   || tokens[nowToken].type == Token::STRING
-                   || tokens[nowToken].value == "None"
-                   || tokens[nowToken].value == "True"
-                   || tokens[nowToken].value == "False")
-                getToken();
+        } else if (nowToken->type == Token::NAME
+                   || nowToken->type == Token::NUMBER
+                   || nowToken->type == Token::STRING
+                   || nowToken->value == "None"
+                   || nowToken->value == "True"
+                   || nowToken->value == "False")
+            getToken();
         else
             throw Exception("Invalid name expression",
-                                  tokens[nowToken].numLine, tokens[nowToken].numPos);
-        while(readTrailer());
+                            nowToken->numLine, nowToken->numPos);
+        while (readTrailer());
+        return true;
     }
 
-    bool readTrailer(){
-        if (tokens[nowToken].value == "("){
+    bool readTrailer() {
+        if (nowToken->value == "(") {
             getToken();
             readArglist();
-            if (tokens[nowToken].value == ")") {
+            if (nowToken->value == ")") {
                 getToken();
                 return true;
-            }
-            else
+            } else
                 throw Exception("Invalid trailer",
-                                tokens[nowToken].numLine, tokens[nowToken].numPos);
+                                nowToken->numLine, nowToken->numPos);
         }
-        if (tokens[nowToken].value == "["){
+        if (nowToken->value == "[") {
             getToken();
             readTest();
-            if (tokens[nowToken].value == "]") {
+            if (nowToken->value == "]") {
                 getToken();
                 return true;
-            }
-            else
+            } else
                 throw Exception("Invalid trailer",
-                                tokens[nowToken].numLine, tokens[nowToken].numPos);
+                                nowToken->numLine, nowToken->numPos);
         }
-        if (tokens[nowToken].value == "."){
+        if (nowToken->value == ".") {
             getToken();
-            if (tokens[nowToken].type != Token::NAME){
+            if (nowToken->type != Token::NAME) {
                 throw Exception("Invalid trailer",
-                                tokens[nowToken].numLine, tokens[nowToken].numPos);
-            } else{
+                                nowToken->numLine, nowToken->numPos);
+            } else {
                 getToken();
                 return true;
             }
@@ -288,12 +287,12 @@ private:
         if (!readTest())
             return false;
         while (!isEnd()) {
-            if (tokens[nowToken].value == ",") {
+            if (nowToken->value == ",") {
                 getToken();
                 if (!readTest()) {
                     throw Exception("Invalid arglist",
-                                    tokens[nowToken].numLine,
-                                    tokens[nowToken].numPos);
+                                    nowToken->numLine,
+                                    nowToken->numPos);
                 }
             } else {
                 break;
@@ -303,7 +302,6 @@ private:
     }
 
 
-
     bool readComparison() {
         if (!readExpr()) {
             return false;
@@ -311,18 +309,19 @@ private:
         if (!isEnd() && readCompOp()) {
             if (!readExpr()) {
                 throw Exception("invalid compare expression",
-                                tokens[nowToken].numLine,
-                                tokens[nowToken].numPos);
+                                nowToken->numLine,
+                                nowToken->numPos);
             }
         }
+        return true;
     }
 
     bool readNotTest() {
-        if (tokens[nowToken].value == "not") {
+        if (nowToken->value == "not") {
             getToken();
             if (!readNotTest()) {
                 throw Exception("invalid not expression",
-                                tokens[nowToken].numLine, tokens[nowToken].numPos);
+                                nowToken->numLine, nowToken->numPos);
             }
         } else {
             if (!readComparison()) {
@@ -336,12 +335,12 @@ private:
         if (!readNotTest())
             return false;
         while (!isEnd()) {
-            if (tokens[nowToken].value == "and") {
+            if (nowToken->value == "and") {
                 getToken();
                 if (!readNotTest()) {
                     throw Exception("Invalid not expression",
-                                    tokens[nowToken].numLine,
-                                    tokens[nowToken].numPos);
+                                    nowToken->numLine,
+                                    nowToken->numPos);
                 }
             } else {
                 break;
@@ -358,47 +357,53 @@ private:
 
 
     bool readDelStmt() {
-        if (tokens[nowToken].value == "del") {
+        if (nowToken->value == "del") {
             getToken();
             if (!readExpr()) {
                 throw Exception("invalid delete stmt",
-                                tokens[nowToken].numLine,
-                                tokens[nowToken].numPos); // FIXME stmt
+                                nowToken->numLine,
+                                nowToken->numPos);
             }
+            return true;
         }
+        return false;
     }
 
     bool readPassStmt() {
-        if (tokens[nowToken].value == "pass") {
+        if (nowToken->value == "pass") {
             getToken();
+            return true;
         }
+        return false;
     }
 
     bool nowImportStmt() {
-        if (tokens[nowToken].value == "import") {
+        if (nowToken->value == "import") {
             getToken();
-            if (tokens[nowToken].type != Token::NAME) {
+            if (nowToken->type != Token::NAME) {
                 throw Exception("invalid import stmt",
-                                tokens[nowToken].numLine,
-                                tokens[nowToken].numPos);
+                                nowToken->numLine,
+                                nowToken->numPos);
             }
             if (!isEnd()) {
-                if (tokens[nowToken].value == "import") {
+                if (nowToken->value == "import") {
                     getToken();
-                    if (tokens[nowToken].type == Token::NAME) {
+                    if (nowToken->type == Token::NAME) {
                         getToken();
                     } else {
                         throw Exception("invalid import alias",
-                                        tokens[nowToken].numLine,
-                                        tokens[nowToken].numPos);
+                                        nowToken->numLine,
+                                        nowToken->numPos);
                     }
                 }
             }
+            return true;
         }
+        return false;
     }
 
     bool readBreakStmt() {
-        if (tokens[nowToken].value == "break") {
+        if (nowToken->value == "break") {
             getToken();
             return true;
         }
@@ -406,7 +411,7 @@ private:
     }
 
     bool readContinueStmt() {
-        if (tokens[nowToken].value == "continue") {
+        if (nowToken->value == "continue") {
             getToken();
             return true;
         }
@@ -414,7 +419,7 @@ private:
     }
 
     bool readReturnStmt() {
-        if (tokens[nowToken].value == "return") {
+        if (nowToken->value == "return") {
             getToken();
             readTest();
             return true;
@@ -434,17 +439,18 @@ private:
 
     bool readCompoundStmt() {
         return readIfStmt() || readWhileStmt()
-               || readForStmt() || readFuncdefStmt()
-               || readClassdefStmt();
+               || readForStmt() || readFuncdef()
+               || readClassdef();
     }
 
     bool readSuite() {
         if (!readBeginLine(true)) {
             return false;
         }
+        if (!readSimpleStmt())
+            return false;
         while (readBeginLine()) {
             while (readBeginLine()) {}
-
             if (!readSimpleStmt())
                 return false;
         }
@@ -452,53 +458,59 @@ private:
     }
 
     bool readIfStmt() {
-        if (tokens[nowToken].value != "if")
+        if (nowToken->value != "if")
             return false;
         getToken();
         if (!readTest())
-            throw Exception("invalid if condition", tokens[nowToken].numLine,
-                            tokens[nowToken].numPos);
-        if (tokens[nowToken].value != ":") {
-            throw Exception("expected : after if statements", tokens[nowToken].numLine,
-                            tokens[nowToken].numPos);
+            throw Exception("invalid if condition",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        if (nowToken->value != ":") {
+            throw Exception("expected : after if condition",
+                            nowToken->numLine,
+                            nowToken->numPos);
         }
         getToken();
-        readBeginLine(true);
         readSuite();
-        while (tokens[nowToken].value == "elif") {
+        while (nowToken->value == "elif") {
             getToken();
             if (!readTest())
-                throw Exception("invalid if condition", tokens[nowToken].numLine,
-                                tokens[nowToken].numPos);
-            if (tokens[nowToken].value != ":")
-                throw Exception("expected : after elif statements", tokens[nowToken].numLine,
-                                tokens[nowToken].numPos);
+                throw Exception("invalid if condition",
+                                nowToken->numLine,
+                                nowToken->numPos);
+            if (nowToken->value != ":")
+                throw Exception("expected : after elif statements",
+                                nowToken->numLine,
+                                nowToken->numPos);
             getToken();
-            readBeginLine(true);
+            readSuite();
         }
-        if (tokens[nowToken].value == "else") {
+        if (nowToken->value == "else") {
             getToken();
-            if (tokens[nowToken].value != ":")
-                throw Exception("expected : after else statements", tokens[nowToken].numLine,
-                                tokens[nowToken].numPos);
-            readBeginLine(true);
+            if (nowToken->value != ":")
+                throw Exception("expected : after else statements",
+                                nowToken->numLine,
+                                nowToken->numPos);
             readSuite();
         }
     }
 
     bool readClassdef() {
-        if (tokens[nowToken].value != "class")
+        if (nowToken->value != "class")
             return false;
         getToken();
-        if (tokens[nowToken].type != Token::NAME)
-            throw Exception("expected class name", tokens[nowToken].numLine,
-                            tokens[nowToken].numPos);
+        if (nowToken->type != Token::NAME)
+            throw Exception("expected class name", nowToken->numLine,
+                            nowToken->numPos);
         getToken();
-        if (tokens[nowToken].value != ":")
+        if (nowToken->value != ":") {
+            getToken();
+            readSuite();
+        }
     }
 
     void file_input_parse() {
-        while (nowToken < tokens.size()) {
+        while (indexNowToken < tokens.size()) {
             readBeginLine();
             readStmt();
         }
@@ -508,13 +520,19 @@ private:
     }
 
     bool isEnd() {
-        return nowToken >= tokens.size();
+        return nowToken->type == Token::ENDMARKER;
     }
 
     void getToken() {
-        if (nowToken + 1 < tokens.size())
-            nowToken++;
+        if (indexNowToken + 1 < tokens.size()) {
+            indexNowToken++;
+            nowToken = &tokens[indexNowToken];
+        }
         throw Exception("invalid EOL");
+    }
+
+    void popLevel() {
+        levels.pop_back();
     }
 };
 

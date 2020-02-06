@@ -1,5 +1,6 @@
 ```
-file_input: (NEWLINE | stmt)* ENDMARKER
+file_input: [suite] ENDMARKER
+suite: (NEWLINE+ stmt)+
 
 funcdef: 'def' NAME parameters ':' suite
 parameters: '(' [funcargslist] ')'
@@ -24,7 +25,6 @@ if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
 while_stmt: 'while' test ':' suite ['else' ':' suite]
 for_stmt: 'for' NAME 'in' test ':' suite ['else' ':' suite]
 
-suite: (NEWLINE+ stmt)+
 
 test: and_test ('or' and_test)*
 and_test: not_test ('and' not_test)*

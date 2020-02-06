@@ -6,7 +6,8 @@
 struct Token {
     enum TypeToken {
         KEYWORD, NAME, STRING,
-        NUMBER, BEGIN_LINE, BEGIN_BLOCK, OPERATOR
+        NUMBER, BEGIN_LINE, BEGIN_BLOCK, OPERATOR,
+        ENDMARKER
     };
     TypeToken type;
     int numLine, numPos;
