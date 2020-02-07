@@ -6,7 +6,7 @@
 class Exception {
 public:
     std::string message;
-    int line, posInLine;
+    int line = -1, posInLine = -1;
 
     Exception(std::string message) :
             message(message) {};

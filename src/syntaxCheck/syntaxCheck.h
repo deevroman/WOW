@@ -8,14 +8,23 @@ class SyntaxCheck {
     std::vector<Token> tokens;
 public:
     explicit SyntaxCheck(std::vector<Token> &v) : tokens(v) {
-        v.push_back(Token(Token::ENDMARKER, -1, -1, ""));
+        tokens.push_back(Token(Token::ENDMARKER, -1, -1, ""));
     }
 
     void check() {
         indexNowToken = 0;
         nowToken = &tokens[0];
         levels = {0};
-        file_input_parse();
+        try {
+            readFileInput();
+        } catch (Exception e) {
+            std::string errorMessage;
+            if (e.line != -1 && e.posInLine != -1) {
+                errorMessage += std::to_string(e.line) + ":" + std::to_string(e.posInLine) + " ";
+            }
+            errorMessage += e.message;
+            throw errorMessage;
+        }
     }
 // Tip в классе Exception есть поля строка и позиция
 // TODO обернуть всё в try чтобы ловить случайные вылеты на границу tokens
@@ -42,7 +51,9 @@ private:
                 return false;
             }
         }
-        levels.push_back(level);
+        if (level != levels.back()) {
+            levels.push_back(level);
+        }
         getToken();
         return true;
     }
@@ -189,20 +200,23 @@ private:
     }
 
     bool readFactorExpr() {
-        while (!isEnd()) {
-            if (nowToken->value == "-" || nowToken->value == "+" ||
-                nowToken->value == "~") {
+        if (!isEnd()) {
+            if (nowToken->value == "-"
+                || nowToken->value == "+"
+                || nowToken->value == "~") {
                 getToken();
-                if (!(readFactorExpr() || readPowerExpr())) {
+                if (!readFactorExpr()) {
                     throw Exception("Invalid factor expression",
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
+                return true;
             } else {
-                break;
+                return readPowerExpr();
             }
+        } else {
+            return false;
         }
-        return true;
     }
 
     bool readPowerExpr() {
@@ -350,9 +364,7 @@ private:
     }
 
     bool readStmt() {
-        if (readCompoundStmt())
-            return true;
-        return readSimpleStmt();
+        return readCompoundStmt() || readSimpleStmt();
     }
 
 
@@ -419,7 +431,14 @@ private:
                                 nowToken->numLine,
                                 nowToken->numPos);
         } else {
-            while (nowToken->value == "=" && readTest());
+            while (nowToken->value == "=") {
+                getToken();
+                if (!readTest()) {
+                    throw Exception("invalid test expr",
+                                    nowToken->numLine,
+                                    nowToken->numPos);
+                }
+            }
         }
         return true;
     }
@@ -458,7 +477,7 @@ private:
     bool readSimpleStmt() {
         return readDelStmt() || readPassStmt()
                || nowImportStmt() || readFlowStmt()
-               || readExpr();
+               || readExprStmt();
     }
 
     bool readCompoundStmt() {
@@ -513,8 +532,6 @@ private:
         getToken();
         return true;
     }
-
-
 
 
     bool readFuncdefarglist() {
@@ -612,14 +629,18 @@ private:
         if (!readBeginLine(true)) {
             return false;
         }
-        if (!readSimpleStmt())
+        if (!readStmt()) {
             return false;
-        while (readBeginLine()) {
-            while (readBeginLine()) {}
-            if (!readSimpleStmt())
-                return false;
         }
-        return readStmt();
+        while (readBeginLine()) {
+            if (!readStmt()) {
+                throw Exception("invalid suite",
+                                nowToken->numLine,
+                                nowToken->numPos);
+            }
+        }
+        popLevel();
+        return true;
     }
 
     bool readIfStmt() {
@@ -658,6 +679,7 @@ private:
                                 nowToken->numPos);
             readSuite();
         }
+        return true;
     }
 
     bool readClassdef() {
@@ -665,18 +687,23 @@ private:
             return false;
         getToken();
         if (nowToken->type != Token::NAME)
-            throw Exception("expected class name", nowToken->numLine,
+            throw Exception("expected class name",
+                            nowToken->numLine,
                             nowToken->numPos);
         getToken();
         if (nowToken->value != ":") {
             getToken();
-            readSuite();
+            if (!readSuite()) {
+                throw Exception("Invalid class suite",
+                                nowToken->numLine,
+                                nowToken->numPos);
+            }
         }
+        return true;
     }
 
-    void file_input_parse() {
-        while (indexNowToken < tokens.size()) {
-            readBeginLine();
+    void readFileInput() {
+        while (readBeginLine()) {
             readStmt();
         }
         if (levels.size() > 1) {
@@ -692,8 +719,9 @@ private:
         if (indexNowToken + 1 < tokens.size()) {
             indexNowToken++;
             nowToken = &tokens[indexNowToken];
+        } else {
+            throw Exception("invalid EOF");
         }
-        throw Exception("invalid EOL");
     }
 
     void popLevel() {

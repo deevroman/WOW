@@ -408,12 +408,6 @@
 			"value": "0"
 		}, 
 		{ 
-			"type": "BEGIN_LINE", 
-			"numLine": 12, 
-			"numPos": 0, 
-			"value": "0"
-		}, 
-		{ 
 			"type": "NAME", 
 			"numLine": 12, 
 			"numPos": 0, 

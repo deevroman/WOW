@@ -24,9 +24,7 @@ int main() {
             std::string inputPath = "../tests/syntaxCheck_tests/positives/test_" + std::to_string(saveTest) + ".input";
             freopen(inputPath.c_str(), "w", stdout);
             std::cout << input;
-        } else if (saveTest == 0) {
-            freopen("../src/syntaxCheck/test.output", "w", stdout);
-        } else {
+        } else if (saveTest < 0){
             std::string inputPath = "../tests/syntaxCheck_tests/negatives/test_" + std::to_string(saveTest) + ".input";
             freopen(inputPath.c_str(), "w", stdout);
             std::cout << input;
@@ -41,7 +39,7 @@ int main() {
                     "../tests/syntaxCheck_tests/negatives/test_" + std::to_string(abs(saveTest)) + ".input";
             freopen(inputPath.c_str(), "w", stdout);
             std::cout << input;
-            std::string outputPath = "../tests/syntaxCheck_tests/positives/test_" + std::to_string(saveTest) + ".output";
+            std::string outputPath = "../tests/syntaxCheck_tests/negatives/test_" + std::to_string(saveTest) + ".output";
             freopen(outputPath.c_str(), "w", stdout);
             std::cout << jsonExport(tokens);
         }

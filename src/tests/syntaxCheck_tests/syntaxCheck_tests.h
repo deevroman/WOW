@@ -17,8 +17,8 @@ public:
 
 private:
     // TODO
-    int COUNT_TESTS_P = 0;
-    int COUNT_TESTS_N = 0;
+    int COUNT_TESTS_P = 1;
+    int COUNT_TESTS_N = 1;
 
     int COUNT_FAILED_TESTS_P = 0;
     int COUNT_FAILED_TESTS_N = 0;
@@ -55,25 +55,15 @@ private:
         for (int i = 1; i <= COUNT_TESTS_P; i++) {
             std::string input = readFile("../tests/syntaxCheck_tests/positives/test_" + std::to_string(i) + ".input");
             Tokenizer tokenizer(input);
-            std::vector<Token> result;
+            std::vector<Token> result = tokenizer.tokenize();
+            SyntaxCheck syntaxCheck(result);
             try {
-                result = tokenizer.tokenize();
-                std::string goodOutput = readFile(
-                        "../tests/syntaxCheck_tests/positives/test_" + std::to_string(i) + ".output");
-                std::vector<Token> goodResult;
-                std::stringstream(goodOutput) >> jsonImport(goodResult);
-                if (result == goodResult) {
-                    std::cout << "Positive test #" << i << '\n';
-                    std::cout << "OK\n";
-                } else {
-                    std::cout << "Positive test #" << i << '\n';
-                    std::cout << "\x1b[31mFailed:\x1b[0m\n";
-                    COUNT_FAILED_TESTS_P++;
-                }
+                syntaxCheck.check();
+                std::cout << "Positive test #" << i << '\n';
+                std::cout << "OK\n";
             } catch (...) {
                 std::cout << "Positive test #" << i << '\n';
                 std::cout << "\x1b[31mFailed:\x1b[0m\n";
-                std::cout << "\x1b[31mCrashed\x1b[0m\n";
                 COUNT_FAILED_TESTS_P++;
             }
         }
@@ -81,16 +71,28 @@ private:
         for (int i = 1; i <= COUNT_TESTS_N; i++) {
             std::string input = readFile("../tests/syntaxCheck_tests/negatives/test_" + std::to_string(i) + ".input");
             Tokenizer tokenizer(input);
-            std::vector<Token> result;
+            std::vector<Token> result = tokenizer.tokenize();
+            SyntaxCheck syntaxCheck(result);
             try {
-                result = tokenizer.tokenize();
+                syntaxCheck.check();
                 std::cout << "Negative test #" << i << '\n';
                 std::cout << "\x1b[31mFailed:\x1b[0m\n";
                 std::cout << "\x1b[31mNot crashed\x1b[0m\n";
                 COUNT_FAILED_TESTS_N++;
+            } catch (std::string e) {
+                std::string goodOutput = readFile(
+                        "../tests/syntaxCheck_tests/positives/test_" + std::to_string(i) + ".output");
+                if (true) { // FIXME пофиксить кода оформим нормально сообщения об ошибках
+                    std::cout << "Negative test #" << i << '\n';
+                    std::cout << "OK\n";
+                } else {
+                    std::cout << "Negative test #" << i << '\n';
+                    std::cout << "\x1b[31mFailed:\x1b[0m\n";
+                    std::cout << "\x1b[31mWrong exception\x1b[0m\n";
+                }
             } catch (...) {
                 std::cout << "Negative test #" << i << '\n';
-                std::cout << "OK\n";
+                std::cout << "Failed. Unknown error\n";
             }
         }
     }

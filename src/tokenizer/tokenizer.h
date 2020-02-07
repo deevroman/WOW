@@ -233,7 +233,10 @@ private:
         try {
             while (!isEnd(pos)) {
                 int cntSpace = readBeginSpace(pos);
-                ans.push_back(Token(Token::BEGIN_LINE, line, 0, std::to_string(cntSpace)));
+                if (ans.empty() ||
+                    ans.back().type != Token::BEGIN_LINE || ans.back().value != std::to_string(cntSpace)) {
+                    ans.push_back(Token(Token::BEGIN_LINE, line, 0, std::to_string(cntSpace)));
+                }
                 posInLine = cntSpace;
 
                 parseLine(pos, line, posInLine, ans);
