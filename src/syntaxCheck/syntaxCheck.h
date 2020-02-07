@@ -443,6 +443,144 @@ private:
                || readClassdef();
     }
 
+    bool readFuncdef() {
+        if (nowToken -> value != "def")
+            return false;
+        getToken();
+        if (nowToken -> type != Token::NAME)
+            throw Exception("expected NAME after def",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        getToken();
+        if (nowToken -> value != ":")
+            throw Exception("expected : after function name",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        getToken();
+        if (!readParameters())
+            throw Exception("invalid function parameters",
+                                  nowToken->numLine,
+                                  nowToken->numPos);
+        if (nowToken -> value != ":")
+            throw Exception("expected : after function parameters",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        getToken();
+        if (!readSuite()){
+            throw Exception("invalid function suite",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        }
+        return true;
+    }
+
+    bool readParameters(){
+        if (nowToken -> value != "(")
+            return false;
+        getToken();
+        if (!readFuncdefarglist())
+            throw Exception("invalid arglist",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        if (nowToken -> value != ")")
+            throw Exception("expected )",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        getToken();
+        return true;
+    }
+
+    bool readFuncdefarglist(){
+        if (nowToken -> type != Token::NAME)
+            throw Exception("expected name",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        getToken();
+        while (nowToken -> value == ","){
+            getToken();
+            if (nowToken -> type != Token::NAME)
+                throw Exception("expected name",
+                                nowToken->numLine,
+                                nowToken->numPos);
+            getToken();
+        }
+        return true;
+    }
+
+    bool readWhileStmt() {
+        if (nowToken -> value != "while")
+            return false;
+        getToken();
+        if (!readTest())
+            throw Exception("invalid while expr",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        if (nowToken -> value != ":")
+            throw Exception("expected : after while condition",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        getToken();
+        if (!readSuite())
+            throw Exception("invalid while suite",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        if (nowToken -> value == "else"){
+            getToken();
+            if (nowToken -> value != ":")
+                throw Exception("expected : after else",
+                                nowToken->numLine,
+                                nowToken->numPos);
+            getToken();
+            if (!readSuite())
+                throw Exception("invalid else suite",
+                                nowToken->numLine,
+                                nowToken->numPos);
+        }
+        return true;
+    }
+
+    bool readForStmt() {
+        if (nowToken -> value != "for")
+            return false;
+        getToken();
+        if (nowToken -> NAME != Token::NAME)
+            throw Exception("expected name after for",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        getToken();
+        if (nowToken -> value != "in")
+            throw Exception("expected in after for in",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        getToken();
+        if (!readTest())
+            throw Exception("invalid for condition",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        if (nowToken -> value != ":")
+            throw Exception("expected : after for statement",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        getToken();
+        if (!readSuite())
+            throw Exception("invalid for suite",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        if (nowToken -> value == "else"){
+            getToken();
+            if (nowToken -> value != ":")
+                throw Exception("expected : after else",
+                                nowToken->numLine,
+                                nowToken->numPos);
+            getToken();
+            if (!readSuite())
+                throw Exception("invalid else suite",
+                                nowToken->numLine,
+                                nowToken->numPos);
+        }
+        return true;
+    }
+
     bool readSuite() {
         if (!readBeginLine(true)) {
             return false;

@@ -23,7 +23,7 @@ import_stmt: 'import' NAME ['as' NAME]
 compound_stmt: if_stmt | while_stmt | for_stmt | funcdef | classdef
 if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
 while_stmt: 'while' test ':' suite ['else' ':' suite]
-for_stmt: 'for' NAME 'in' test ':' suite ['else' ':' suite]
+for_stmt: 'for' NAME 'iifn' test ':' suite ['else' ':' suite]
 
 
 test: and_test ('or' and_test)*
