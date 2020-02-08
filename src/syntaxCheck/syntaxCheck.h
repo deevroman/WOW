@@ -444,12 +444,16 @@ private:
 
     bool readAugassign() {
         std::string nowName = nowToken->value;
-        return (nowName == "+=" || nowName == "-="
+        if (nowName == "+=" || nowName == "-="
                 || nowName == "*=" || nowName == "/="
                 || nowName == "%=" || nowName == "**="
                 || nowName == "&=" || nowName == "|="
                 || nowName == "^=" || nowName == "<<="
-                || nowName == ">>=");
+                || nowName == ">>="){
+            getToken();
+            return true;
+        }
+        return false;
     }
 
     bool readContinueStmt() {
