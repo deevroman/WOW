@@ -715,6 +715,8 @@ private:
         if (levels.size() > 1) {
             throw Exception("invalid EOF");
         }
+        if (!isEnd())
+            throw Exception("Something after program");
     }
 
     bool isEnd() {
