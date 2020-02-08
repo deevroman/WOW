@@ -14,32 +14,35 @@ int main() {
     Tokenizer tokenizer(input);
     try {
         std::vector<Token> tokens = tokenizer.tokenize();
-        std::cout << "Save how test?\n0 - No\nOther - Number test\n";
+        freopen("../src/tokenizer/test.output", "w", stdout);
+        std::cout << jsonExport(tokens);
+
+        std::cout << "Save how test?\n0 - No\n1 - Yes\n";
         int saveTest;
         std::cin >> saveTest;
-        if (saveTest > 0) {
-            std::string inputPath = "../tests/tokenizer_tests/positives/test_" + std::to_string(saveTest) + ".input";
+        if (saveTest) {
+            int cntTests = stoi(readFile("../tests/tokenizer_tests/positives/countTests"));
+            freopen("../tests/tokenizer_tests/positives/countTests", "w", stdout);
+            std::cout << ++cntTests;
+
+            std::string inputPath = "../tests/tokenizer_tests/positives/test_" + std::to_string(cntTests) + ".input";
             freopen(inputPath.c_str(), "w", stdout);
             std::cout << input;
-            std::string outputPath = "../tests/tokenizer_tests/positives/test_" + std::to_string(saveTest) + ".output";
+            std::string outputPath = "../tests/tokenizer_tests/positives/test_" + std::to_string(cntTests) + ".output";
             freopen(outputPath.c_str(), "w", stdout);
             std::cout << jsonExport(tokens);
-        } else if (saveTest == 0) {
-            freopen("../src/tokenizer/test.output", "w", stdout);
-            std::cout << jsonExport(tokens);
-        } else {
-            std::string inputPath = "../tests/tokenizer_tests/negatives/test_" + std::to_string(saveTest) + ".input";
-            freopen(inputPath.c_str(), "w", stdout);
-            std::cout << input;
         }
     } catch (std::string e) {
         std::cerr << e;
-        std::cout << "Save how test?\n0 - No\nOther - Number test\n";
+        std::cout << "Save how test?\n0 - No\n1 - Yes\n";
         int saveTest;
         std::cin >> saveTest;
-        if (saveTest < 0) {
+        if (saveTest) {
+            int cntTests = stoi(readFile("../tests/tokenizer_tests/negatives/countTests"));
+            freopen("../tests/tokenizer_tests/negatives/countTests", "w", stdout);
+            std::cout << ++cntTests;
             std::string inputPath =
-                    "../tests/tokenizer_tests/negatives/test_" + std::to_string(abs(saveTest)) + ".input";
+                    "../tests/tokenizer_tests/negatives/test_" + std::to_string(cntTests) + ".input";
             freopen(inputPath.c_str(), "w", stdout);
             std::cout << input;
         }

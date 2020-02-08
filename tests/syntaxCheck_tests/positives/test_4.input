@@ -1,0 +1,5 @@
+for i in graph:
+    for j in graph[i]:
+        if j or graph[j]:
+            return make_response(jsonify('Invalid data. Invalid relatives.'), 400)
+today = datetime.today()

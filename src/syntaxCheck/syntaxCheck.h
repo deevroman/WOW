@@ -20,7 +20,7 @@ public:
         } catch (Exception e) {
             std::string errorMessage;
             if (e.line != -1 && e.posInLine != -1) {
-                errorMessage += std::to_string(e.line) + ":" + std::to_string(e.posInLine) + " ";
+                errorMessage += std::to_string(e.line + 1) + ":" + std::to_string(e.posInLine + 1) + " ";
             }
             errorMessage += e.message;
             throw errorMessage;
@@ -47,7 +47,7 @@ private:
                 throw Exception("Invalid in begin of line", nowToken->numLine,
                                 nowToken->numPos);
             }
-            if (levels.back() < level) {
+            if (levels.back() > level) {
                 return false;
             }
         }
@@ -257,8 +257,7 @@ private:
                    || nowToken->value == "False")
             getToken();
         else
-            throw Exception("Invalid name expression",
-                            nowToken->numLine, nowToken->numPos);
+            return false;
         while (readTrailer());
         return true;
     }
@@ -658,7 +657,8 @@ private:
         }
         getToken();
         readSuite();
-        while (nowToken->value == "elif") {
+        readBeginLine();
+        while (nowToken->value == "elif") { // FIXME жаба
             getToken();
             if (!readTest())
                 throw Exception("invalid if condition",
@@ -670,6 +670,7 @@ private:
                                 nowToken->numPos);
             getToken();
             readSuite();
+            readBeginLine();
         }
         if (nowToken->value == "else") {
             getToken();

@@ -15,13 +15,21 @@ public:
         run_tests();
     }
 
+    SyntaxCheckTests() {
+        loadCountTests();
+    }
+
 private:
-    // TODO
-    int COUNT_TESTS_P = 1;
-    int COUNT_TESTS_N = 1;
+    int COUNT_TESTS_P;
+    int COUNT_TESTS_N;
 
     int COUNT_FAILED_TESTS_P = 0;
     int COUNT_FAILED_TESTS_N = 0;
+
+    void loadCountTests(){
+        COUNT_TESTS_P = stoi(readFile("../tests/syntaxCheck_tests/positives/countTests"));
+        COUNT_TESTS_N = stoi(readFile("../tests/syntaxCheck_tests/negatives/countTests"));
+    }
 public:
     int getCountTestsP() const {
         return COUNT_TESTS_P;

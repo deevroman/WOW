@@ -1,1 +1,5 @@
-a = 5 =
+a = 49.0
+if True:
+    a = 3
+else:
+    print(4, 4
