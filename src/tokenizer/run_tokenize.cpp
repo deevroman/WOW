@@ -14,8 +14,8 @@ int main() {
     Tokenizer tokenizer(input);
     try {
         std::vector<Token> tokens = tokenizer.tokenize();
-        freopen("../src/tokenizer/test.output", "w", stdout);
-        std::cout << jsonExport(tokens);
+        freopen("../src/tokenizer/test.output", "w", stderr);
+        std::cerr << jsonExport(tokens);
 
         std::cout << "Save how test?\n0 - No\n1 - Yes\n";
         int saveTest;

@@ -678,6 +678,7 @@ private:
                 throw Exception("expected : after else statements",
                                 nowToken->numLine,
                                 nowToken->numPos);
+            getToken();
             readSuite();
         }
         return true;
