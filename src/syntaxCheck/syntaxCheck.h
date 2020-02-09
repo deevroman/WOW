@@ -233,6 +233,44 @@ private:
     }
 
     bool readNameExpr() {
+        if (isOperator("[")) {
+            getToken();
+            if (!readTest()){
+                if (isOperator("]")) {
+                    getToken();
+                    while(readTrailer());
+                    return true;
+                }
+            }
+            if (isOperator(",")) {
+                while (isOperator(",")) {
+                    getToken();
+                    if (!readTest()) {
+                        throw Exception("expected testExpr",
+                                        nowToken->numLine, nowToken->numPos);
+                    }
+                }
+            } else if (isKeyword("for")) {
+                getToken();
+                if (nowToken->type != Token::NAME)
+                    throw Exception("expected NAME",
+                                    nowToken->numLine, nowToken->numPos);
+                getToken();
+                if (!isKeyword("in"))
+                    throw Exception("expected in",
+                                    nowToken->numLine, nowToken->numPos);
+                getToken();
+                if (!readTest())
+                    throw Exception("expected testExpr",
+                                    nowToken->numLine, nowToken->numPos);
+            }
+            if (!isOperator("]"))
+                throw Exception("expected testExpr",
+                                nowToken->numLine, nowToken->numPos);
+            getToken();
+            while (readTrailer());
+            return true;
+        }
         if (isOperator("(")) {
             getToken();
             if (!readTest()) {
