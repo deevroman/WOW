@@ -42,7 +42,7 @@ private:
             }
         } else {
             if (level > levels.back()) {
-                throw Exception("Invalid in begin of line", nowToken->numLine,
+                throw Exception("invalid in begin of line", nowToken->numLine,
                                 nowToken->numPos);
             }
             if (levels.back() > level) {
@@ -63,7 +63,7 @@ private:
             if (nowToken->value == "or") {
                 getToken();
                 if (!readAndTest()) {
-                    throw Exception("Invalid and expression",
+                    throw Exception("invalid and expression",
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
@@ -110,7 +110,7 @@ private:
             if (isOperator("^")) {
                 getToken();
                 if (!readAndExpr()) {
-                    throw Exception("Invalid xor expression",
+                    throw Exception("invalid xor expression",
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
@@ -128,7 +128,7 @@ private:
             if (isOperator("&")) {
                 getToken();
                 if (!readShiftExpr()) {
-                    throw Exception("Invalid and expression",
+                    throw Exception("invalid and expression",
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
@@ -146,7 +146,7 @@ private:
             if (isOperator("<<") || isOperator(">>")) {
                 getToken();
                 if (!readArithExpr()) {
-                    throw Exception("Invalid shift expression",
+                    throw Exception("invalid shift expression",
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
@@ -161,10 +161,10 @@ private:
         if (!readTermExpr())
             return false;
         while (!isEnd()) {
-            if (isOperator("+") || isOperator("-") ){
+            if (isOperator("+") || isOperator("-")) {
                 getToken();
                 if (!readTermExpr()) {
-                    throw Exception("Invalid arith expression",
+                    throw Exception("invalid arith expression",
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
@@ -179,8 +179,8 @@ private:
         if (!readFactorExpr())
             return false;
         while (!isEnd()) {
-            if (isOperator("*" )|| isOperator("/" )||
-                isOperator("%") || isOperator("//") ){
+            if (isOperator("*") || isOperator("/") ||
+                isOperator("%") || isOperator("//")) {
                 getToken();
                 if (!readFactorExpr()) {
                     throw Exception("Invalid arith expression",
@@ -201,7 +201,7 @@ private:
                 || isOperator("~")) {
                 getToken();
                 if (!readFactorExpr()) {
-                    throw Exception("Invalid factor expression",
+                    throw Exception("invalid factor expression",
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
@@ -221,7 +221,7 @@ private:
             if (isOperator("**")) {
                 getToken();
                 if (!readNameExpr()) {
-                    throw Exception("Invalid power expression",
+                    throw Exception("invalid power expression",
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
@@ -236,20 +236,20 @@ private:
         if (isOperator("(")) {
             getToken();
             if (!readTest()) {
-                throw Exception("Invalid brackets statement expression",
+                throw Exception("invalid brackets statement expression",
                                 nowToken->numLine, nowToken->numPos);
             }
             if (!isOperator(")")) {
-                throw Exception("Invalid brackets statement expression",
+                throw Exception("invalid brackets statement expression",
                                 nowToken->numLine, nowToken->numPos);
             }
             getToken();
         } else if (nowToken->type == Token::NAME
                    || nowToken->type == Token::NUMBER
                    || nowToken->type == Token::STRING
-                   || isKeyword( "None")
-                   || isKeyword( "True")
-                   || isKeyword( "False"))
+                   || isKeyword("None")
+                   || isKeyword("True")
+                   || isKeyword("False"))
             getToken();
         else
             return false;
@@ -261,27 +261,27 @@ private:
         if (isOperator("(")) {
             getToken();
             readArglist();
-            if (isOperator(")") ){
+            if (isOperator(")")) {
                 getToken();
                 return true;
             } else
-                throw Exception("Invalid trailer",
+                throw Exception("invalid trailer",
                                 nowToken->numLine, nowToken->numPos);
         }
-        if (isOperator("[") ){
+        if (isOperator("[")) {
             getToken();
             readTest();
             if (isOperator("]")) {
                 getToken();
                 return true;
             } else
-                throw Exception("Invalid trailer",
+                throw Exception("invalid trailer",
                                 nowToken->numLine, nowToken->numPos);
         }
-        if (isOperator(".") ){
+        if (isOperator(".")) {
             getToken();
             if (nowToken->type != Token::NAME) {
-                throw Exception("Invalid trailer",
+                throw Exception("invalid trailer",
                                 nowToken->numLine, nowToken->numPos);
             } else {
                 getToken();
@@ -295,7 +295,7 @@ private:
         if (!readTest())
             return false;
         while (!isEnd()) {
-            if (isOperator(",") ){
+            if (isOperator(",")) {
                 getToken();
                 if (!readTest()) {
                     throw Exception("Invalid arglist",
@@ -325,7 +325,7 @@ private:
     }
 
     bool readNotTest() {
-        if (isKeyword( "not")) {
+        if (isKeyword("not")) {
             getToken();
             if (!readNotTest()) {
                 throw Exception("invalid not expression",
@@ -343,10 +343,10 @@ private:
         if (!readNotTest())
             return false;
         while (!isEnd()) {
-            if (isKeyword( "and") ){
+            if (isKeyword("and")) {
                 getToken();
                 if (!readNotTest()) {
-                    throw Exception("Invalid not expression",
+                    throw Exception("invalid not expression",
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
@@ -392,7 +392,7 @@ private:
                                 nowToken->numPos);
             }
             if (!isEnd()) {
-                if (isKeyword("import") ){
+                if (isKeyword("import")) {
                     getToken();
                     if (nowToken->type == Token::NAME) {
                         getToken();
@@ -438,12 +438,12 @@ private:
     }
 
     bool readAugassign() {
-        if (isOperator( "+=") || isOperator( "-=")
-            || isOperator( "*=") || isOperator( "/=")
-            || isOperator( "%=") || isOperator( "**=")
-            || isOperator( "&=") || isOperator( "|=")
-            || isOperator( "^=") || isOperator( "<<=")
-            || isOperator( ">>=") ){
+        if (isOperator("+=") || isOperator("-=")
+            || isOperator("*=") || isOperator("/=")
+            || isOperator("%=") || isOperator("**=")
+            || isOperator("&=") || isOperator("|=")
+            || isOperator("^=") || isOperator("<<=")
+            || isOperator(">>=")) {
             getToken();
             return true;
         }
@@ -451,7 +451,7 @@ private:
     }
 
     bool readContinueStmt() {
-        if (isKeyword( "continue")) {
+        if (isKeyword("continue")) {
             getToken();
             return true;
         }
@@ -459,7 +459,7 @@ private:
     }
 
     bool readReturnStmt() {
-        if (isKeyword( "return") ){
+        if (isKeyword("return")) {
             getToken();
             readTest();
             return true;
@@ -492,7 +492,7 @@ private:
                             nowToken->numLine,
                             nowToken->numPos);
         getToken();
-        if (nowToken->value != ":")
+        if (!isBeginBlock(":"))
             throw Exception("expected : after function name",
                             nowToken->numLine,
                             nowToken->numPos);
@@ -501,7 +501,7 @@ private:
             throw Exception("invalid function parameters",
                             nowToken->numLine,
                             nowToken->numPos);
-        if (nowToken->value != ":")
+        if (!isBeginBlock(":"))
             throw Exception("expected : after function parameters",
                             nowToken->numLine,
                             nowToken->numPos);
@@ -537,7 +537,7 @@ private:
                             nowToken->numLine,
                             nowToken->numPos);
         getToken();
-        while (isOperator( ",")) {
+        while (isOperator(",")) {
             getToken();
             if (nowToken->type != Token::NAME)
                 throw Exception("expected name",
@@ -556,8 +556,8 @@ private:
             throw Exception("invalid while condition",
                             nowToken->numLine,
                             nowToken->numPos);
-        if (nowToken->value != ":")
-            throw Exception("expected : after while condition",
+        if (!isBeginBlock(":"))
+            throw Exception("invalid while condition",
                             nowToken->numLine,
                             nowToken->numPos);
         getToken();
@@ -565,7 +565,7 @@ private:
         if (isEqualLevel() && isNextTokenKey("else")) {
             readBeginLine();
             getToken();
-            if (nowToken->value != ":")
+            if (!isBeginBlock(":"))
                 throw Exception("expected : after else",
                                 nowToken->numLine,
                                 nowToken->numPos);
@@ -585,7 +585,7 @@ private:
                             nowToken->numLine,
                             nowToken->numPos);
         getToken();
-        if (nowToken->value != "in")
+        if (!isKeyword("in"))
             throw Exception("expected in after for in",
                             nowToken->numLine,
                             nowToken->numPos);
@@ -594,7 +594,7 @@ private:
             throw Exception("invalid for condition",
                             nowToken->numLine,
                             nowToken->numPos);
-        if (nowToken->value != ":")
+        if (!isBeginBlock(":"))
             throw Exception("expected : after for statement",
                             nowToken->numLine,
                             nowToken->numPos);
@@ -606,7 +606,7 @@ private:
         if (isEqualLevel() && isNextTokenKey("else")) {
             readBeginLine();
             getToken();
-            if (nowToken->value != ":")
+            if (!isBeginBlock(":"))
                 throw Exception("expected : after else",
                                 nowToken->numLine,
                                 nowToken->numPos);
@@ -635,7 +635,7 @@ private:
     }
 
     bool readIfStmt() {
-        if (nowToken->value != "if")
+        if (!isKeyword( "if"))
             return false;
 
         getToken();
@@ -643,8 +643,8 @@ private:
             throw Exception("invalid if condition",
                             nowToken->numLine,
                             nowToken->numPos);
-        if (nowToken->value != ":") {
-            throw Exception("expected : after if condition",
+        if (!isBeginBlock(":")) {
+            throw Exception("invalid if condition",
                             nowToken->numLine,
                             nowToken->numPos);
         }
@@ -657,8 +657,8 @@ private:
                 throw Exception("invalid elif condition",
                                 nowToken->numLine,
                                 nowToken->numPos);
-            if (nowToken->value != ":")
-                throw Exception("expected : after elif statements",
+            if (!isBeginBlock(":"))
+                throw Exception("invalid elif condition",
                                 nowToken->numLine,
                                 nowToken->numPos);
             getToken();
@@ -667,7 +667,7 @@ private:
         if (isEqualLevel() && isNextTokenKey("else")) {
             readBeginLine();
             getToken();
-            if (nowToken->value != ":")
+            if (!isBeginBlock(":"))
                 throw Exception("expected : after else statements",
                                 nowToken->numLine,
                                 nowToken->numPos);
@@ -678,7 +678,7 @@ private:
     }
 
     bool readClassdef() {
-        if (nowToken->value != "class")
+        if (!isKeyword( "class"))
             return false;
         getToken();
         if (nowToken->type != Token::NAME)
@@ -686,7 +686,7 @@ private:
                             nowToken->numLine,
                             nowToken->numPos);
         getToken();
-        if (nowToken->value != ":") {
+        if (!isBeginBlock(":")) {
             getToken();
             if (!readSuite()) {
                 throw Exception("Invalid class suite",
@@ -705,7 +705,7 @@ private:
             throw Exception("invalid EOF");
         }
         if (!isEnd())
-            throw Exception("Unknown lexem",
+            throw Exception("unknown syntax",
                             nowToken->numLine,
                             nowToken->numPos);
     }
@@ -724,15 +724,17 @@ private:
     }
 
     bool isNextTokenKey(std::string name) {
-        return (indexNowToken + 1 < tokens.size() &&
-                tokens[indexNowToken + 1].type == Token::KEYWORD &&
-                tokens[indexNowToken + 1].value == name);
+        return (indexNowToken + 1 < tokens.size()
+                && tokens[indexNowToken + 1].type == Token::KEYWORD
+                && tokens[indexNowToken + 1].value == name);
     }
 
     bool isEqualLevel() {
-        if (nowToken->type != Token::BEGIN_LINE || levels.empty())
+        if (nowToken->type == Token::ENDMARKER)
+            return levels.back() == 0;
+        if (nowToken->type != Token::BEGIN_LINE)
             throw Exception("Ban");
-        return (std::stoi(nowToken->value) == levels.back());
+        return std::stoi(nowToken->value) == levels.back();
     }
 
     bool isKeyword(const std::string &name) {
@@ -741,6 +743,10 @@ private:
 
     bool isOperator(const std::string &name) {
         return nowToken->type == Token::OPERATOR && nowToken->value == name;
+    }
+
+    bool isBeginBlock(const std::string &name) {
+        return nowToken->type == Token::BEGIN_BLOCK && nowToken->value == name;
     }
 
     void popLevel() {

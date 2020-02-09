@@ -12,7 +12,14 @@ int main() {
     using ThorsAnvil::Serialize::jsonExport;
     std::string input = readFile("../src/syntaxCheck/test.input");
     Tokenizer tokenizer(input);
-    auto tokens = tokenizer.tokenize();
+    std::vector<Token> tokens;
+    try {
+        tokens = tokenizer.tokenize();
+    } catch (std::string e) {
+        std::cout << "Not parsed\n";
+        std::cerr << e;
+        return 0;
+    }
     try {
         SyntaxCheck syntaxChecker(tokens);
         syntaxChecker.check();
@@ -43,7 +50,8 @@ int main() {
                     "../tests/syntaxCheck_tests/negatives/test_" + std::to_string(cntTests) + ".input";
             freopen(inputPath.c_str(), "w", stdout);
             std::cout << input;
-            std::string outputPath = "../tests/syntaxCheck_tests/negatives/test_" + std::to_string(cntTests) + ".output";
+            std::string outputPath =
+                    "../tests/syntaxCheck_tests/negatives/test_" + std::to_string(cntTests) + ".output";
             freopen(outputPath.c_str(), "w", stdout);
             std::cout << jsonExport(tokens);
         }

@@ -1,0 +1,7 @@
+if a != 48:
+    a = 5
+else:
+    print(a)
+    b += 0
+    if a == 0 and b != 0:
+        print('ok')
