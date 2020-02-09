@@ -308,7 +308,10 @@ private:
         }
         if (isOperator("[")) {
             getToken();
-            readTest();
+            if(!readTest()){
+                throw Exception("invalid trailer",
+                                nowToken->numLine, nowToken->numPos);
+            }
             if (isOperator("]")) {
                 getToken();
                 return true;
