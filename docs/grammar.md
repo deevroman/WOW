@@ -41,7 +41,9 @@ arith_expr: term (('+'|'-') term)*
 term: factor (('*'|'/'|'%'|'//') factor)*
 factor: ('+'|'-'|'~') factor | power
 power: name_expr ('**' factor)*
-name_expr: ('(' test ')' | NAME | NUMBER | STRING | 'None' | 'True' | 'False') trailer*
+name_expr: ('(' test ')' 
+             | '[' [test ((',' test)* | 'for' NAME 'in' test)]  ']'
+             | NAME | NUMBER | STRING | 'None' | 'True' | 'False') trailer*
 trailer: '(' [arglist] ')' | '[' test ']' | '.' NAME
 
 arglist: test (',' test)*

@@ -383,7 +383,7 @@ private:
         return false;
     }
 
-    bool nowImportStmt() {
+    bool readImportStmt() {
         if (isKeyword("import")) {
             getToken();
             if (nowToken->type != Token::NAME) {
@@ -391,8 +391,9 @@ private:
                                 nowToken->numLine,
                                 nowToken->numPos);
             }
+            getToken();
             if (!isEnd()) {
-                if (isKeyword("import")) {
+                if (isKeyword("as")) {
                     getToken();
                     if (nowToken->type == Token::NAME) {
                         getToken();
@@ -473,7 +474,7 @@ private:
 
     bool readSimpleStmt() {
         return readDelStmt() || readPassStmt()
-               || nowImportStmt() || readFlowStmt()
+               || readImportStmt() || readFlowStmt()
                || readExprStmt();
     }
 
@@ -489,11 +490,6 @@ private:
         getToken();
         if (nowToken->type != Token::NAME)
             throw Exception("expected NAME after def",
-                            nowToken->numLine,
-                            nowToken->numPos);
-        getToken();
-        if (!isBeginBlock(":"))
-            throw Exception("expected : after function name",
                             nowToken->numLine,
                             nowToken->numPos);
         getToken();
@@ -635,7 +631,7 @@ private:
     }
 
     bool readIfStmt() {
-        if (!isKeyword( "if"))
+        if (!isKeyword("if"))
             return false;
 
         getToken();
@@ -678,7 +674,7 @@ private:
     }
 
     bool readClassdef() {
-        if (!isKeyword( "class"))
+        if (!isKeyword("class"))
             return false;
         getToken();
         if (nowToken->type != Token::NAME)
@@ -686,7 +682,7 @@ private:
                             nowToken->numLine,
                             nowToken->numPos);
         getToken();
-        if (!isBeginBlock(":")) {
+        if (isBeginBlock(":")) {
             getToken();
             if (!readSuite()) {
                 throw Exception("Invalid class suite",

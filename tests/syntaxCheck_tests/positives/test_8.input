@@ -1,0 +1,8 @@
+def foo(a):
+    pass
+for i in a:
+    continue
+class Bar:
+    pass
+if a:
+    pass
