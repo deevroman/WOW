@@ -235,10 +235,10 @@ private:
     bool readNameExpr() {
         if (isOperator("[")) {
             getToken();
-            if (!readTest()){
+            if (!readTest()) {
                 if (isOperator("]")) {
                     getToken();
-                    while(readTrailer());
+                    while (readTrailer());
                     return true;
                 }
             }
@@ -308,7 +308,7 @@ private:
         }
         if (isOperator("[")) {
             getToken();
-            if(!readTest()){
+            if (!readTest()) {
                 throw Exception("invalid trailer",
                                 nowToken->numLine, nowToken->numPos);
             }
@@ -655,10 +655,14 @@ private:
 
     bool readSuite() {
         if (!readBeginLine(true)) {
-            throw Exception("expected suite", nowToken->numLine, nowToken->numPos);
+            throw Exception("expected suite",
+                            nowToken->numLine,
+                            nowToken->numPos);
         }
         if (!readStmt()) {
-            throw Exception("expected suite", nowToken->numLine, nowToken->numPos);
+            throw Exception("expected suite",
+                            nowToken->numLine,
+                            nowToken->numPos);
         }
         while (readBeginLine()) {
             if (!readStmt()) {
