@@ -1,0 +1,1 @@
+a = [kek(i*i) for i in LOL]
