@@ -1,0 +1,2 @@
+transactions_test=pd.read_csv('data/transactions_test.csv')
+test_id=pd.read_csv('data/test.csv')

@@ -1,0 +1,3 @@
+kek_test = transactions_test.copy()
+kek_test['trans_date'] = kek_test['trans_date'] * 24 * 60 * 60
+kek_test

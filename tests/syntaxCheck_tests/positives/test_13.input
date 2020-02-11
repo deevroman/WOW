@@ -1,0 +1,10 @@
+import time
+import os
+
+current_timestamp = int(time.time())
+submission_path = 'submissions/{}.csv'.format(current_timestamp)
+
+if not os.path.exists('submissions'):
+    os.makedirs('submissions')
+
+print(submission_path)
