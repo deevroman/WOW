@@ -1,0 +1,4 @@
+if 0:
+    if 1:
+        for i in a:
+            pass
