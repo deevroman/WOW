@@ -1,4 +1,4 @@
-for i in a:
-    pass
-else:
-    print('0\'')
+def lol():
+    a
+
+    b

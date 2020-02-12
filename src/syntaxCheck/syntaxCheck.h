@@ -552,14 +552,18 @@ private:
     }
 
     bool readParameters() {
-        if (nowToken->value != "(")
+        if (!isOperator("("))
             return false;
         getToken();
+        if (isOperator(")")){
+            getToken();
+            return true;
+        }
         if (!readFuncdefarglist())
             throw Exception("invalid arglist",
                             nowToken->numLine,
                             nowToken->numPos);
-        if (nowToken->value != ")")
+        if (!isOperator(")"))
             throw Exception("expected )",
                             nowToken->numLine,
                             nowToken->numPos);
