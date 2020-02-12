@@ -1,2 +1,2 @@
 # WOW
-WOW is WOW programming languge
+WOW is WOW programming language
