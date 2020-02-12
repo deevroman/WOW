@@ -555,7 +555,7 @@ private:
         if (!isOperator("("))
             return false;
         getToken();
-        if (isOperator(")")){
+        if (isOperator(")")) {
             getToken();
             return true;
         }
@@ -778,7 +778,9 @@ private:
         if (nowToken->type == Token::ENDMARKER)
             return levels.back() == 0;
         if (nowToken->type != Token::BEGIN_LINE)
-            throw Exception("Ban");
+            throw Exception("invalid EOL",
+                            nowToken->numLine,
+                            nowToken->numPos);
         return std::stoi(nowToken->value) == levels.back();
     }
 
