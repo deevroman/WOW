@@ -801,5 +801,4 @@ private:
     }
 };
 
-
 #endif //WOW_SYNTAXCHECK_H
