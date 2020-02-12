@@ -28,32 +28,35 @@ int main() {
         std::cin >> saveTest;
         if (saveTest) {
             int cntTests = stoi(readFile("../tests/syntaxCheck_tests/positives/countTests"));
-            freopen("../tests/syntaxCheck_tests/positives/countTests", "w", stdout);
-            std::cout << ++cntTests;
-            std::string inputPath = "../tests/syntaxCheck_tests/positives/test_" + std::to_string(cntTests) + ".input";
-            freopen(inputPath.c_str(), "w", stdout);
-            std::cout << input;
+            std::ofstream testCountFile("../tests/syntaxCheck_tests/positives/countTests");
+            testCountFile << ++cntTests;
+
+            std::ofstream testInputFile("../tests/syntaxCheck_tests/positives/test_"+ std::to_string(cntTests) + ".input");
+            testInputFile << input;
+            std::cout << "Test \n#" + std::to_string(cntTests) + " saved";
         }
     } catch (std::string e) {
         std::cerr << e;
         std::cout << "\nSave how test?\n0 - No\n1 - Yes\n";
-        std::string inputPath = "../src/syntaxCheck/test.output";
-        freopen(inputPath.c_str(), "w", stdout);
-        std::cout << e;
+        std::ofstream testNotSaveOutputFile("../src/syntaxCheck/test.output");
+        testNotSaveOutputFile << e;
         int saveTest;
         std::cin >> saveTest;
         if (saveTest) {
             int cntTests = stoi(readFile("../tests/syntaxCheck_tests/negatives/countTests"));
-            freopen("../tests/syntaxCheck_tests/negatives/countTests", "w", stdout);
-            std::cout << ++cntTests;
+            std::ofstream testCountFile("../tests/syntaxCheck_tests/negatives/countTests");
+            testCountFile << ++cntTests;
             std::string inputPath =
                     "../tests/syntaxCheck_tests/negatives/test_" + std::to_string(cntTests) + ".input";
-            freopen(inputPath.c_str(), "w", stdout);
-            std::cout << input;
+            std::ofstream testInputFile(inputPath);
+            testInputFile << input;
+
             std::string outputPath =
                     "../tests/syntaxCheck_tests/negatives/test_" + std::to_string(cntTests) + ".output";
-            freopen(outputPath.c_str(), "w", stdout);
-            std::cout << jsonExport(tokens);
+            std::ofstream testOutputFile(outputPath);
+            testOutputFile << e;
+
+            std::cout << "Test \n#" + std::to_string(cntTests) + " saved";
         }
     }
 

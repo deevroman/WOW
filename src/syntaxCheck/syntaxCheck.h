@@ -38,11 +38,14 @@ private:
         int level = std::stoi(nowToken->value);
         if (needMore) {
             if (level <= levels.back()) {
-                throw Exception("invalid begin line");
+                throw Exception("invalid begin line",
+                                nowToken->numLine,
+                                nowToken->numPos);
             }
         } else {
             if (level > levels.back()) {
-                throw Exception("invalid in begin of line", nowToken->numLine,
+                throw Exception("invalid in begin of line",
+                                nowToken->numLine,
                                 nowToken->numPos);
             }
             if (levels.back() > level) {
@@ -764,7 +767,9 @@ private:
             indexNowToken++;
             nowToken = &tokens[indexNowToken];
         } else {
-            throw Exception("invalid EOF");
+            throw Exception("invalid EOF",
+                            nowToken->numLine,
+                            nowToken->numPos);
         }
     }
 

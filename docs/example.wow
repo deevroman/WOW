@@ -1,0 +1,26 @@
+a = int(input())
+if a == 3:
+    exit(3)
+elif a == 49:
+    print('aaaaaaaaaAa')
+else:
+    while(print(range(kek, kek, lol))):
+        set.add[3].print()
+    else:
+        make_error('True')
+
+def gcd(a, b):
+    while a and b:
+        raise 
+        if a > b:
+            a %= b
+        else:
+            b %= a
+    return a + b
+
+print(gcd(48, 148))
+
+for i in a:
+    pass
+else:
+    print('0\'')

@@ -284,6 +284,10 @@ private:
                 ans.push_back(Token(Token::BEGIN_BLOCK, line, posInLine, ":"));
                 pos++;
                 posInLine++;
+            } else if (input[pos] == '\\' && !isEnd(pos + 1) && input[pos + 1] == '\n') {
+                pos += 2;
+                line++;
+                posInLine = 0;
             } else {
                 throw Exception("Invalid syntax");
             }

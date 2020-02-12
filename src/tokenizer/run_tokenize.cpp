@@ -3,6 +3,7 @@
 #include <string>
 #include "../fread/fread.h"
 #include "tokenizer.h"
+#include <fstream>
 
 #include "../../external/ThorsSerializer/ThorSerialize/Traits.h"
 #include "../../external/ThorsSerializer/ThorSerialize/JsonThor.h"
@@ -22,15 +23,16 @@ int main() {
         std::cin >> saveTest;
         if (saveTest) {
             int cntTests = stoi(readFile("../tests/tokenizer_tests/positives/countTests"));
-            freopen("../tests/tokenizer_tests/positives/countTests", "w", stdout);
-            std::cout << ++cntTests;
+            std::fstream testCountFile("../tests/tokenizer_tests/positives/countTests");
+            testCountFile << ++cntTests;
 
             std::string inputPath = "../tests/tokenizer_tests/positives/test_" + std::to_string(cntTests) + ".input";
-            freopen(inputPath.c_str(), "w", stdout);
-            std::cout << input;
+            std::ofstream testInputFile(inputPath);
+            testInputFile << input;
             std::string outputPath = "../tests/tokenizer_tests/positives/test_" + std::to_string(cntTests) + ".output";
-            freopen(outputPath.c_str(), "w", stdout);
-            std::cout << jsonExport(tokens);
+            std::ofstream testOutputFile(outputPath);
+            testOutputFile << jsonExport(tokens);
+            std::cout << "\nTest #" + std::to_string(cntTests) + " saved" << std::flush;
         }
     } catch (std::string e) {
         std::cerr << e;
@@ -39,12 +41,13 @@ int main() {
         std::cin >> saveTest;
         if (saveTest) {
             int cntTests = stoi(readFile("../tests/tokenizer_tests/negatives/countTests"));
-            freopen("../tests/tokenizer_tests/negatives/countTests", "w", stdout);
-            std::cout << ++cntTests;
+            std::ofstream testCountFile("../tests/tokenizer_tests/negatives/countTests");
+            testCountFile << ++cntTests;
             std::string inputPath =
                     "../tests/tokenizer_tests/negatives/test_" + std::to_string(cntTests) + ".input";
-            freopen(inputPath.c_str(), "w", stdout);
-            std::cout << input;
+            std::ofstream testInputFile(inputPath);
+            testInputFile << e;
+            std::cout << "Test \n#" + std::to_string(cntTests) + " saved";
         }
     }
     return 0;
