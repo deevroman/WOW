@@ -1,4 +1,5 @@
-def lol():
-    a
-
-    b
+def Vehicle():
+    def __init__(self):
+        'Constructor'
+        pass
+    lol
