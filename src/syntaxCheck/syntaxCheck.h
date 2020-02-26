@@ -2,19 +2,67 @@
 #define WOW_SYNTAXCHECK_H
 
 #include <vector>
+#include <unordered_set>
+#include <set>
 #include "../tokenizer/tokenizer.h"
 
 class SyntaxCheck {
     std::vector<Token> tokens;
+
+    struct Scope {
+        struct varInfo {
+            std::string name;
+
+            const bool operator<(const varInfo &other) {
+                return name < other.name;
+            }
+        };
+
+        std::set<varInfo> variables;
+
+        struct FuncInfo {
+            std::string name;
+
+            const bool operator<(const FuncInfo &other) {
+                return name < other.name;
+            }
+        };
+
+        std::set<FuncInfo> functions;
+
+        struct ClassInfo {
+            std::string name;
+
+            const bool operator<(const FuncInfo &other) {
+                return name < other.name;
+            }
+        };
+
+        std::set<ClassInfo> classes;
+    };
+
+    std::vector<Scope> scopes;
+    std::vector<Scope> bigScopes;
+
+
 public:
     explicit SyntaxCheck(std::vector<Token> &v) : tokens(v) {
-        tokens.push_back(Token(Token::ENDMARKER, tokens.back().numLine, tokens.back().numPos + 1, ""));
+        tokens.push_back(Token(Token::ENDMARKER, tokens.back().numLine,
+                               tokens.back().numPos + 1, ""));
     }
 
     void check() {
         indexNowToken = 0;
         nowToken = &tokens[0];
         levels = {0};
+        std::vector<std::string> reservedFunctions = {"print", "input"};
+        std::vector<std::string> reservedTypes = {"list", "dict", "set", "str"}; // TODO init
+        scopes.push_back({});
+        bigScopes.push_back({});
+        for (const std::string &cur : reservedFunctions) {
+            scopes[0].functions.insert({cur}); // TODO constructor
+            bigScopes[0].functions.insert({cur});
+        }
         try {
             readFileInput();
         } catch (Exception e) {
@@ -28,6 +76,7 @@ public:
     }
 
 private:
+    std::vector<std::string> nameInTest;
     std::vector<int> levels;
     int indexNowToken{};
     Token *nowToken;
@@ -60,6 +109,7 @@ private:
     }
 
     bool readTest() {
+        nameInTest.clear();
         if (!readAndTest())
             return false;
         while (!isEnd()) {
@@ -258,6 +308,7 @@ private:
                 if (nowToken->type != Token::NAME)
                     throw Exception("expected NAME",
                                     nowToken->numLine, nowToken->numPos);
+                initVar(nowToken->value); // TODO list generator
                 getToken();
                 if (!isKeyword("in"))
                     throw Exception("expected in",
@@ -290,9 +341,22 @@ private:
                    || nowToken->type == Token::STRING
                    || isKeyword("None")
                    || isKeyword("True")
-                   || isKeyword("False"))
+                   || isKeyword("False")) {
+            std::string funcName = nowToken->value;
+            if (nowToken->type == Token::NAME) {
+                if (isFuncDefined(funcName)) {
+                    if (!isNextTokenOperator("(")) {
+                        throw Exception("semantic error: after " + nowToken->value + " expected arglist",
+                                        nowToken->numLine,
+                                        nowToken->numPos);
+                    }
+                }
+                else {
+                    nameInTest.push_back(nowToken->value);
+                }
+            }
             getToken();
-        else
+        } else
             return false;
         while (readTrailer());
         return true;
@@ -461,21 +525,47 @@ private:
         return false;
     }
 
+    void initVar(std::string basicString) {
+
+    }
+
     bool readExprStmt() {
+        int pos = indexNowToken;
         if (!readTest())
             return false;
+        bool isMove = false;
+        if (pos + 1 == indexNowToken && tokens[pos].type == Token::NAME) {
+            isMove = true;
+        } else {
+            checkDefinedTestNames();
+        }
         if (readAugassign()) {
+            if (isMove && isNotDefined(tokens[pos].value)) {
+                throw Exception("semantic error: " + tokens[pos].value + "not defined",
+                                nowToken->numLine,
+                                nowToken->numPos);
+            }
             if (!readTest())
                 throw Exception("invalid test",
                                 nowToken->numLine,
                                 nowToken->numPos);
         } else {
             while (isOperator("=")) {
+                if (isMove) {
+                    initVar(tokens[pos].value);
+                }
                 getToken();
+                pos = indexNowToken;
                 if (!readTest()) {
                     throw Exception("invalid test expr",
                                     nowToken->numLine,
                                     nowToken->numPos);
+                }
+                isMove = false;
+                if (pos + 1 == indexNowToken && tokens[pos].type == Token::NAME) {
+                    isMove = true;
+                } else {
+                    checkDefinedTestNames();
                 }
             }
         }
@@ -687,7 +777,7 @@ private:
             return false;
 
         getToken();
-        if (!readTest())
+        if (!readTest() && checkDefinedTestNames())
             throw Exception("invalid if condition",
                             nowToken->numLine,
                             nowToken->numPos);
@@ -705,6 +795,7 @@ private:
                 throw Exception("invalid elif condition",
                                 nowToken->numLine,
                                 nowToken->numPos);
+            checkDefinedTestNames();
             if (!isBeginBlock(":"))
                 throw Exception("invalid elif condition",
                                 nowToken->numLine,
@@ -776,6 +867,12 @@ private:
     bool isNextTokenKey(std::string name) {
         return (indexNowToken + 1 < tokens.size()
                 && tokens[indexNowToken + 1].type == Token::KEYWORD
+                && tokens[indexNowToken + 1].value == name);
+    }
+
+    bool isNextTokenOperator(std::string name) {
+        return (indexNowToken + 1 < tokens.size()
+                && tokens[indexNowToken + 1].type == Token::OPERATOR
                 && tokens[indexNowToken + 1].value == name);
     }
 
