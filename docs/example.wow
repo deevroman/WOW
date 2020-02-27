@@ -10,8 +10,7 @@ else:
         make_error('True')
 
 def gcd(a, b):
-    while a and b:
-        raise 
+    while a and b: 
         if a > b:
             a %= b
         else:
@@ -24,3 +23,4 @@ for i in a:
     pass
 else:
     print('0\'')
+

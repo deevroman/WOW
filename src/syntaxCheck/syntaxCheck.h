@@ -4,16 +4,24 @@
 #include <vector>
 #include <unordered_set>
 #include <set>
+#include <string>
 #include "../tokenizer/tokenizer.h"
 
 class SyntaxCheck {
     std::vector<Token> tokens;
 
     struct Scope {
+        enum TypeScope {
+            SIMPLE, FUNC, CLASS
+        };
+        TypeScope type;
+        std::string value; // for func, class
+        int countCycle, countFunc;
+
         struct varInfo {
             std::string name;
 
-            const bool operator<(const varInfo &other) {
+            const bool operator<(const varInfo &other) const {
                 return name < other.name;
             }
         };
@@ -21,29 +29,26 @@ class SyntaxCheck {
         std::set<varInfo> variables;
 
         struct FuncInfo {
-            std::string name;
-
-            const bool operator<(const FuncInfo &other) {
-                return name < other.name;
-            }
+            std::set<std::string> parentFunc;
+            int countArgs;
         };
 
-        std::set<FuncInfo> functions;
+        std::map<std::string, FuncInfo> functions;
 
         struct ClassInfo {
             std::string name;
 
-            const bool operator<(const FuncInfo &other) {
+            const bool operator<(const ClassInfo &other) const {
                 return name < other.name;
             }
         };
 
         std::set<ClassInfo> classes;
+
     };
 
     std::vector<Scope> scopes;
     std::vector<Scope> bigScopes;
-
 
 public:
     explicit SyntaxCheck(std::vector<Token> &v) : tokens(v) {
@@ -60,8 +65,8 @@ public:
         scopes.push_back({});
         bigScopes.push_back({});
         for (const std::string &cur : reservedFunctions) {
-            scopes[0].functions.insert({cur}); // TODO constructor
-            bigScopes[0].functions.insert({cur});
+            scopes[0].functions[cur] = {}; // TODO constructor
+            bigScopes[0].functions[cur] = {};
         }
         try {
             readFileInput();
@@ -76,7 +81,11 @@ public:
     }
 
 private:
-    std::vector<std::string> nameInTest;
+    //tmp
+    std::vector<Token> nameInTest;
+    std::vector<Token> funcParent;
+    int countArgs;
+
     std::vector<int> levels;
     int indexNowToken{};
     Token *nowToken;
@@ -109,7 +118,6 @@ private:
     }
 
     bool readTest() {
-        nameInTest.clear();
         if (!readAndTest())
             return false;
         while (!isEnd()) {
@@ -285,6 +293,26 @@ private:
         return true;
     }
 
+    bool isFuncDefined(std::string funcName) {
+        auto it = bigScopes.back().functions.find({funcName});
+        return it != bigScopes.back().functions.end();
+    }
+
+    bool isFuncFullDefined(std::string funcName) {
+        auto it = bigScopes.back().functions.find(funcName);
+        if (it == bigScopes.back().functions.end()) {
+            return false;
+        }
+        for (auto i = it->second.parentFunc.begin(); i != it->second.parentFunc.end();) {
+            if (isFuncFullDefined(*i)) {
+                i = it->second.parentFunc.erase(i);
+            } else {
+                ++i;
+            }
+        }
+        return it->second.parentFunc.empty();
+    }
+
     bool readNameExpr() {
         if (isOperator("[")) {
             getToken();
@@ -308,7 +336,7 @@ private:
                 if (nowToken->type != Token::NAME)
                     throw Exception("expected NAME",
                                     nowToken->numLine, nowToken->numPos);
-                initVar(nowToken->value); // TODO list generator
+                initVar(indexNowToken); // TODO list generator
                 getToken();
                 if (!isKeyword("in"))
                     throw Exception("expected in",
@@ -346,13 +374,22 @@ private:
             if (nowToken->type == Token::NAME) {
                 if (isFuncDefined(funcName)) {
                     if (!isNextTokenOperator("(")) {
-                        throw Exception("semantic error: after " + nowToken->value + " expected arglist",
+                        throw Exception("semantic error: " + nowToken->value + " defined as function",
                                         nowToken->numLine,
                                         nowToken->numPos);
                     }
-                }
-                else {
-                    nameInTest.push_back(nowToken->value);
+                } else {
+                    if (isNextTokenOperator("(")) {
+                        if (bigScopes.back().type == Scope::FUNC) {
+                            scopes.back().functions.find({bigScopes.back().value})->second.parentFunc.insert(nowToken->value);
+                            bigScopes.back().functions.find({bigScopes.back().value})->second.parentFunc.insert(nowToken->value);
+                        } else {
+                            throw Exception("semantic error: " + nowToken->value + " call undefined as function",
+                                            nowToken->numLine,
+                                            nowToken->numPos);
+                        }
+                    }
+                    nameInTest.push_back(*nowToken);
                 }
             }
             getToken();
@@ -417,7 +454,6 @@ private:
         return true;
     }
 
-
     bool readComparison() {
         if (!readExpr()) {
             return false;
@@ -469,7 +505,6 @@ private:
         return readCompoundStmt() || readSimpleStmt();
     }
 
-
     bool readDelStmt() {
         if (isKeyword("del")) {
             getToken();
@@ -519,14 +554,55 @@ private:
 
     bool readBreakStmt() {
         if (isKeyword("break")) {
+            if (!bigScopes.back().countCycle) {
+                throw Exception("semantic error: break outdoor cycle",
+                                nowToken->numLine,
+                                nowToken->numPos);
+            }
             getToken();
             return true;
         }
         return false;
     }
 
-    void initVar(std::string basicString) {
+    void initVar(int pos) {
+        std::string name = tokens[pos].value;
+        if (bigScopes.back().functions.count({name}) == 1
+            || bigScopes.back().classes.count({name}) == 1) {
+            throw Exception("semantic error: redefinition \"" + name + "\"",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        }
+        if (isNotNameDefines(name)) {
+            scopes.back().variables.insert({name});
+            bigScopes.back().variables.insert({name});
+        }
+    }
 
+    bool isNotDefines(std::string name) {
+        return bigScopes.back().variables.count({name}) != 1
+               && bigScopes.back().functions.count(name) != 1
+               && bigScopes.back().classes.count({name}) != 1;
+    }
+
+    bool isNotNameDefines(std::string name) {
+        return bigScopes.back().variables.count({name}) != 1;
+    }
+
+    bool isNameDefines(std::string name) {
+        return bigScopes.back().variables.count({name}) == 1;
+    }
+
+    bool checkDefinedTestNames() {
+        for (auto now : nameInTest) {
+            if (isNotNameDefines(now.value)) {
+                throw Exception("semantic error: " + now.value + " not defined",
+                                nowToken->numLine,
+                                nowToken->numPos);
+            }
+        }
+        nameInTest.clear();
+        return true;
     }
 
     bool readExprStmt() {
@@ -540,8 +616,8 @@ private:
             checkDefinedTestNames();
         }
         if (readAugassign()) {
-            if (isMove && isNotDefined(tokens[pos].value)) {
-                throw Exception("semantic error: " + tokens[pos].value + "not defined",
+            if (isMove && isNotNameDefines(tokens[pos].value)) {
+                throw Exception("semantic error: " + tokens[pos].value + " not defined",
                                 nowToken->numLine,
                                 nowToken->numPos);
             }
@@ -552,7 +628,7 @@ private:
         } else {
             while (isOperator("=")) {
                 if (isMove) {
-                    initVar(tokens[pos].value);
+                    initVar(pos);
                 }
                 getToken();
                 pos = indexNowToken;
@@ -587,6 +663,11 @@ private:
 
     bool readContinueStmt() {
         if (isKeyword("continue")) {
+            if (!bigScopes.back().countCycle) {
+                throw Exception("semantic error: continue outdoor cycle",
+                                nowToken->numLine,
+                                nowToken->numPos);
+            }
             getToken();
             return true;
         }
@@ -595,6 +676,11 @@ private:
 
     bool readReturnStmt() {
         if (isKeyword("return")) {
+            if (!bigScopes.back().countFunc) {
+                throw Exception("semantic error: return outdoor function",
+                                nowToken->numLine,
+                                nowToken->numPos);
+            }
             getToken();
             readTest();
             return true;
@@ -618,6 +704,32 @@ private:
                || readClassdef();
     }
 
+    void popBigScope() {
+        bigScopes.pop_back();
+    }
+
+    void initFunc(Token token) {
+        if (isNotDefines(token.value)) {
+            scopes.back().functions[token.value] = {};
+            bigScopes.back().functions[token.value] = {};
+        } else {
+            throw Exception("semantic error: redefinition " + token.value,
+                            nowToken->numLine,
+                            nowToken->numPos);
+        }
+    }
+
+    void initClass(Token token) {
+        if (isNotDefines(token.value)) {
+            scopes.back().classes.insert({token.value});
+            bigScopes.back().classes.insert({token.value});
+        } else {
+            throw Exception("semantic error: redefinition " + token.value,
+                            nowToken->numLine,
+                            nowToken->numPos);
+        }
+    }
+
     bool readFuncdef() {
         if (nowToken->value != "def")
             return false;
@@ -626,11 +738,23 @@ private:
             throw Exception("expected NAME after def",
                             nowToken->numLine,
                             nowToken->numPos);
+        initFunc(*nowToken);
+        Scope last = bigScopes.back();
+        bigScopes.push_back({Scope::FUNC, nowToken->value, 0, 1});
+        bigScopes.back().classes = last.classes;
+        bigScopes.back().functions = last.functions;
+        scopes.push_back({Scope::FUNC, nowToken->value});
         getToken();
+        if (isFuncFullDefined(nowToken->value)) {
+            throw Exception("semantic error: " + nowToken->value + " redefinition",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        }
         if (!readParameters())
             throw Exception("invalid function parameters",
                             nowToken->numLine,
                             nowToken->numPos);
+        scopes[scopes.size() - 2].functions.find(nowToken->value)->second.countArgs = countArgs;
         if (!isBeginBlock(":"))
             throw Exception("expected : after function parameters",
                             nowToken->numLine,
@@ -641,10 +765,13 @@ private:
                             nowToken->numLine,
                             nowToken->numPos);
         }
+        popScope();
+        popBigScope();
         return true;
     }
 
     bool readParameters() {
+        countArgs = 0;
         if (!isOperator("("))
             return false;
         getToken();
@@ -664,12 +791,17 @@ private:
         return true;
     }
 
-
     bool readFuncdefarglist() {
         if (nowToken->type != Token::NAME)
             throw Exception("expected name",
                             nowToken->numLine,
                             nowToken->numPos);
+        if (isNameDefines(nowToken->value)) {
+            throw Exception("semantic error: " + nowToken->value + " already used",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        }
+        countArgs++;
         getToken();
         while (isOperator(",")) {
             getToken();
@@ -677,15 +809,43 @@ private:
                 throw Exception("expected name",
                                 nowToken->numLine,
                                 nowToken->numPos);
+            if (isNameDefines(nowToken->value)) {
+                throw Exception("semantic error: " + nowToken->value + " already used",
+                                nowToken->numLine,
+                                nowToken->numPos);
+            }
+            countArgs++;
             getToken();
         }
         return true;
+    }
+
+    void popScope() {
+        for (auto now : scopes.back().variables) {
+            bigScopes.back().variables.erase({now});
+        }
+        for (auto i = scopes.back().functions.begin(); i != scopes.back().functions.end(); ++i) {
+            for (auto now2 : i->second.parentFunc) {
+                if (!now2.empty()) {
+                    throw Exception("semantic error: " + now2 + " not defined",
+                                    nowToken->numLine,
+                                    nowToken->numPos);
+                }
+            }
+            bigScopes.back().functions.erase(i->first);
+        }
+        for (auto now : scopes.back().classes) {
+            bigScopes.back().classes.erase({now});
+        }
+        scopes.pop_back();
     }
 
     bool readWhileStmt() {
         if (nowToken->value != "while")
             return false;
         getToken();
+        scopes.push_back({Scope::SIMPLE, ""});
+        bigScopes.back().countCycle++;
         if (!readTest())
             throw Exception("invalid while condition",
                             nowToken->numLine,
@@ -699,32 +859,37 @@ private:
         if (isEqualLevel() && isNextTokenKey("else")) {
             readBeginLine();
             getToken();
+            scopes.push_back({});
             if (!isBeginBlock(":"))
                 throw Exception("expected : after else",
                                 nowToken->numLine,
                                 nowToken->numPos);
             getToken();
             readSuite();
+            popScope();
         }
+        bigScopes.back().countCycle--;
         return true;
     }
 
     bool readForStmt() {
         if (nowToken->value != "for")
             return false;
-
         getToken();
+        scopes.push_back({Scope::SIMPLE, ""});
+        bigScopes.back().countCycle++;
         if (nowToken->NAME != Token::NAME)
             throw Exception("expected name after for",
                             nowToken->numLine,
                             nowToken->numPos);
+        initVar(indexNowToken);
         getToken();
         if (!isKeyword("in"))
             throw Exception("expected in after for in",
                             nowToken->numLine,
                             nowToken->numPos);
         getToken();
-        if (!readTest())
+        if (!readTest() && checkDefinedTestNames())
             throw Exception("invalid for condition",
                             nowToken->numLine,
                             nowToken->numPos);
@@ -737,16 +902,20 @@ private:
             throw Exception("invalid for suite",
                             nowToken->numLine,
                             nowToken->numPos);
+        popScope();
         if (isEqualLevel() && isNextTokenKey("else")) {
             readBeginLine();
             getToken();
+            scopes.push_back({});
             if (!isBeginBlock(":"))
                 throw Exception("expected : after else",
                                 nowToken->numLine,
                                 nowToken->numPos);
             getToken();
             readSuite();
+            popScope();
         }
+        bigScopes.back().countCycle--;
         return true;
     }
 
@@ -775,8 +944,8 @@ private:
     bool readIfStmt() {
         if (!isKeyword("if"))
             return false;
-
         getToken();
+        scopes.push_back({Scope::SIMPLE, ""});
         if (!readTest() && checkDefinedTestNames())
             throw Exception("invalid if condition",
                             nowToken->numLine,
@@ -788,38 +957,59 @@ private:
         }
         getToken();
         readSuite();
+        popScope();
         while (isEqualLevel() && isNextTokenKey("elif")) {
             readBeginLine();
             getToken();
-            if (!readTest())
+            scopes.push_back({});
+            if (!readTest() && checkDefinedTestNames())
                 throw Exception("invalid elif condition",
                                 nowToken->numLine,
                                 nowToken->numPos);
-            checkDefinedTestNames();
             if (!isBeginBlock(":"))
                 throw Exception("invalid elif condition",
                                 nowToken->numLine,
                                 nowToken->numPos);
             getToken();
             readSuite();
+            popScope();
         }
         if (isEqualLevel() && isNextTokenKey("else")) {
             readBeginLine();
             getToken();
+            scopes.push_back({});
             if (!isBeginBlock(":"))
                 throw Exception("expected : after else statements",
                                 nowToken->numLine,
                                 nowToken->numPos);
             getToken();
             readSuite();
+            popScope();
         }
         return true;
+    }
+
+    bool isDefines(std::string name) {
+        return bigScopes.back().variables.count({name})
+               || bigScopes.back().functions.count(name)
+               || bigScopes.back().classes.count({name});
     }
 
     bool readClassdef() {
         if (!isKeyword("class"))
             return false;
         getToken();
+        initClass(*nowToken);
+        Scope last = bigScopes.back();
+        bigScopes.push_back({Scope::CLASS, nowToken->value, 0, 0});
+        bigScopes.back().classes = last.classes;
+        bigScopes.back().functions = last.functions;
+        scopes.push_back({Scope::CLASS, nowToken->value});
+        if (isDefines(nowToken->value)) {
+            throw Exception("semantic error: " + nowToken->value + " redefinition",
+                            nowToken->numLine,
+                            nowToken->numPos);
+        }
         if (nowToken->type != Token::NAME)
             throw Exception("expected class name",
                             nowToken->numLine,
@@ -833,6 +1023,8 @@ private:
                                 nowToken->numPos);
             }
         }
+        popScope();
+        popBigScope();
         return true;
     }
 
