@@ -18,32 +18,27 @@ class SyntaxCheck {
         std::string value; // for func, class
         int countCycle, countFunc;
 
-        struct varInfo {
+        struct VarInfo {
             std::string name;
 
-            const bool operator<(const varInfo &other) const {
+            const bool operator<(const VarInfo &other) const {
                 return name < other.name;
             }
         };
 
-        std::set<varInfo> variables;
+        std::set<VarInfo> variables;
 
         struct FuncInfo {
             std::set<std::string> parentFunc;
-            int countArgs;
         };
 
         std::map<std::string, FuncInfo> functions;
 
         struct ClassInfo {
-            std::string name;
-
-            const bool operator<(const ClassInfo &other) const {
-                return name < other.name;
-            }
+            std::set<std::string> parentClasses;
         };
 
-        std::set<ClassInfo> classes;
+        std::map<std::string, ClassInfo> classes;
 
     };
 
@@ -61,12 +56,16 @@ public:
         nowToken = &tokens[0];
         levels = {0};
         std::vector<std::string> reservedFunctions = {"print", "input"};
-        std::vector<std::string> reservedTypes = {"list", "dict", "set", "str"}; // TODO init
+        std::vector<std::string> reservedClasses = {"list", "dict", "set", "str"}; // TODO add
         scopes.push_back({});
         bigScopes.push_back({});
         for (const std::string &cur : reservedFunctions) {
-            scopes[0].functions[cur] = {}; // TODO constructor
+            scopes[0].functions[cur] = {};
             bigScopes[0].functions[cur] = {};
+        }
+        for (const std::string &cur : reservedClasses) {
+            scopes[0].classes[cur] = {};
+            bigScopes[0].classes[cur] = {};
         }
         try {
             readFileInput();
@@ -77,14 +76,14 @@ public:
             }
             errorMessage += e.message;
             throw errorMessage;
+        } catch (...) {
+            std::cerr << "Semantic error";
         }
     }
 
 private:
     //tmp
     std::vector<Token> nameInTest;
-    std::vector<Token> funcParent;
-    int countArgs;
 
     std::vector<int> levels;
     int indexNowToken{};
@@ -298,19 +297,39 @@ private:
         return it != bigScopes.back().functions.end();
     }
 
+    bool isClassDefined(std::string funcName) {
+        auto it = bigScopes.back().classes.find({funcName});
+        return it != bigScopes.back().classes.end();
+    }
+
     bool isFuncFullDefined(std::string funcName) {
         auto it = bigScopes.back().functions.find(funcName);
         if (it == bigScopes.back().functions.end()) {
             return false;
         }
         for (auto i = it->second.parentFunc.begin(); i != it->second.parentFunc.end();) {
-            if (isFuncFullDefined(*i)) {
+            if (*i == funcName || isFuncFullDefined(*i)) {
                 i = it->second.parentFunc.erase(i);
             } else {
                 ++i;
             }
         }
         return it->second.parentFunc.empty();
+    }
+
+    bool isClassFullDefined(std::string className) {
+        auto it = bigScopes.back().classes.find(className);
+        if (it == bigScopes.back().classes.end()) {
+            return false;
+        }
+        for (auto i = it->second.parentClasses.begin(); i != it->second.parentClasses.end();) {
+            if (isClassFullDefined(*i)) {
+                i = it->second.parentClasses.erase(i);
+            } else {
+                ++i;
+            }
+        }
+        return it->second.parentClasses.empty();
     }
 
     bool readNameExpr() {
@@ -337,6 +356,7 @@ private:
                     throw Exception("expected NAME",
                                     nowToken->numLine, nowToken->numPos);
                 initVar(indexNowToken); // TODO list generator
+//                checkDefinedTestNames();
                 getToken();
                 if (!isKeyword("in"))
                     throw Exception("expected in",
@@ -370,25 +390,68 @@ private:
                    || isKeyword("None")
                    || isKeyword("True")
                    || isKeyword("False")) {
-            std::string funcName = nowToken->value;
+            std::string name = nowToken->value;
             if (nowToken->type == Token::NAME) {
-                if (isFuncDefined(funcName)) {
+                if (isFuncDefined(name)) {
                     if (!isNextTokenOperator("(")) {
                         throw Exception("semantic error: " + nowToken->value + " defined as function",
                                         nowToken->numLine,
                                         nowToken->numPos);
-                    }
-                } else {
-                    if (isNextTokenOperator("(")) {
+                    } else {
                         if (bigScopes.back().type == Scope::FUNC) {
-                            scopes.back().functions.find({bigScopes.back().value})->second.parentFunc.insert(nowToken->value);
-                            bigScopes.back().functions.find({bigScopes.back().value})->second.parentFunc.insert(nowToken->value);
-                        } else {
+//                            scopes.rbegin()->functions.find({bigScopes.back().value})->second.parentFunc.insert(
+//                                    nowToken->value);
+                            bigScopes.rbegin()->functions.find({bigScopes.back().value})->second.parentFunc.insert(
+                                    nowToken->value);
+                            next(bigScopes.rbegin())->functions.find(
+                                    {bigScopes.back().value})->second.parentFunc.insert(
+                                    nowToken->value);
+                        } else if (!isFuncFullDefined(name)) {
+                            throw Exception("semantic error: " + nowToken->value + " not full defined",
+                                            nowToken->numLine,
+                                            nowToken->numPos);
+                        }
+                    }
+                } else if (isClassDefined(name)) {
+                    if (!isClassFullDefined(name)) {
+                        throw Exception("semantic error: " + nowToken->value + " not full defined",
+                                        nowToken->numLine,
+                                        nowToken->numPos);
+                    }
+
+                    if (isNextTokenOperator("(")) {
+                        if (bigScopes.back().type == Scope::CLASS) {
+//                            scopes.rbegin()->functions.find({bigScopes.back().value})->second.parentFunc.insert(
+//                                    nowToken->value);
+                            bigScopes.rbegin()->classes.find({bigScopes.back().value})->second.parentClasses.insert(
+                                    nowToken->value);
+                            next(bigScopes.rbegin())->classes.find(
+                                    {bigScopes.back().value})->second.parentClasses.insert(
+                                    nowToken->value);
+                        } else if (!isClassFullDefined(name)) {
                             throw Exception("semantic error: " + nowToken->value + " call undefined as function",
                                             nowToken->numLine,
                                             nowToken->numPos);
                         }
                     }
+                } else if (!isDefines(name) && isNextTokenOperator("(")) {
+                    if (bigScopes.back().type == Scope::FUNC) {
+//                            scopes.rbegin()->functions.find({bigScopes.back().value})->second.parentFunc.insert(
+//                                    nowToken->value);
+                        bigScopes.rbegin()->functions.find({bigScopes.back().value})->second.parentFunc.insert(
+                                nowToken->value);
+                        next(bigScopes.rbegin())->functions.find(
+                                {bigScopes.back().value})->second.parentFunc.insert(
+                                nowToken->value);
+                    } else
+                        throw Exception("semantic error: " + nowToken->value + " not full defined",
+                                        nowToken->numLine,
+                                        nowToken->numPos);
+                }
+//                    else throw Exception("semantic error: " + nowToken->value + " defined as variable",
+//                                        nowToken->numLine,
+//                                        nowToken->numPos);
+                else {
                     nameInTest.push_back(*nowToken);
                 }
             }
@@ -597,8 +660,8 @@ private:
         for (auto now : nameInTest) {
             if (isNotNameDefines(now.value)) {
                 throw Exception("semantic error: " + now.value + " not defined",
-                                nowToken->numLine,
-                                nowToken->numPos);
+                                now.numLine,
+                                now.numPos);
             }
         }
         nameInTest.clear();
@@ -612,6 +675,7 @@ private:
         bool isMove = false;
         if (pos + 1 == indexNowToken && tokens[pos].type == Token::NAME) {
             isMove = true;
+            nameInTest.clear();
         } else {
             checkDefinedTestNames();
         }
@@ -638,8 +702,9 @@ private:
                                     nowToken->numPos);
                 }
                 isMove = false;
-                if (pos + 1 == indexNowToken && tokens[pos].type == Token::NAME) {
+                if (isNextTokenOperator("=") && pos + 1 == indexNowToken && tokens[pos].type == Token::NAME) {
                     isMove = true;
+                    nameInTest.clear(); // FIXME a = a
                 } else {
                     checkDefinedTestNames();
                 }
@@ -705,11 +770,35 @@ private:
     }
 
     void popBigScope() {
+        for (auto i = scopes.back().functions.begin(); i != scopes.back().functions.end(); ++i) {
+            if (i->first == bigScopes.back().value)
+                continue;
+
+            if (!i->second.parentFunc.empty()) {
+                throw Exception("semantic error: " + bigScopes.back().value + " not full defined",
+                                nowToken->numLine,
+                                nowToken->numPos);
+            }
+        }
+
+        for (auto i = scopes.back().classes.begin(); i != scopes.back().classes.end(); ++i) {
+            if (i->first == bigScopes.back().value)
+                continue;
+
+            if (!i->second.parentClasses.empty()) {
+                throw Exception("semantic error: " + bigScopes.back().value + " not full defined",
+                                nowToken->numLine,
+                                nowToken->numPos);
+            }
+        }
         bigScopes.pop_back();
     }
 
     void initFunc(Token token) {
         if (isNotDefines(token.value)) {
+            for (auto & now : bigScopes.back().functions){
+                now.second.parentFunc.erase(token.value);
+            }
             scopes.back().functions[token.value] = {};
             bigScopes.back().functions[token.value] = {};
         } else {
@@ -721,8 +810,8 @@ private:
 
     void initClass(Token token) {
         if (isNotDefines(token.value)) {
-            scopes.back().classes.insert({token.value});
-            bigScopes.back().classes.insert({token.value});
+            scopes.back().classes[token.value] = {};
+            bigScopes.back().classes[token.value] = {};
         } else {
             throw Exception("semantic error: redefinition " + token.value,
                             nowToken->numLine,
@@ -734,6 +823,10 @@ private:
         if (nowToken->value != "def")
             return false;
         getToken();
+        if (isDefines(nowToken->value))
+            throw Exception("semantic error: redefinition " + nowToken->value,
+                            nowToken->numLine,
+                            nowToken->numPos);
         if (nowToken->type != Token::NAME)
             throw Exception("expected NAME after def",
                             nowToken->numLine,
@@ -745,16 +838,10 @@ private:
         bigScopes.back().functions = last.functions;
         scopes.push_back({Scope::FUNC, nowToken->value});
         getToken();
-        if (isFuncFullDefined(nowToken->value)) {
-            throw Exception("semantic error: " + nowToken->value + " redefinition",
-                            nowToken->numLine,
-                            nowToken->numPos);
-        }
         if (!readParameters())
             throw Exception("invalid function parameters",
                             nowToken->numLine,
                             nowToken->numPos);
-        scopes[scopes.size() - 2].functions.find(nowToken->value)->second.countArgs = countArgs;
         if (!isBeginBlock(":"))
             throw Exception("expected : after function parameters",
                             nowToken->numLine,
@@ -771,7 +858,6 @@ private:
     }
 
     bool readParameters() {
-        countArgs = 0;
         if (!isOperator("("))
             return false;
         getToken();
@@ -796,12 +882,13 @@ private:
             throw Exception("expected name",
                             nowToken->numLine,
                             nowToken->numPos);
-        if (isNameDefines(nowToken->value)) {
+        if (isDefines(nowToken->value)) {
             throw Exception("semantic error: " + nowToken->value + " already used",
                             nowToken->numLine,
                             nowToken->numPos);
         }
-        countArgs++;
+        scopes.back().variables.insert({nowToken->value});
+        bigScopes.back().variables.insert({nowToken->value});
         getToken();
         while (isOperator(",")) {
             getToken();
@@ -814,7 +901,8 @@ private:
                                 nowToken->numLine,
                                 nowToken->numPos);
             }
-            countArgs++;
+            scopes.back().variables.insert({nowToken->value});
+            bigScopes.back().variables.insert({nowToken->value});
             getToken();
         }
         return true;
@@ -823,19 +911,6 @@ private:
     void popScope() {
         for (auto now : scopes.back().variables) {
             bigScopes.back().variables.erase({now});
-        }
-        for (auto i = scopes.back().functions.begin(); i != scopes.back().functions.end(); ++i) {
-            for (auto now2 : i->second.parentFunc) {
-                if (!now2.empty()) {
-                    throw Exception("semantic error: " + now2 + " not defined",
-                                    nowToken->numLine,
-                                    nowToken->numPos);
-                }
-            }
-            bigScopes.back().functions.erase(i->first);
-        }
-        for (auto now : scopes.back().classes) {
-            bigScopes.back().classes.erase({now});
         }
         scopes.pop_back();
     }
@@ -931,7 +1006,7 @@ private:
                             nowToken->numPos);
         }
         while (readBeginLine()) {
-            if (!readStmt()) {
+            if (nowToken->type != Token::BEGIN_LINE && !readStmt()) {
                 throw Exception("invalid suite kek",
                                 nowToken->numLine,
                                 nowToken->numPos);
@@ -999,29 +1074,31 @@ private:
         if (!isKeyword("class"))
             return false;
         getToken();
+        if (isDefines(nowToken->value))
+            throw Exception("semantic error: redefinition " + nowToken->value,
+                            nowToken->numLine,
+                            nowToken->numPos);
+        if (nowToken->type != Token::NAME)
+            throw Exception("expected class name",
+                            nowToken->numLine,
+                            nowToken->numPos);
         initClass(*nowToken);
         Scope last = bigScopes.back();
         bigScopes.push_back({Scope::CLASS, nowToken->value, 0, 0});
         bigScopes.back().classes = last.classes;
         bigScopes.back().functions = last.functions;
         scopes.push_back({Scope::CLASS, nowToken->value});
-        if (isDefines(nowToken->value)) {
-            throw Exception("semantic error: " + nowToken->value + " redefinition",
-                            nowToken->numLine,
-                            nowToken->numPos);
-        }
-        if (nowToken->type != Token::NAME)
-            throw Exception("expected class name",
+        getToken();
+        if (!isBeginBlock(":"))
+            throw Exception("expected : invalid classdef",
                             nowToken->numLine,
                             nowToken->numPos);
         getToken();
-        if (isBeginBlock(":")) {
-            getToken();
-            if (!readSuite()) {
-                throw Exception("Invalid class suite",
-                                nowToken->numLine,
-                                nowToken->numPos);
-            }
+        if (!readSuite()) {
+            throw Exception("Invalid class suite",
+                            nowToken->numLine,
+                            nowToken->numPos);
+
         }
         popScope();
         popBigScope();

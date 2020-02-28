@@ -1,3 +1,10 @@
-def a(b):
-    pass
+def a():
+    b()
+
+def b():
+    a()
+
 a()
+u=9
+for i in [u]:
+    print(i)

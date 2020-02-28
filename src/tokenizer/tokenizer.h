@@ -119,6 +119,11 @@ private:
                 } else {
                     throw Exception("Invalid float number format");
                 }
+                if(isEnd(pos+1)){
+                    throw Exception("Invalid float number format");
+                } else if (input[pos+1] < '0' && input[pos+1] > '9'){
+                    throw Exception("Invalid float number format");
+                }
             }
             num += input[pos];
             pos++;
