@@ -6,7 +6,7 @@
 struct Token {
     enum TypeToken {
         KEYWORD, NAME, STRING,
-        NUMBER, BEGIN_LINE, BEGIN_BLOCK, OPERATOR,
+        NUMBER, BEGIN_LINE, BEGIN_BLOCK, OPERATOR, // TODO возможно стоит разделить на NUMBER_INT и NUMBER_DOUBLE
         ENDMARKER
     };
     TypeToken type;

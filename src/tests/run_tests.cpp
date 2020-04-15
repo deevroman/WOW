@@ -42,11 +42,11 @@ void tokenizeTests(){
 
 
 void syntaxCheckTests(){
-    std::cout << "Running syntaxCheck tests:\n";
+    std::cout << "Running translator tests:\n";
     SyntaxCheckTests syntaxCheckTests;
     syntaxCheckTests.run();
 
-    std::cout << "Ended syntaxCheck tests\n";
+    std::cout << "Ended translator tests\n";
     if (syntaxCheckTests.getCountFailedTestsP() != 0) {
         std::cout << "\x1b[31m";
     }

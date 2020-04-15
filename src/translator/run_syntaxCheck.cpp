@@ -1,7 +1,7 @@
 #include <iostream>
 #include "../fread/fread.h"
 #include "../tokenizer/tokenizer.h"
-#include "../syntaxCheck/syntaxCheck.h"
+#include "../translator/translator.h"
 
 
 #include "../../external/ThorsSerializer/ThorSerialize/Traits.h"
@@ -10,7 +10,7 @@
 
 int main() {
     using ThorsAnvil::Serialize::jsonExport;
-    std::string input = readFile("../src/syntaxCheck/test.input");
+    std::string input = readFile("../src/translator/test.input");
     Tokenizer tokenizer(input);
     std::vector<Token> tokens;
     try {
@@ -21,7 +21,7 @@ int main() {
         return 0;
     }
     try {
-        SyntaxCheck syntaxChecker(tokens);
+        Translator syntaxChecker(tokens);
         syntaxChecker.check();
         std::cout << "OK\nSave how test?\n0 - No\n1 - Yes\n";
         int saveTest;
@@ -38,7 +38,7 @@ int main() {
     } catch (std::string e) {
         std::cerr << e;
         std::cout << "\nSave how test?\n0 - No\n1 - Yes\n";
-        std::ofstream testNotSaveOutputFile("../src/syntaxCheck/test.output");
+        std::ofstream testNotSaveOutputFile("../src/translator/test.output");
         testNotSaveOutputFile << e;
         int saveTest;
         std::cin >> saveTest;

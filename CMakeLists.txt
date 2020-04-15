@@ -3,6 +3,6 @@ project(WOW)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(WOW src/interpetator/WOW.cpp)
+add_executable(WOW src/interpretator/WOW.cpp src/utils/poliz.h src/utils/simpleFunctions.h src/interpretator/vm.h src/translator/translator.h )
 
-SET( EXECUTABLE_OUTPUT_PATH "./bin")
+SET(EXECUTABLE_OUTPUT_PATH "../bin")

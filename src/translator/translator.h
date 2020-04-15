@@ -6,8 +6,9 @@
 #include <set>
 #include <string>
 #include "../tokenizer/tokenizer.h"
+#include "../utils/poliz.h"
 
-class SyntaxCheck {
+class Translator {
     std::vector<Token> tokens;
 
     struct Scope {
@@ -45,13 +46,19 @@ class SyntaxCheck {
     std::vector<Scope> scopes;
     std::vector<Scope> bigScopes;
 
+    Poliz *poliz = nullptr;
+    Poliz *nowPoliz = nullptr;
+
 public:
-    explicit SyntaxCheck(std::vector<Token> &v) : tokens(v) {
+    explicit Translator(std::vector<Token> &v) : tokens(v) {
         tokens.push_back(Token(Token::ENDMARKER, tokens.back().numLine,
                                tokens.back().numPos + 1, ""));
     }
 
-    void check() {
+    Poliz *translate() {
+        // ~~~
+        poliz = nowPoliz = new Poliz; // TODO добавить зарезервированные функции  и функции простых типов
+        // ~~~
         indexNowToken = 0;
         nowToken = &tokens[0];
         levels = {0};
@@ -79,6 +86,7 @@ public:
         } catch (...) {
             std::cerr << "Semantic error";
         }
+        return poliz;
     }
 
 private:
@@ -99,7 +107,8 @@ private:
                                 nowToken->numLine,
                                 nowToken->numPos);
             }
-        } else {
+        }
+        else {
             if (level > levels.back()) {
                 throw Exception("invalid in begin of line",
                                 nowToken->numLine,
@@ -127,7 +136,11 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
-            } else {
+                // ~~~
+                nowPoliz->operations.push_back({0, Element::OR});
+                // ~~~
+            }
+            else {
                 break;
             }
         }
@@ -144,7 +157,6 @@ private:
         return false;
     }
 
-
     bool readExpr() {
         if (!readXorExpr())
             return false;
@@ -156,7 +168,8 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
-            } else {
+            }
+            else {
                 break;
             }
         }
@@ -174,7 +187,8 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
-            } else {
+            }
+            else {
                 break;
             }
         }
@@ -192,7 +206,8 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
-            } else {
+            }
+            else {
                 break;
             }
         }
@@ -210,7 +225,8 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
-            } else {
+            }
+            else {
                 break;
             }
         }
@@ -222,13 +238,25 @@ private:
             return false;
         while (!isEnd()) {
             if (isOperator("+") || isOperator("-")) {
+                // ~~~
+                auto nowOperator = nowToken->value;
+                // ~~~
                 getToken();
                 if (!readTermExpr()) {
                     throw Exception("invalid arith expression",
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
-            } else {
+                // ~~~
+                if (nowOperator == "+") {
+                    nowPoliz->operations.push_back({0, Element::PLUS});
+                }
+                else {
+                    nowPoliz->operations.push_back({0, Element::MINUS});
+                }
+                // ~~~
+            }
+            else {
                 break;
             }
         }
@@ -241,13 +269,31 @@ private:
         while (!isEnd()) {
             if (isOperator("*") || isOperator("/") ||
                 isOperator("%") || isOperator("//")) {
+                // ~~~
+                auto nowOperator = nowToken->value;
+                // ~~~
                 getToken();
                 if (!readFactorExpr()) {
                     throw Exception("Invalid arith expression",
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
-            } else {
+                // ~~~
+                if (nowOperator == "*") {
+                    nowPoliz->operations.push_back({0, Element::MUL});
+                }
+                else if (nowOperator == "/") {
+                    nowPoliz->operations.push_back({0, Element::DIV});
+                }
+                else if (nowOperator == "//") {
+                    nowPoliz->operations.push_back({0, Element::INTDIV});
+                }
+                {
+                    nowPoliz->operations.push_back({0, Element::MOD});
+                }
+                // ~~~
+            }
+            else {
                 break;
             }
         }
@@ -266,10 +312,12 @@ private:
                                     nowToken->numPos);
                 }
                 return true;
-            } else {
+            }
+            else {
                 return readPowerExpr();
             }
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -285,7 +333,8 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
-            } else {
+            }
+            else {
                 break;
             }
         }
@@ -310,7 +359,8 @@ private:
         for (auto i = it->second.parentFunc.begin(); i != it->second.parentFunc.end();) {
             if (*i == funcName || isFuncFullDefined(*i)) {
                 i = it->second.parentFunc.erase(i);
-            } else {
+            }
+            else {
                 ++i;
             }
         }
@@ -325,7 +375,8 @@ private:
         for (auto i = it->second.parentClasses.begin(); i != it->second.parentClasses.end();) {
             if (isClassFullDefined(*i)) {
                 i = it->second.parentClasses.erase(i);
-            } else {
+            }
+            else {
                 ++i;
             }
         }
@@ -350,7 +401,8 @@ private:
                                         nowToken->numLine, nowToken->numPos);
                     }
                 }
-            } else if (isKeyword("for")) {
+            }
+            else if (isKeyword("for")) {
                 getToken();
                 if (nowToken->type != Token::NAME)
                     throw Exception("expected NAME",
@@ -384,12 +436,13 @@ private:
                                 nowToken->numLine, nowToken->numPos);
             }
             getToken();
-        } else if (nowToken->type == Token::NAME
-                   || nowToken->type == Token::NUMBER
-                   || nowToken->type == Token::STRING
-                   || isKeyword("None")
-                   || isKeyword("True")
-                   || isKeyword("False")) {
+        }
+        else if (nowToken->type == Token::NAME
+                 || nowToken->type == Token::NUMBER
+                 || nowToken->type == Token::STRING
+                 || isKeyword("None")
+                 || isKeyword("True")
+                 || isKeyword("False")) {
             std::string name = nowToken->value;
             if (nowToken->type == Token::NAME) {
                 if (isFuncDefined(name)) {
@@ -397,7 +450,8 @@ private:
                         throw Exception("semantic error: " + nowToken->value + " defined as function",
                                         nowToken->numLine,
                                         nowToken->numPos);
-                    } else {
+                    }
+                    else {
                         if (bigScopes.back().type == Scope::FUNC) {
 //                            scopes.rbegin()->functions.find({bigScopes.back().value})->second.parentFunc.insert(
 //                                    nowToken->value);
@@ -406,13 +460,15 @@ private:
                             next(bigScopes.rbegin())->functions.find(
                                     {bigScopes.back().value})->second.parentFunc.insert(
                                     nowToken->value);
-                        } else if (!isFuncFullDefined(name)) {
+                        }
+                        else if (!isFuncFullDefined(name)) {
                             throw Exception("semantic error: " + nowToken->value + " not full defined",
                                             nowToken->numLine,
                                             nowToken->numPos);
                         }
                     }
-                } else if (isClassDefined(name)) {
+                }
+                else if (isClassDefined(name)) {
                     if (!isClassFullDefined(name)) {
                         throw Exception("semantic error: " + nowToken->value + " not full defined",
                                         nowToken->numLine,
@@ -428,13 +484,15 @@ private:
                             next(bigScopes.rbegin())->classes.find(
                                     {bigScopes.back().value})->second.parentClasses.insert(
                                     nowToken->value);
-                        } else if (!isClassFullDefined(name)) {
+                        }
+                        else if (!isClassFullDefined(name)) {
                             throw Exception("semantic error: " + nowToken->value + " call undefined as function",
                                             nowToken->numLine,
                                             nowToken->numPos);
                         }
                     }
-                } else if (!isDefines(name) && isNextTokenOperator("(")) {
+                }
+                else if (!isDefines(name) && isNextTokenOperator("(")) {
                     if (bigScopes.back().type == Scope::FUNC) {
 //                            scopes.rbegin()->functions.find({bigScopes.back().value})->second.parentFunc.insert(
 //                                    nowToken->value);
@@ -443,7 +501,8 @@ private:
                         next(bigScopes.rbegin())->functions.find(
                                 {bigScopes.back().value})->second.parentFunc.insert(
                                 nowToken->value);
-                    } else
+                    }
+                    else
                         throw Exception("semantic error: " + nowToken->value + " not full defined",
                                         nowToken->numLine,
                                         nowToken->numPos);
@@ -455,8 +514,48 @@ private:
                     nameInTest.push_back(*nowToken);
                 }
             }
+            else if (nowToken->type == Token::NUMBER) {
+                // ~~~
+                // TODO для даблов
+                nowPoliz->operations.push_back({0,
+                                                Element::GET_VALUE_INT,
+                                                false,
+                                                0,
+                                                std::stoi(nowToken->value)});
+                // ~~~
+            }
+            else if (nowToken->type == Token::STRING) {
+                // ~~~
+                nowPoliz->operations.push_back({0,
+                                                Element::GET_VALUE_STR,
+                                                false,
+                                                0,
+                                                0,
+                                                0.0,
+                                                nowToken->value
+                                               });
+                // ~~~
+            }
+            else if (isKeyword("None")) {
+                // ~~~
+                nowPoliz->operations.push_back({0,
+                                                Element::GET_VALUE_NONE
+                                               });
+                // ~~~
+            }
+            else if (isKeyword("True") || isKeyword("False")){
+                // ~~~
+                nowPoliz->operations.push_back({0,
+                                                Element::GET_VALUE_BOOL,
+                                                false,
+                                                0,
+                                                isKeyword("True")
+                                               });
+                // ~~~
+            }
             getToken();
-        } else
+        }
+        else
             return false;
         while (readTrailer());
         return true;
@@ -469,7 +568,8 @@ private:
             if (isOperator(")")) {
                 getToken();
                 return true;
-            } else
+            }
+            else
                 throw Exception("invalid trailer",
                                 nowToken->numLine, nowToken->numPos);
         }
@@ -482,7 +582,8 @@ private:
             if (isOperator("]")) {
                 getToken();
                 return true;
-            } else
+            }
+            else
                 throw Exception("invalid trailer",
                                 nowToken->numLine, nowToken->numPos);
         }
@@ -491,7 +592,8 @@ private:
             if (nowToken->type != Token::NAME) {
                 throw Exception("invalid trailer",
                                 nowToken->numLine, nowToken->numPos);
-            } else {
+            }
+            else {
                 getToken();
                 return true;
             }
@@ -510,7 +612,8 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
-            } else {
+            }
+            else {
                 break;
             }
         }
@@ -538,7 +641,8 @@ private:
                 throw Exception("invalid not expression",
                                 nowToken->numLine, nowToken->numPos);
             }
-        } else {
+        }
+        else {
             if (!readComparison()) {
                 return false;
             }
@@ -557,7 +661,8 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
-            } else {
+            }
+            else {
                 break;
             }
         }
@@ -603,7 +708,8 @@ private:
                     getToken();
                     if (nowToken->type == Token::NAME) {
                         getToken();
-                    } else {
+                    }
+                    else {
                         throw Exception("invalid import alias",
                                         nowToken->numLine,
                                         nowToken->numPos);
@@ -676,7 +782,8 @@ private:
         if (pos + 1 == indexNowToken && tokens[pos].type == Token::NAME) {
             isMove = true;
             nameInTest.clear();
-        } else {
+        }
+        else {
             checkDefinedTestNames();
         }
         if (readAugassign()) {
@@ -689,7 +796,8 @@ private:
                 throw Exception("invalid test",
                                 nowToken->numLine,
                                 nowToken->numPos);
-        } else {
+        }
+        else {
             while (isOperator("=")) {
                 if (isMove) {
                     initVar(pos);
@@ -705,7 +813,8 @@ private:
                 if (isNextTokenOperator("=") && pos + 1 == indexNowToken && tokens[pos].type == Token::NAME) {
                     isMove = true;
                     nameInTest.clear(); // FIXME a = a
-                } else {
+                }
+                else {
                     checkDefinedTestNames();
                 }
             }
@@ -796,12 +905,13 @@ private:
 
     void initFunc(Token token) {
         if (isNotDefines(token.value)) {
-            for (auto & now : bigScopes.back().functions){
+            for (auto &now : bigScopes.back().functions) {
                 now.second.parentFunc.erase(token.value);
             }
             scopes.back().functions[token.value] = {};
             bigScopes.back().functions[token.value] = {};
-        } else {
+        }
+        else {
             throw Exception("semantic error: redefinition " + token.value,
                             nowToken->numLine,
                             nowToken->numPos);
@@ -812,7 +922,8 @@ private:
         if (isNotDefines(token.value)) {
             scopes.back().classes[token.value] = {};
             bigScopes.back().classes[token.value] = {};
-        } else {
+        }
+        else {
             throw Exception("semantic error: redefinition " + token.value,
                             nowToken->numLine,
                             nowToken->numPos);
@@ -1025,6 +1136,9 @@ private:
             throw Exception("invalid if condition",
                             nowToken->numLine,
                             nowToken->numPos);
+        // ~~~
+
+        // ~~~
         if (!isBeginBlock(":")) {
             throw Exception("invalid if condition",
                             nowToken->numLine,
@@ -1126,7 +1240,8 @@ private:
         if (indexNowToken + 1 < tokens.size()) {
             indexNowToken++;
             nowToken = &tokens[indexNowToken];
-        } else {
+        }
+        else {
             throw Exception("invalid EOF",
                             nowToken->numLine,
                             nowToken->numPos);
