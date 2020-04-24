@@ -26,7 +26,8 @@ int main(int argc, char *argv[]) {
     try {
         Translator translator(tokens);
         auto wowByteCode = translator.translate();
-        VM::run(wowByteCode);
+        VM vm;
+        vm.run(wowByteCode);
     } catch (std::string e) {
         std::cout << "Not parsed\n";
         std::cerr << e;

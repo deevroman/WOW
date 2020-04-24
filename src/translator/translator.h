@@ -452,6 +452,18 @@ private:
                                         nowToken->numPos);
                     }
                     else {
+                        // ~~~
+                        nowPoliz->operations.push_back({
+                            -1,
+                            Element::FUNCTION,
+                            false,
+                            0,
+                            0,
+                            0.0,
+                            nowToken->value
+                        });
+                        // ~~~
+                        /*
                         if (bigScopes.back().type == Scope::FUNC) {
 //                            scopes.rbegin()->functions.find({bigScopes.back().value})->second.parentFunc.insert(
 //                                    nowToken->value);
@@ -461,11 +473,13 @@ private:
                                     {bigScopes.back().value})->second.parentFunc.insert(
                                     nowToken->value);
                         }
-                        else if (!isFuncFullDefined(name)) {
+                         else if (!isFuncFullDefined(name)) {
                             throw Exception("semantic error: " + nowToken->value + " not full defined",
                                             nowToken->numLine,
                                             nowToken->numPos);
                         }
+                        */
+
                     }
                 }
                 else if (isClassDefined(name)) {

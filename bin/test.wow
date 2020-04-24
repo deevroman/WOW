@@ -1,1 +1,8 @@
-1 + 2
+def a():
+    pass
+
+class C:
+    def b():
+        c()
+    def c():
+        pass
