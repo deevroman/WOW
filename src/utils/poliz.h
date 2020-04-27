@@ -23,7 +23,6 @@ public:
         GET_VALUE_NONE, GET_VALUE_BOOL,
         CLEAR_STACK
     } TYPE;
-    bool isNotSavingToPoliz = false; // FIXME удалить и заменить на CLEAR_STACK
     int isJump = 0; // 0 - нет, иначе позиция
     int intValue = 0;
     double doubleValue = 0.0; // TODO можно переписать на объединение

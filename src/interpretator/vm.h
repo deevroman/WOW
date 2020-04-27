@@ -56,10 +56,29 @@ private:
                         stackTrace.back().curStack.pop_back();
                         stackTrace.back().curStack.push_back(tmpobj);
                     }
+                    else if (getItemOfCurStack(1)->type == wowobj::STRING
+                             && getItemOfCurStack()->type == wowobj::STRING) {
+                        std::string value = (*(static_cast<std::string *>(getItemOfCurStack(1)->value)))
+                                            + (*(static_cast<std::string *>(getItemOfCurStack()->value)));
+                        auto tmpobj = new wowobj(wowobj::STRING, new std::string(value));
+                        stackTrace.back().curStack.pop_back();
+                        stackTrace.back().curStack.pop_back();
+                        stackTrace.back().curStack.push_back(tmpobj);
+                    }
                     break;
                 }
-                case Element::MINUS:
+                case Element::MINUS: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) -
+                                    *(static_cast<int *>(getItemOfCurStack()->value));
+                        auto tmpobj = new wowobj(wowobj::INT, new int(value));
+                        stackTrace.back().curStack.pop_back();
+                        stackTrace.back().curStack.pop_back();
+                        stackTrace.back().curStack.push_back(tmpobj);
+                    }
                     break;
+                }
                 case Element::MUL:
                     break;
                 case Element::DIV:
@@ -86,19 +105,20 @@ private:
                     break;
                 }
                 case Element::GET_VALUE: {
-                    if (curLevel.TID.count(curOp.stringValue) == 0) {
-                        curLevel.curStack.push_back(curLevel.TID[curOp.stringValue]);
+                    if (curLevel.TID->count(curOp.stringValue) == 0) {
+                        curLevel.curStack.push_back((*(curLevel.TID))[curOp.stringValue]);
                     }
                     else {
                         curLevel.curStack.push_back(new wowobj(wowobj::NONE));
-                        curLevel.TID[curOp.stringValue] = curLevel.curStack.back();
+                        (*(curLevel.TID))[curOp.stringValue] = curLevel.curStack.back();
                     }
                     break;
                 }
                 case Element::INDEX_VALUE:
                     break;
-                case Element::DEF_FUNC:
+                case Element::DEF_FUNC: {
                     break;
+                }
                 case Element::DEF_CLASS:
                     break;
                 case Element::CALL_FUNC: {
@@ -106,23 +126,38 @@ private:
                         std::string tmp; // TODO наверное можно нормально
                         std::cin >> tmp;
                         auto tmp2 = new std::string(tmp);
-                        curLevel.curStack.push_back(new wowobj(wowobj::STRING), static_cast<void *>(tmp2));
+                        curLevel.curStack.push_back(new wowobj(wowobj::STRING, static_cast<void *>(tmp2)));
                     }
                     else if (curOp.stringValue == "print") {
                         auto arg = getItemOfCurStack();
                         if (arg->type == wowobj::STRING) {
-                            std::cout << *(static_cast<std::string *>arg->value);
+                            std::cout << *(static_cast<std::string *>(arg->value));
                         }
                         else if (arg->type == wowobj::INT) {
-                            std::cout << *(static_cast<int *>arg->value);
+                            std::cout << *(static_cast<int *>(arg->value));
                         } // TODO
                     }
                     else if (curOp.stringValue == "int") {
                         auto arg = getItemOfCurStack();
-                        
                         if (arg->type == wowobj::STRING) {
-                            curLevel.curStack.push_back(new wowobj(wowobj::STRING), static_cast<void *>(tmp2));
-                        } else {
+                            int *tmp = new int(std::stoi(*(static_cast<std::string *>(arg->value))));
+                            curLevel.curStack.push_back(new wowobj(wowobj::INT, static_cast<void *>(tmp)));
+                        }
+                        else {
+                            throw "TODO"; // TODO
+                        }
+                    }
+                    else if (curOp.stringValue == "str") {
+                        auto arg = getItemOfCurStack();
+                        if (arg->type == wowobj::INT) {
+                            auto *tmp = new std::string(std::to_string(*(static_cast<int *>(arg->value))));
+                            curLevel.curStack.push_back(new wowobj(wowobj::STRING, static_cast<void *>(tmp)));
+                        }
+//                        else if (arg->type == wowobj::BOOL) {
+//                            auto *tmp = new std::string(std::to_string(*(static_cast<bool *>(arg->value)))); // TODO проверить работаеть ли to_string для була
+//                            curLevel.curStack.push_back(new wowobj(wowobj::STRING, static_cast<void *>(tmp)));
+//                        }
+                        else {
                             throw "TODO"; // TODO
                         }
                     }
@@ -158,13 +193,17 @@ private:
                     curLevel.curStack.push_back(new wowobj(wowobj::BOOL, tmpBool));
                     break;
                 }
+                case Element::CLEAR_STACK: {
+                    curLevel.curStack.clear();
+                    break;
+                }
             }
         }
     }
 
 public:
     int run(Poliz *wowByteCode, std::string name = "") {
-        stackTrace.push_back({name, wowByteCode});
+        stackTrace.push_back({name, wowByteCode, {}, {}, new std::map<std::string, wowobj *>});
         runLevel();
         return 0;
     }

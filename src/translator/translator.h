@@ -62,8 +62,8 @@ public:
         indexNowToken = 0;
         nowToken = &tokens[0];
         levels = {0};
-        std::vector<std::string> reservedFunctions = {"print", "input"};
-        std::vector<std::string> reservedClasses = {"list", "dict", "set", "str"}; // TODO add
+        std::vector<std::string> reservedFunctions = {"print", "input", "int", "str", "bool"};
+        std::vector<std::string> reservedClasses = {"list", "dict", "set"}; // TODO add
         scopes.push_back({});
         bigScopes.push_back({});
         for (const std::string &cur : reservedFunctions) {
@@ -240,7 +240,7 @@ private:
                 // ~~~
                 continue;
             }
-            if (isOperator(">>")){
+            if (isOperator(">>")) {
                 getToken();
                 if (!readArithExpr()) {
                     throw Exception("invalid shift expression",
@@ -496,7 +496,6 @@ private:
                         nowPoliz->operations.push_back({
                                                                -1,
                                                                Element::CALL_FUNC,
-                                                               false,
                                                                0,
                                                                0,
                                                                0.0,
@@ -546,7 +545,7 @@ private:
                         }
                     }
                 }
-                else if (!isDefines(name) && isNextTokenOperator("(")) {
+                /*else if (!isDefines(name) && isNextTokenOperator("(")) {
                     if (bigScopes.back().type == Scope::FUNC) {
 //                            scopes.rbegin()->functions.find({bigScopes.back().value})->second.parentFunc.insert(
 //                                    nowToken->value);
@@ -563,7 +562,7 @@ private:
                 }
 //                    else throw Exception("semantic error: " + nowToken->value + " defined as variable",
 //                                        nowToken->numLine,
-//                                        nowToken->numPos);
+//                                        nowToken->numPos);*/
                 else {
                     nameInTest.push_back(*nowToken);
                 }
@@ -573,7 +572,6 @@ private:
                 // TODO для даблов
                 nowPoliz->operations.push_back({0,
                                                 Element::GET_VALUE_INT,
-                                                false,
                                                 0,
                                                 std::stoi(nowToken->value)});
                 // ~~~
@@ -582,7 +580,6 @@ private:
                 // ~~~
                 nowPoliz->operations.push_back({0,
                                                 Element::GET_VALUE_STR,
-                                                false,
                                                 0,
                                                 0,
                                                 0.0,
@@ -601,7 +598,6 @@ private:
                 // ~~~
                 nowPoliz->operations.push_back({0,
                                                 Element::GET_VALUE_BOOL,
-                                                false,
                                                 0,
                                                 isKeyword("True")
                                                });
@@ -618,9 +614,13 @@ private:
     bool readTrailer() {
         if (isOperator("(")) {
             getToken();
-            readArglist();
+            auto backup = nowPoliz->operations.back();
+            nowPoliz->operations.pop_back();
+            int countArgs = readArglist();
             if (isOperator(")")) {
                 getToken();
+                backup.countParams = countArgs;
+                nowPoliz->operations.push_back(backup);
                 return true;
             }
             else
@@ -655,9 +655,10 @@ private:
         return false;
     }
 
-    bool readArglist() {
+    int readArglist() {
         if (!readTest())
-            return false;
+            return 0;
+        int countArgs = 1;
         while (!isEnd()) {
             if (isOperator(",")) {
                 getToken();
@@ -666,12 +667,13 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
+                countArgs++;
             }
             else {
                 break;
             }
         }
-        return true;
+        return countArgs;
     }
 
     bool readComparison() {

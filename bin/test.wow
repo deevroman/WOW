@@ -1,8 +1,1 @@
-def a():
-    pass
-
-class C:
-    def b():
-        c()
-    def c():
-        pass
+print(str(48)+input()+'7')
