@@ -168,6 +168,10 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
+                // ~~~
+                nowPoliz->operations.push_back({0, Element::OR_BIT});
+                // ~~~
+
             }
             else {
                 break;
@@ -187,6 +191,9 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
+                // ~~~
+                nowPoliz->operations.push_back({0, Element::XOR});
+                // ~~~
             }
             else {
                 break;
@@ -206,6 +213,9 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
+                // ~~~
+                nowPoliz->operations.push_back({0, Element::AND_BIT});
+                // ~~~
             }
             else {
                 break;
@@ -218,13 +228,29 @@ private:
         if (!readArithExpr())
             return false;
         while (!isEnd()) {
-            if (isOperator("<<") || isOperator(">>")) {
+            if (isOperator("<<")) {
                 getToken();
                 if (!readArithExpr()) {
                     throw Exception("invalid shift expression",
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
+                // ~~~
+                nowPoliz->operations.push_back({0, Element::SHIFT_LEFT_BIN});
+                // ~~~
+                continue;
+            }
+            if (isOperator(">>")){
+                getToken();
+                if (!readArithExpr()) {
+                    throw Exception("invalid shift expression",
+                                    nowToken->numLine,
+                                    nowToken->numPos);
+                }
+                // ~~~
+                nowPoliz->operations.push_back({0, Element::SHIFT_RIGHT_BIN});
+                // ~~~
+                continue;
             }
             else {
                 break;
@@ -305,12 +331,23 @@ private:
             if (isOperator("-")
                 || isOperator("+")
                 || isOperator("~")) {
+                // ~~~
+                auto nowOperator = nowToken->value;
+                // ~~~
                 getToken();
                 if (!readFactorExpr()) {
                     throw Exception("invalid factor expression",
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
+                // ~~~
+                if (nowOperator == "-")
+                    nowPoliz->operations.push_back({0, Element::UNAR_MINUS});
+                if (nowOperator == "+")
+                    nowPoliz->operations.push_back({0, Element::UNAR_PLUS});
+                if (nowOperator == "~")
+                    nowPoliz->operations.push_back({0, Element::UNAR_TILDA});
+                // ~~~
                 return true;
             }
             else {
@@ -333,6 +370,9 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
+                // ~~~
+                nowPoliz->operations.push_back({0, Element::POW});
+                // ~~~
             }
             else {
                 break;
@@ -454,14 +494,14 @@ private:
                     else {
                         // ~~~
                         nowPoliz->operations.push_back({
-                            -1,
-                            Element::CALL_FUNC,
-                            false,
-                            0,
-                            0,
-                            0.0,
-                            nowToken->value
-                        });
+                                                               -1,
+                                                               Element::CALL_FUNC,
+                                                               false,
+                                                               0,
+                                                               0,
+                                                               0.0,
+                                                               nowToken->value
+                                                       });
                         // ~~~
                         /*
                         if (bigScopes.back().type == Scope::FUNC) {
@@ -557,7 +597,7 @@ private:
                                                });
                 // ~~~
             }
-            else if (isKeyword("True") || isKeyword("False")){
+            else if (isKeyword("True") || isKeyword("False")) {
                 // ~~~
                 nowPoliz->operations.push_back({0,
                                                 Element::GET_VALUE_BOOL,
@@ -653,8 +693,12 @@ private:
             getToken();
             if (!readNotTest()) {
                 throw Exception("invalid not expression",
-                                nowToken->numLine, nowToken->numPos);
+                                nowToken->numLine,
+                                nowToken->numPos);
             }
+            // ~~~
+            nowPoliz->operations.push_back({0, Element::NOT});
+            // ~~~
         }
         else {
             if (!readComparison()) {
@@ -675,6 +719,9 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
+                // ~~~
+                nowPoliz->operations.push_back({0, Element::AND});
+                // ~~~
             }
             else {
                 break;
