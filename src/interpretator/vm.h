@@ -117,6 +117,15 @@ private:
                             std::cout << *(static_cast<int *>arg->value);
                         } // TODO
                     }
+                    else if (curOp.stringValue == "int") {
+                        auto arg = getItemOfCurStack();
+                        
+                        if (arg->type == wowobj::STRING) {
+                            curLevel.curStack.push_back(new wowobj(wowobj::STRING), static_cast<void *>(tmp2));
+                        } else {
+                            throw "TODO"; // TODO
+                        }
+                    }
                     break;
                 }
                 case Element::CREATE_CLASS:
