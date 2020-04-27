@@ -101,8 +101,24 @@ private:
                     break;
                 case Element::DEF_CLASS:
                     break;
-                case Element::CALL_FUNC:
+                case Element::CALL_FUNC: {
+                    if (curOp.stringValue == "input") {
+                        std::string tmp; // TODO наверное можно нормально
+                        std::cin >> tmp;
+                        auto tmp2 = new std::string(tmp);
+                        curLevel.curStack.push_back(new wowobj(wowobj::STRING), static_cast<void *>(tmp2));
+                    }
+                    else if (curOp.stringValue == "print") {
+                        auto arg = getItemOfCurStack();
+                        if (arg->type == wowobj::STRING) {
+                            std::cout << *(static_cast<std::string *>arg->value);
+                        }
+                        else if (arg->type == wowobj::INT) {
+                            std::cout << *(static_cast<int *>arg->value);
+                        } // TODO
+                    }
                     break;
+                }
                 case Element::CREATE_CLASS:
                     break;
                 case Element::GET_FIELD:
