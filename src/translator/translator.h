@@ -455,7 +455,7 @@ private:
                         // ~~~
                         nowPoliz->operations.push_back({
                             -1,
-                            Element::FUNCTION,
+                            Element::CALL_FUNC,
                             false,
                             0,
                             0,
