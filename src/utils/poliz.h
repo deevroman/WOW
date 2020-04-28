@@ -29,10 +29,11 @@ public:
     std::string stringValue = ""; // TODO на указатели сюда же имя функции
 };
 
+class Poliz;
 
 class Poliz {
 public:
-    std::unordered_map<std::string, Poliz> funcs; // TODO classes
+    std::map<std::string, Poliz> funcs; // TODO classes
     std::vector<Element> operations;
 };
 

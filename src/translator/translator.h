@@ -314,7 +314,7 @@ private:
                 else if (nowOperator == "//") {
                     nowPoliz->operations.push_back({0, Element::INTDIV});
                 }
-                {
+                else if (nowOperator == "%") {
                     nowPoliz->operations.push_back({0, Element::MOD});
                 }
                 // ~~~
@@ -545,24 +545,24 @@ private:
                         }
                     }
                 }
-                /*else if (!isDefines(name) && isNextTokenOperator("(")) {
-                    if (bigScopes.back().type == Scope::FUNC) {
-//                            scopes.rbegin()->functions.find({bigScopes.back().value})->second.parentFunc.insert(
-//                                    nowToken->value);
-                        bigScopes.rbegin()->functions.find({bigScopes.back().value})->second.parentFunc.insert(
-                                nowToken->value);
-                        next(bigScopes.rbegin())->functions.find(
-                                {bigScopes.back().value})->second.parentFunc.insert(
-                                nowToken->value);
+                    /*else if (!isDefines(name) && isNextTokenOperator("(")) {
+                        if (bigScopes.back().type == Scope::FUNC) {
+    //                            scopes.rbegin()->functions.find({bigScopes.back().value})->second.parentFunc.insert(
+    //                                    nowToken->value);
+                            bigScopes.rbegin()->functions.find({bigScopes.back().value})->second.parentFunc.insert(
+                                    nowToken->value);
+                            next(bigScopes.rbegin())->functions.find(
+                                    {bigScopes.back().value})->second.parentFunc.insert(
+                                    nowToken->value);
+                        }
+                        else
+                            throw Exception("semantic error: " + nowToken->value + " not full defined",
+                                            nowToken->numLine,
+                                            nowToken->numPos);
                     }
-                    else
-                        throw Exception("semantic error: " + nowToken->value + " not full defined",
-                                        nowToken->numLine,
-                                        nowToken->numPos);
-                }
-//                    else throw Exception("semantic error: " + nowToken->value + " defined as variable",
-//                                        nowToken->numLine,
-//                                        nowToken->numPos);*/
+    //                    else throw Exception("semantic error: " + nowToken->value + " defined as variable",
+    //                                        nowToken->numLine,
+    //                                        nowToken->numPos);*/
                 else {
                     nameInTest.push_back(*nowToken);
                 }
