@@ -22,7 +22,7 @@ int main() {
     }
     try {
         Translator syntaxChecker(tokens);
-        syntaxChecker.check();
+        syntaxChecker.translate(); // check()
         std::cout << "OK\nSave how test?\n0 - No\n1 - Yes\n";
         int saveTest;
         std::cin >> saveTest;

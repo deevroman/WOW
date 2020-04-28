@@ -151,7 +151,7 @@ private:
         if (isOperator("<") || isOperator(">")
             || isOperator("==") || isOperator(">=")
             || isOperator("<=") || isOperator("!=")) {
-            curOperator = nowToken->value;
+            *curOperator = nowToken->value;
             getToken();
             return true;
         }
@@ -571,6 +571,7 @@ private:
             else if (nowToken->type == Token::NUMBER) {
                 // ~~~
                 // TODO для даблов
+                // TODO longInt
                 nowPoliz->operations.push_back({0,
                                                 Element::GET_VALUE_INT,
                                                 0,
@@ -1113,6 +1114,9 @@ private:
         if (nowToken->value != "while")
             return false;
         getToken();
+        // ~~~
+        int statementBeginPos = nowPoliz->operations.size();
+        // ~~~
         scopes.push_back({Scope::SIMPLE, ""});
         bigScopes.back().countCycle++;
         if (!readTest())
@@ -1124,8 +1128,20 @@ private:
                             nowToken->numLine,
                             nowToken->numPos);
         getToken();
+        // ~~~
+        int suiteBeginPos = nowPoliz->operations.size();
+        nowPoliz->operations.push_back({0, Element::NEGATIVE_JMP, 0});
+        int stmtJmpPos = nowPoliz->operations.size() - 1;
+        bool withElse = false;
+        // ~~~
         readSuite();
+        // ~~~
+            nowPoliz->operations.push_back({0, Element::JMP, statementBeginPos});
+            int elseSuiteBegin = 0;
+        // ~~~
+
         if (isEqualLevel() && isNextTokenKey("else")) {
+            withElse = true;
             readBeginLine();
             getToken();
             scopes.push_back({});
@@ -1134,10 +1150,16 @@ private:
                                 nowToken->numLine,
                                 nowToken->numPos);
             getToken();
+            elseSuiteBegin = nowPoliz->operations.size();
             readSuite();
             popScope();
         }
-        bigScopes.back().countCycle--;
+        // ~~~
+        int endPos = nowPoliz->operations.size();
+        if (withElse)
+            endPos = elseSuiteBegin;
+        nowPoliz->operations[stmtJmpPos].isJump = endPos;
+        // ~~~
         return true;
     }
 
@@ -1219,15 +1241,15 @@ private:
             throw Exception("invalid if condition",
                             nowToken->numLine,
                             nowToken->numPos);
-        // ~~~
-
-        // ~~~
         if (!isBeginBlock(":")) {
             throw Exception("invalid if condition",
                             nowToken->numLine,
                             nowToken->numPos);
         }
         getToken();
+        // ~~~
+
+        // ~~~
         readSuite();
         popScope();
         while (isEqualLevel() && isNextTokenKey("elif")) {

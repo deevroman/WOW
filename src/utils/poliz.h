@@ -11,6 +11,7 @@ public:
     enum PrimeFuncs {
         OR, AND, NOT,
         XOR, OR_BIT,
+        POSITIVE_JMP, NEGATIVE_JMP, JMP,
         AND_BIT, SHIFT_LEFT_BIN, SHIFT_RIGHT_BIN,
         PLUS, MINUS, MUL, DIV, MOD, INTDIV,
         UNAR_PLUS, UNAR_MINUS, UNAR_TILDA,
