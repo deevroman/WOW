@@ -147,10 +147,11 @@ private:
         return true;
     }
 
-    bool readCompOp() {
+    bool readCompOp(std::string * curOperator) {
         if (isOperator("<") || isOperator(">")
             || isOperator("==") || isOperator(">=")
             || isOperator("<=") || isOperator("!=")) {
+            curOperator = nowToken->value;
             getToken();
             return true;
         }
@@ -680,12 +681,31 @@ private:
         if (!readExpr()) {
             return false;
         }
-        if (!isEnd() && readCompOp()) {
+        std::string nowOperator;
+        if (!isEnd() && readCompOp(&nowOperator)) {
             if (!readExpr()) {
                 throw Exception("invalid compare expression",
                                 nowToken->numLine,
                                 nowToken->numPos);
             }
+        }
+        if (nowOperator == "<"){
+            nowPoliz->operations.push_back({0, Element::CMP_LESS});
+        }
+        if (nowOperator == ">"){
+            nowPoliz->operations.push_back({0, Element::CMP_MORE});
+        }
+        if (nowOperator == "<="){
+            nowPoliz->operations.push_back({0, Element::CMP_LESS_EQUAL});
+        }
+        if (nowOperator == ">="){
+            nowPoliz->operations.push_back({0, Element::CMP_MORE_EQUAL});
+        }
+        if (nowOperator == "=="){
+            nowPoliz->operations.push_back({0, Element::CMP_EQUAL});
+        }
+        if (nowOperator == "!="){
+            nowPoliz->operations.push_back({0, Element::CMP_NOT_EQUAL});
         }
         return true;
     }

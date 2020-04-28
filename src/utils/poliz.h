@@ -21,7 +21,8 @@ public:
         GET_FIELD, EVAL_METHOD,
         GET_VALUE_INT, GET_VALUE_DOUBLE, GET_VALUE_STR,
         GET_VALUE_NONE, GET_VALUE_BOOL,
-        CLEAR_STACK
+        CLEAR_STACK,
+        CMP_EQUAL, CMP_NOT_EQUAL, CMP_LESS, CMP_MORE, CMP_MORE_EQUAL, CMP_LESS_EQUAL
     } TYPE;
     int isJump = 0; // 0 - нет, иначе позиция
     int intValue = 0;
