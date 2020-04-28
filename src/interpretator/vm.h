@@ -15,10 +15,12 @@ private:
         Poliz *poliz;
         std::vector<wowobj *> curStack;
         std::map<std::string, Poliz *> scope;
+//        std::map<std::string, > ;
         std::map<std::string, wowobj *> *TID = nullptr;
     };
 
     std::vector<Level> stackTrace;
+    std::vector<Level> bigScope;
 
     wowobj *getItemOfCurStack(int number = 0, int numberOfStack = 0) {
         int sz = stackTrace[stackTrace.size() - 1 - numberOfStack].curStack.size();
@@ -79,20 +81,70 @@ private:
                     }
                     break;
                 }
-                case Element::MUL:
+                case Element::MUL: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) *
+                                    *(static_cast<int *>(getItemOfCurStack()->value));
+                        auto tmpobj = new wowobj(wowobj::INT, new int(value));
+                        stackTrace.back().curStack.pop_back();
+                        stackTrace.back().curStack.pop_back();
+                        stackTrace.back().curStack.push_back(tmpobj);
+                    }
                     break;
+                }
                 case Element::DIV:
                     break;
-                case Element::MOD:
+                case Element::MOD: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) %
+                                    *(static_cast<int *>(getItemOfCurStack()->value));
+                        auto tmpobj = new wowobj(wowobj::INT, new int(value));
+                        stackTrace.back().curStack.pop_back();
+                        stackTrace.back().curStack.pop_back();
+                        stackTrace.back().curStack.push_back(tmpobj);
+                    }
                     break;
+                }
                 case Element::INTDIV:
                     break;
-                case Element::UNAR_PLUS:
+                case Element::UNAR_PLUS: {
+                    if (getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = *(static_cast<int *>(getItemOfCurStack()->value));
+                        auto tmpobj = new wowobj(wowobj::INT, new int(value));
+                        stackTrace.back().curStack.pop_back();
+                        stackTrace.back().curStack.push_back(tmpobj);
+                    }
+                    else {
+                        // TODO
+                    }
                     break;
-                case Element::UNAR_MINUS:
+                }
+                case Element::UNAR_MINUS: {
+                    if (getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = -*(static_cast<int *>(getItemOfCurStack()->value));
+                        auto tmpobj = new wowobj(wowobj::INT, new int(value));
+                        stackTrace.back().curStack.pop_back();
+                        stackTrace.back().curStack.push_back(tmpobj);
+                    }
+                    else {
+                        // TODO
+                    }
                     break;
-                case Element::UNAR_TILDA:
+                }
+                case Element::UNAR_TILDA: {
+                    if (getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = ~*(static_cast<int *>(getItemOfCurStack()->value));
+                        auto tmpobj = new wowobj(wowobj::INT, new int(value));
+                        stackTrace.back().curStack.pop_back();
+                        stackTrace.back().curStack.push_back(tmpobj);
+                    }
+                    else {
+                        // TODO
+                    }
                     break;
+                }
                 case Element::POW:
                     break;
                 case Element::COPY: {
@@ -159,6 +211,15 @@ private:
 //                        }
                         else {
                             throw "TODO"; // TODO
+                        }
+                    }
+                    else {
+                        if (curLevel.scope.count(curOp.stringValue)) {
+                            stackTrace.push_back({curOp.stringValue, curLevel.scope[curOp.stringValue], {}, {},
+                                                  new std::map<std::string, wowobj *>});
+                        }
+                        else {
+                            // TODO
                         }
                     }
                     break;
