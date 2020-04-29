@@ -1,3 +1,4 @@
+
 #ifndef WOW_VM_H
 #define WOW_VM_H
 
