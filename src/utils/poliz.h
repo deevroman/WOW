@@ -7,7 +7,7 @@
 
 class Element {
 public:
-    int countParams = 0; // TODO возможно можно перенести
+    int countParams = 0; // TODO можно перенести
     enum PrimeFuncs {
         OR, AND, NOT,
         XOR, OR_BIT,
