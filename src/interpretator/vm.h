@@ -196,6 +196,7 @@ private:
                     break;
                 }
                 case Element::DEF_FUNC: {
+                    bigScopes.back().funcs[curOp.stringValue] = scopes.back().funcs[curOp.stringValue] = curLevel.poliz->funcs[curOp.stringValue];
                     break;
                 }
                 case Element::DEF_CLASS: {
@@ -299,6 +300,15 @@ private:
                             continue;
                         }
                     }
+                    else if (getItemOfCurStack()->type == wowobj::INT) {
+                        if (*(static_cast<int *>(getItemOfCurStack()->value))) {
+                            i = curOp.intValue - 1;
+                            continue;
+                        }
+                    }
+                    else {
+                        throw "invalid type for comp";
+                    }
                     break;
                 }
                 case Element::NEGATIVE_JMP: {
@@ -308,11 +318,19 @@ private:
                             continue;
                         }
                     }
+                    else if (getItemOfCurStack()->type == wowobj::INT) {
+                        if (!*(static_cast<int *>(getItemOfCurStack()->value))) {
+                            i = curOp.intValue - 1;
+                            continue;
+                        }
+                    }
+                    else {
+                        throw "invalid type for comp";
+                    }
                     break;
                 }
                 case Element::JMP: {
                     i = curOp.intValue - 1;
-                    continue;
                     break;
                 }
                 case Element::CMP_EQUAL: {
@@ -345,14 +363,24 @@ private:
                 case Element::CMP_LESS_EQUAL: {
                     break;
                 }
-                case Element::JUMP_TO_SCOPE: {
-                    stackTrace.push_back({"", curLevel.poliz->otherScopes[curOp.intValue], {}});
+                case Element::BEGIN_SCOPE: {
                     scopes.emplace_back();
-                    runLevel();
                     break;
                 }
+                case Element::END_SCOPE: {
+                    for (const auto &now : scopes.back().vars) {
+                        bigScopes.back().vars.erase(now.first);
+                    }
+                    for (const auto &now : scopes.back().funcs) {
+                        bigScopes.back().funcs.erase(now.first);
+                    }
+                    for (const auto &now : scopes.back().classes) {
+                        bigScopes.back().classes.erase(now.first);
+                    }
+                    scopes.pop_back();
+                }
                 case Element::RETURN_VALUE: {
-
+                    stackTrace[stackTrace.size() - 2].curStack.push_back({getItemOfCurStack()});
                     break;
                 }
                 case Element::GET_VALUES_FROM_PREV_STACK:
