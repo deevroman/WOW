@@ -1,1 +1,2 @@
-print(str(48)+input()+'7')
+if 1:
+    print(42)
