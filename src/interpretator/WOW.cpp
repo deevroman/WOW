@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
         std::cerr << e;
         return 0;
     }
-    Poliz* wowByteCode;
+    Poliz *wowByteCode;
     try {
         Translator translator(tokens);
         wowByteCode = translator.translate();
@@ -32,7 +32,8 @@ int main(int argc, char *argv[]) {
         std::cerr << e;
         return 0;
     }
-    try {VM vm;
+    try {
+        VM vm;
         vm.run(wowByteCode);
     } catch (std::string e) {
         std::cout << "Runtime error\n";
