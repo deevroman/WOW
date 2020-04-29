@@ -299,13 +299,13 @@ private:
                 case Element::POSITIVE_JMP: {
                     if (getItemOfCurStack()->type == wowobj::BOOL) {
                         if (*(static_cast<bool *>(getItemOfCurStack()->value))) {
-                            i = curOp.intValue - 1;
+                            i = curOp.posJump - 1;
                             continue;
                         }
                     }
                     else if (getItemOfCurStack()->type == wowobj::INT) {
                         if (*(static_cast<int *>(getItemOfCurStack()->value))) {
-                            i = curOp.intValue - 1;
+                            i = curOp.posJump - 1;
                             continue;
                         }
                     }
@@ -317,13 +317,13 @@ private:
                 case Element::NEGATIVE_JMP: {
                     if (getItemOfCurStack()->type == wowobj::BOOL) {
                         if (!*(static_cast<bool *>(getItemOfCurStack()->value))) {
-                            i = curOp.intValue - 1;
+                            i = curOp.posJump - 1;
                             continue;
                         }
                     }
                     else if (getItemOfCurStack()->type == wowobj::INT) {
                         if (!*(static_cast<int *>(getItemOfCurStack()->value))) {
-                            i = curOp.intValue - 1;
+                            i = curOp.posJump - 1;
                             continue;
                         }
                     }
@@ -333,7 +333,7 @@ private:
                     break;
                 }
                 case Element::JMP: {
-                    i = curOp.intValue - 1;
+                    i = curOp.posJump - 1;
                     break;
                 }
                 case Element::CMP_EQUAL: {
