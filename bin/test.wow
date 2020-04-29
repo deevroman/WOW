@@ -1,2 +1,4 @@
-if True:
-    print(1)
+if 1 > 2:
+    print('TRUE')
+else:
+    print('FALSE')

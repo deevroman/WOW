@@ -768,6 +768,7 @@ private:
                                 nowToken->numLine,
                                 nowToken->numPos);
             }
+            nowPoliz->operations.push_back({0, Element::DEL});
             return true;
         }
         return false;
@@ -875,7 +876,8 @@ private:
         else {
             checkDefinedTestNames();
         }
-        if (readAugassign()) {
+        std::string operation;
+        if (readAugassign(operation)) {
             if (isMove && isNotNameDefines(tokens[pos].value)) {
                 throw Exception("semantic error: " + tokens[pos].value + " not defined",
                                 nowToken->numLine,
@@ -885,6 +887,39 @@ private:
                 throw Exception("invalid test",
                                 nowToken->numLine,
                                 nowToken->numPos);
+            if (operation == "+="){
+                nowPoliz->operations.push_back({0, Element::PLUS_IMPLACE});
+            }
+            else if(operation == "-="){
+                nowPoliz->operations.push_back({0, Element::MINUS_IMPLACE});
+            }
+            else if(operation == "*="){
+                nowPoliz->operations.push_back({0, Element::MULT_IMPLACE});
+            }
+            else if(operation == "**="){
+                nowPoliz->operations.push_back({0, Element::POW_IMPLACE});
+            }
+            else if(operation == "/="){
+                nowPoliz->operations.push_back({0, Element::DIV_IMPLACE});
+            }
+            else if(operation == "//="){
+                nowPoliz->operations.push_back({0, Element::INT_DIV_IMPLACE});
+            }
+            else if(operation == "^="){
+                nowPoliz->operations.push_back({0, Element::XOR_IMPLACE});
+            }
+            else if(operation == "&="){
+                nowPoliz->operations.push_back({0, Element::AND_BIT_IMPLACE});
+            }
+            else if(operation == "|="){
+                nowPoliz->operations.push_back({0, Element::OR_BIT_IMPLACE});
+            }
+            else if(operation == ">>="){
+                nowPoliz->operations.push_back({0, Element::RIGHT_SHIFT_IMPLACE});
+            }
+            else if(operation == "<<="){
+                nowPoliz->operations.push_back({0, Element::LEFT_SHIFT_IMPLACE});
+            }
         }
         else {
             while (isOperator("=")) {
@@ -898,6 +933,8 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
+                nowPoliz->operations.push_back({0, Element::COPY});
+                nowPoliz->operations.push_back({0, Element::CLEAR_STACK});
                 isMove = false;
                 if (isNextTokenOperator("=") && pos + 1 == indexNowToken && tokens[pos].type == Token::NAME) {
                     isMove = true;
@@ -911,13 +948,14 @@ private:
         return true;
     }
 
-    bool readAugassign() {
+    bool readAugassign(std::string & s) {
         if (isOperator("+=") || isOperator("-=")
             || isOperator("*=") || isOperator("/=")
             || isOperator("%=") || isOperator("**=")
             || isOperator("&=") || isOperator("|=")
             || isOperator("^=") || isOperator("<<=")
             || isOperator(">>=")) {
+            s = nowToken->value;
             getToken();
             return true;
         }
@@ -948,6 +986,9 @@ private:
             }
             getToken();
             readTest();
+            // ~~~
+            nowPoliz->operations.push_back({0, Element::RETURN_VALUE});
+            // ~~~
             return true;
         }
         return false;
@@ -1025,6 +1066,7 @@ private:
         if (nowToken->value != "def")
             return false;
         getToken();
+        auto mainPoliz = nowPoliz;
         if (isDefines(nowToken->value))
             throw Exception("semantic error: redefinition " + nowToken->value,
                             nowToken->numLine,
@@ -1033,6 +1075,10 @@ private:
             throw Exception("expected NAME after def",
                             nowToken->numLine,
                             nowToken->numPos);
+        auto funcPoliz = new Poliz;
+        mainPoliz->funcs[nowToken->value] = funcPoliz;
+        nowPoliz = funcPoliz;
+
         initFunc(*nowToken);
         Scope last = bigScopes.back();
         bigScopes.push_back({Scope::FUNC, nowToken->value, 0, 1});
@@ -1056,6 +1102,7 @@ private:
         }
         popScope();
         popBigScope();
+        nowPoliz = mainPoliz;
         return true;
     }
 
