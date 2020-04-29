@@ -17,29 +17,25 @@ public:
         UNAR_PLUS, UNAR_MINUS, UNAR_TILDA,
         POW, COPY,
         GET_VALUE, INDEX_VALUE,
-        GET_VALUES_FROM_PREV_STACK, // для вызовы функции. После def func кладём этот элемент c intValue =кол-ву аргументов, а потом copy, clear_stack для каждого аргумента
-        DEF_FUNC, DEF_CLASS, // def func нужно передать аргументы
+        DEF_FUNC, DEF_CLASS,
         CALL_FUNC, CREATE_CLASS,
         GET_FIELD, EVAL_METHOD,
         GET_VALUE_INT, GET_VALUE_DOUBLE, GET_VALUE_STR,
         GET_VALUE_NONE, GET_VALUE_BOOL,
         CLEAR_STACK,
-        CMP_EQUAL, CMP_NOT_EQUAL, CMP_LESS, CMP_MORE, CMP_MORE_EQUAL, CMP_LESS_EQUAL,
-        JUMP_TO_SCOPE, // в intValue храним индекс в массиве otherScopes
-        RETURN_VALUE
+        CMP_EQUAL, CMP_NOT_EQUAL, CMP_LESS, CMP_MORE, CMP_MORE_EQUAL, CMP_LESS_EQUAL
     } TYPE;
-    int posJump = 0;
+    int isJump = 0; // 0 - нет, иначе позиция
     int intValue = 0;
     double doubleValue = 0.0; // TODO можно переписать на объединение
-    std::string stringValue = ""; // сюда же имя функции
+    std::string stringValue = ""; // TODO на указатели сюда же имя функции
 };
 
+class Poliz;
 
 class Poliz {
 public:
-    std::map<std::string, Poliz *> funcs;
-    std::map<std::string, Poliz *> classes;
-    std::vector<Poliz *> otherScopes;
+    std::map<std::string, Poliz> funcs; // TODO classes
     std::vector<Element> operations;
 };
 
