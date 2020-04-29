@@ -1248,27 +1248,49 @@ private:
         }
         getToken();
         // ~~~
-
+        int stmtPos = nowPoliz->operations.size();
+        nowPoliz->operations.push_back({0, Element::NEGATIVE_JMP});
+        int endPos = -1;
+        std::vector<int> elifEndPos;
         // ~~~
         readSuite();
+        // ~~~
+        elifEndPos.push_back(nowPoliz->operations.size());
+        nowPoliz->operations.push_back({0, Element::JMP});
+        // ~~~
         popScope();
         while (isEqualLevel() && isNextTokenKey("elif")) {
             readBeginLine();
             getToken();
+            // ~~~
+            nowPoliz->operations[stmtPos].posJump = nowPoliz->operations.size();
+            // ~~~
             scopes.push_back({});
-            if (!readTest() && checkDefinedTestNames())
+            if (!readTest() && checkDefinedTestNames()) {
                 throw Exception("invalid elif condition",
                                 nowToken->numLine,
                                 nowToken->numPos);
-            if (!isBeginBlock(":"))
+            }
+            // ~~~
+            stmtPos = nowPoliz->operations.size();
+            nowPoliz->operations.push_back({0, Element::NEGATIVE_JMP});
+            // ~~~
+            if (!isBeginBlock(":")) {
                 throw Exception("invalid elif condition",
                                 nowToken->numLine,
                                 nowToken->numPos);
+            }
             getToken();
             readSuite();
+            // ~~~
+            elifEndPos.push_back(nowPoliz->operations.size());
+            nowPoliz->operations.push_back({0, Element::JMP});
+            // ~~~
             popScope();
         }
+        bool withElse = false;
         if (isEqualLevel() && isNextTokenKey("else")) {
+            withElse = true;
             readBeginLine();
             getToken();
             scopes.push_back({});
@@ -1277,9 +1299,19 @@ private:
                                 nowToken->numLine,
                                 nowToken->numPos);
             getToken();
+            // ~~~
+            nowPoliz->operations[stmtPos].posJump = nowPoliz->operations.size();
+            // ~~~
             readSuite();
             popScope();
         }
+        // ~~~
+        endPos = nowPoliz->operations.size();
+        for (int i:elifEndPos)
+            nowPoliz->operations[i].posJump = endPos;
+        if (!withElse)
+            nowPoliz->operations[stmtPos].posJump = endPos;
+        // ~~~
         return true;
     }
 
