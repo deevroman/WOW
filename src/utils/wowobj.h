@@ -9,6 +9,11 @@ public:
     void *value;
     wowobj(){}
     wowobj(decltype(type) type, void* value = nullptr) : type(type), value(value){};
+    class User_Class {
+    public:
+        Poliz* poliz;
+        std::map<std::string, wowobj*> fields;
+    };
 };
 
 #endif //WOW_WOWOBJ_H

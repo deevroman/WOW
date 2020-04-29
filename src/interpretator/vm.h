@@ -4,23 +4,28 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <utility>
 #include "../utils/poliz.h"
 #include "../utils/wowobj.h"
 
 class VM {
 private:
+    struct scope {
+        std::map<std::string, Poliz *> funcs;
+        std::map<std::string, std::pair<Poliz *, wowobj *>> classes;
+        std::map<std::string, wowobj *> vars;
+    };
+
     class Level {
     public:
         std::string name;
         Poliz *poliz;
         std::vector<wowobj *> curStack;
-        std::map<std::string, Poliz *> scope;
-//        std::map<std::string, > ;
-        std::map<std::string, wowobj *> *TID = nullptr;
     };
 
     std::vector<Level> stackTrace;
-    std::vector<Level> bigScope;
+    std::vector<scope> bigScopes;
+    std::vector<scope> scopes;
 
     wowobj *getItemOfCurStack(int number = 0, int numberOfStack = 0) {
         int sz = stackTrace[stackTrace.size() - 1 - numberOfStack].curStack.size();
@@ -157,12 +162,12 @@ private:
                     break;
                 }
                 case Element::GET_VALUE: {
-                    if (curLevel.TID->count(curOp.stringValue) == 0) {
-                        curLevel.curStack.push_back((*(curLevel.TID))[curOp.stringValue]);
+                    if (bigScopes.back().vars.count(curOp.stringValue) == 0) {
+                        curLevel.curStack.push_back(bigScopes.back().vars[curOp.stringValue]);
                     }
                     else {
                         curLevel.curStack.push_back(new wowobj(wowobj::NONE));
-                        (*(curLevel.TID))[curOp.stringValue] = curLevel.curStack.back();
+                        bigScopes.back().vars[curOp.stringValue] = curLevel.curStack.back();
                     }
                     break;
                 }
@@ -214,12 +219,12 @@ private:
                         }
                     }
                     else {
-                        if (curLevel.scope.count(curOp.stringValue)) {
-                            stackTrace.push_back({curOp.stringValue, curLevel.scope[curOp.stringValue], {}, {},
-                                                  new std::map<std::string, wowobj *>});
+                        if (scopes.back().funcs.count(curOp.stringValue)) {
+                            stackTrace.push_back({curOp.stringValue, scopes.back().funcs[curOp.stringValue]});
+                            // todo передать аргументы
                         }
                         else {
-                            // TODO
+                            throw "Called undefined function";
                         }
                     }
                     break;
@@ -258,13 +263,41 @@ private:
                     curLevel.curStack.clear();
                     break;
                 }
+                case Element::POSITIVE_JMP:
+                    break;
+                case Element::NEGATIVE_JMP:
+                    break;
+                case Element::JMP:
+                    break;
+                case Element::CMP_EQUAL:
+                    break;
+                case Element::CMP_NOT_EQUAL:
+                    break;
+                case Element::CMP_LESS:
+                    break;
+                case Element::CMP_MORE:
+                    break;
+                case Element::CMP_MORE_EQUAL:
+                    break;
+                case Element::CMP_LESS_EQUAL:
+                    break;
+                case Element::JUMP_TO_SCOPE: {
+                    stackTrace.push_back({"", curLevel.poliz->otherScopes[curOp.intValue], {}});
+                    scopes.emplace_back();
+                    runLevel();
+                    break;
+                }
+                case Element::RETURN_VALUE:
+                    break;
             }
         }
     }
 
 public:
     int run(Poliz *wowByteCode, std::string name = "") {
-        stackTrace.push_back({name, wowByteCode, {}, {}, new std::map<std::string, wowobj *>});
+        stackTrace.push_back({name, wowByteCode, {}});
+        bigScopes.emplace_back();
+        scopes.emplace_back();
         runLevel();
         return 0;
     }

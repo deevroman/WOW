@@ -23,13 +23,20 @@ int main(int argc, char *argv[]) {
         std::cerr << e;
         return 0;
     }
+    Poliz* wowByteCode;
     try {
         Translator translator(tokens);
-        auto wowByteCode = translator.translate();
+        wowByteCode = translator.translate();
+    } catch (std::string e) {
+        std::cout << "Not parsed\n";
+        std::cerr << e;
+        return 0;
+    }
+    try {
         VM vm;
         vm.run(wowByteCode);
     } catch (std::string e) {
-        std::cout << "Not parsed\n";
+        std::cout << "Runtime error\n";
         std::cerr << e;
     }
     return 0;

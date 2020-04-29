@@ -1158,7 +1158,7 @@ private:
         int endPos = nowPoliz->operations.size();
         if (withElse)
             endPos = elseSuiteBegin;
-        nowPoliz->operations[stmtJmpPos].isJump = endPos;
+        nowPoliz->operations[stmtJmpPos].posJump = endPos;
         // ~~~
         return true;
     }
