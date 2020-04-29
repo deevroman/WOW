@@ -24,10 +24,10 @@ public:
         GET_VALUE_INT, GET_VALUE_DOUBLE, GET_VALUE_STR,
         GET_VALUE_NONE, GET_VALUE_BOOL,
         CLEAR_STACK,
-        BEGIN_SCOPE,
-        END_SCOPE,
         CMP_EQUAL, CMP_NOT_EQUAL, CMP_LESS, CMP_MORE, CMP_MORE_EQUAL, CMP_LESS_EQUAL,
-        JUMP_TO_SCOPE, // в intValue храним индекс в массиве otherScopes
+        END_SCOPE,
+        JUMP_TO_SCOPE,
+        BEGIN_SCOPE, // в intValue храним индекс в массиве otherScopes
         RETURN_VALUE
     } TYPE;
     int posJump = 0;
