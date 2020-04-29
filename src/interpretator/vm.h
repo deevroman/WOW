@@ -251,7 +251,6 @@ private:
                             stackTrace.push_back({curOp.stringValue, scopes.back().funcs[curOp.stringValue]});
                             bigScopes.push_back({});
                             scopes.push_back({});
-
                             // todo передать аргументы
                         }
                         else {
