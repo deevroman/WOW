@@ -11,6 +11,9 @@
 class Translator {
     std::vector<Token> tokens;
 
+    std::vector<int> continuePos;
+    std::vector<int> breakPos;
+
     struct Scope {
         enum TypeScope {
             SIMPLE, FUNC, CLASS
@@ -812,6 +815,8 @@ private:
                                 nowToken->numLine,
                                 nowToken->numPos);
             }
+            breakPos.push_back(nowPoliz->operations.size());
+            nowPoliz->operations.push_back({0, Element::JMP});
             getToken();
             return true;
         }
@@ -927,6 +932,8 @@ private:
                                 nowToken->numPos);
             }
             getToken();
+            continuePos.push_back(nowPoliz->operations.size());
+            nowPoliz->operations.push_back({0, Element::JMP});
             return true;
         }
         return false;
@@ -1162,6 +1169,14 @@ private:
         if (withElse)
             endPos = elseSuiteBegin;
         nowPoliz->operations[stmtJmpPos].posJump = endPos;
+        while (!breakPos.empty() && breakPos.back() >= stmtJmpPos){
+            nowPoliz->operations[breakPos.back()].posJump = endPos;
+            breakPos.pop_back();
+        }
+        while (!continuePos.empty() && continuePos.back() >= stmtJmpPos) {
+            nowPoliz->operations[continuePos.back()].posJump = statementBeginPos;
+            continuePos.pop_back();
+        }
         // ~~~
         return true;
     }
