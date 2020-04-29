@@ -1136,8 +1136,8 @@ private:
         // ~~~
         readSuite();
         // ~~~
-            nowPoliz->operations.push_back({0, Element::JMP, statementBeginPos});
-            int elseSuiteBegin = 0;
+        nowPoliz->operations.push_back({0, Element::JMP, statementBeginPos});
+        int elseSuiteBegin = 0;
         // ~~~
 
         if (isEqualLevel() && isNextTokenKey("else")) {
@@ -1253,7 +1253,9 @@ private:
         int endPos = -1;
         std::vector<int> elifEndPos;
         // ~~~
+        nowPoliz->operations.push_back({0, Element::BEGIN_SCOPE});
         readSuite();
+        nowPoliz->operations.push_back({0, Element::END_SCOPE});
         // ~~~
         elifEndPos.push_back(nowPoliz->operations.size());
         nowPoliz->operations.push_back({0, Element::JMP});
@@ -1281,7 +1283,9 @@ private:
                                 nowToken->numPos);
             }
             getToken();
+            nowPoliz->operations.push_back({0, Element::BEGIN_SCOPE});
             readSuite();
+            nowPoliz->operations.push_back({0, Element::END_SCOPE});
             // ~~~
             elifEndPos.push_back(nowPoliz->operations.size());
             nowPoliz->operations.push_back({0, Element::JMP});
@@ -1302,7 +1306,9 @@ private:
             // ~~~
             nowPoliz->operations[stmtPos].posJump = nowPoliz->operations.size();
             // ~~~
+            nowPoliz->operations.push_back({0, Element::BEGIN_SCOPE});
             readSuite();
+            nowPoliz->operations.push_back({0, Element::END_SCOPE});
             popScope();
         }
         // ~~~
