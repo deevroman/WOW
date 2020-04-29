@@ -14,6 +14,9 @@ private:
         std::map<std::string, Poliz *> funcs;
         std::map<std::string, std::pair<Poliz *, wowobj *>> classes;
         std::map<std::string, wowobj *> vars;
+        enum {
+            SIMPLE, FUNC, CLASS
+        } type = SIMPLE;
     };
 
     class Level {
@@ -156,28 +159,48 @@ private:
                     if (getItemOfCurStack()->type == wowobj::INT
                         || getItemOfCurStack()->type == wowobj::DOUBLE
                         || getItemOfCurStack()->type == wowobj::STRING) {
-                        getItemOfCurStack(1)->value = getItemOfCurStack()->value;
+                        if (getItemOfCurStack()->type == wowobj::INT) {
+                            getItemOfCurStack(1)->value = static_cast<void *>(new int(
+                                    *static_cast<int *>(getItemOfCurStack()->value)));
+                        }
+                        else if (getItemOfCurStack()->type == wowobj::STRING) {
+                            getItemOfCurStack(1)->value = static_cast<void *>(new std::string(
+                                    *static_cast<std::string *>(getItemOfCurStack()->value)));
+                        }
+                        else if (getItemOfCurStack()->type == wowobj::DOUBLE) {
+                            getItemOfCurStack(1)->value = static_cast<void *>(new double(
+                                    *static_cast<double *>(getItemOfCurStack()->value)));
+                        }
                         getItemOfCurStack(1)->type = getItemOfCurStack()->type;
                     }
                     break;
                 }
                 case Element::GET_VALUE: {
-                    if (bigScopes.back().vars.count(curOp.stringValue) == 0) {
+                    if (bigScopes.back().vars.count(curOp.stringValue)) {
                         curLevel.curStack.push_back(bigScopes.back().vars[curOp.stringValue]);
                     }
                     else {
                         curLevel.curStack.push_back(new wowobj(wowobj::NONE));
-                        bigScopes.back().vars[curOp.stringValue] = curLevel.curStack.back();
+                        bigScopes.back().vars[curOp.stringValue] = scopes.back().vars[curOp.stringValue] = curLevel.curStack.back();
                     }
                     break;
                 }
-                case Element::INDEX_VALUE:
+                case Element::INDEX_VALUE: {
+                    if (getItemOfCurStack()->type == wowobj::INT) {
+                        int ind = *static_cast<int *>(getItemOfCurStack()->value);
+                        if (getItemOfCurStack(1)->type == wowobj::LIST) {
+                            auto tmp = (*static_cast<std::vector<wowobj *> *>(getItemOfCurStack(1)->value))[ind];
+                            curLevel.curStack.push_back(tmp);
+                        }
+                    }
                     break;
+                }
                 case Element::DEF_FUNC: {
                     break;
                 }
-                case Element::DEF_CLASS:
+                case Element::DEF_CLASS: {
                     break;
+                }
                 case Element::CALL_FUNC: {
                     if (curOp.stringValue == "input") {
                         std::string tmp; // TODO наверное можно нормально
@@ -218,6 +241,10 @@ private:
                             throw "TODO"; // TODO
                         }
                     }
+                    else if (curOp.stringValue == "list") {
+                        curLevel.curStack.push_back(
+                                new wowobj(wowobj::LIST, static_cast<void *>(new std::vector<wowobj *>)));
+                    }
                     else {
                         if (scopes.back().funcs.count(curOp.stringValue)) {
                             stackTrace.push_back({curOp.stringValue, scopes.back().funcs[curOp.stringValue]});
@@ -229,8 +256,10 @@ private:
                     }
                     break;
                 }
-                case Element::CREATE_CLASS:
+                case Element::CREATE_CLASS: {
+
                     break;
+                }
                 case Element::GET_FIELD:
                     break;
                 case Element::EVAL_METHOD:
@@ -263,34 +292,84 @@ private:
                     curLevel.curStack.clear();
                     break;
                 }
-                case Element::POSITIVE_JMP:
+                case Element::POSITIVE_JMP: {
+                    if (getItemOfCurStack()->type == wowobj::BOOL) {
+                        if (*(static_cast<bool *>(getItemOfCurStack()->value))) {
+                            i = curOp.intValue - 1;
+                            continue;
+                        }
+                    }
                     break;
-                case Element::NEGATIVE_JMP:
+                }
+                case Element::NEGATIVE_JMP: {
+                    if (getItemOfCurStack()->type == wowobj::BOOL) {
+                        if (!*(static_cast<bool *>(getItemOfCurStack()->value))) {
+                            i = curOp.intValue - 1;
+                            continue;
+                        }
+                    }
                     break;
-                case Element::JMP:
+                }
+                case Element::JMP: {
+                    i = curOp.intValue - 1;
+                    continue;
                     break;
-                case Element::CMP_EQUAL:
+                }
+                case Element::CMP_EQUAL: {
+                    if (getItemOfCurStack(1)->type == getItemOfCurStack()->type
+                        && getItemOfCurStack(1)->type == wowobj::INT) {
+                        bool tmp = *static_cast<int *>(getItemOfCurStack(1)->value)
+                                   == *static_cast<int *>(getItemOfCurStack()->value);
+                        curLevel.curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
+                    }
+                    else if (getItemOfCurStack(1)->type == getItemOfCurStack()->type
+                             && getItemOfCurStack(1)->type == wowobj::BOOL) {
+                        bool tmp = *static_cast<bool *>(getItemOfCurStack(1)->value)
+                                   == *static_cast<bool *>(getItemOfCurStack()->value);
+                        curLevel.curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
+                    }
                     break;
-                case Element::CMP_NOT_EQUAL:
+                }
+                case Element::CMP_NOT_EQUAL: {
                     break;
-                case Element::CMP_LESS:
+                }
+                case Element::CMP_LESS: {
                     break;
-                case Element::CMP_MORE:
+                }
+                case Element::CMP_MORE: {
                     break;
-                case Element::CMP_MORE_EQUAL:
+                }
+                case Element::CMP_MORE_EQUAL: {
                     break;
-                case Element::CMP_LESS_EQUAL:
+                }
+                case Element::CMP_LESS_EQUAL: {
                     break;
+                }
                 case Element::JUMP_TO_SCOPE: {
                     stackTrace.push_back({"", curLevel.poliz->otherScopes[curOp.intValue], {}});
                     scopes.emplace_back();
                     runLevel();
                     break;
                 }
-                case Element::RETURN_VALUE:
+                case Element::RETURN_VALUE: {
+
+                    break;
+                }
+                case Element::GET_VALUES_FROM_PREV_STACK:
                     break;
             }
         }
+        for (const auto &now : scopes.back().vars) {
+            bigScopes.back().vars.erase(now.first);
+        }
+        for (const auto &now : scopes.back().funcs) {
+            bigScopes.back().funcs.erase(now.first);
+        }
+        for (const auto &now : scopes.back().classes) {
+            bigScopes.back().classes.erase(now.first);
+        }
+        scopes.pop_back();
+        stackTrace.pop_back();
     }
 
 public:
