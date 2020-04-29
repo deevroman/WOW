@@ -25,9 +25,7 @@ public:
         GET_VALUE_NONE, GET_VALUE_BOOL,
         CLEAR_STACK,
         CMP_EQUAL, CMP_NOT_EQUAL, CMP_LESS, CMP_MORE, CMP_MORE_EQUAL, CMP_LESS_EQUAL,
-        END_SCOPE,
-        JUMP_TO_SCOPE,
-        BEGIN_SCOPE, // в intValue храним индекс в массиве otherScopes
+        JUMP_TO_SCOPE, // в intValue храним индекс в массиве otherScopes
         RETURN_VALUE
     } TYPE;
     int posJump = 0;
