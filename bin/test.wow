@@ -1,2 +1,2 @@
-if 1:
-    print(42)
+if True:
+    print(1)

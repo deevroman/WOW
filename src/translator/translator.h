@@ -1115,6 +1115,7 @@ private:
             return false;
         getToken();
         // ~~~
+        nowPoliz->operations.push_back({0, Element::BEGIN_SCOPE});
         int statementBeginPos = nowPoliz->operations.size();
         // ~~~
         scopes.push_back({Scope::SIMPLE, ""});
@@ -1136,14 +1137,15 @@ private:
         // ~~~
         readSuite();
         // ~~~
-            nowPoliz->operations.push_back({0, Element::JMP, statementBeginPos});
-            int elseSuiteBegin = 0;
+        nowPoliz->operations.push_back({0, Element::JMP, statementBeginPos});
+        int elseSuiteBegin = 0;
         // ~~~
-
+        nowPoliz->operations.push_back({0, Element::END_SCOPE});
         if (isEqualLevel() && isNextTokenKey("else")) {
             withElse = true;
             readBeginLine();
             getToken();
+            nowPoliz->operations.push_back({0, Element::BEGIN_SCOPE});
             scopes.push_back({});
             if (!isBeginBlock(":"))
                 throw Exception("expected : after else",
@@ -1153,6 +1155,7 @@ private:
             elseSuiteBegin = nowPoliz->operations.size();
             readSuite();
             popScope();
+            nowPoliz->operations.push_back({0, Element::END_SCOPE});
         }
         // ~~~
         int endPos = nowPoliz->operations.size();
@@ -1253,7 +1256,9 @@ private:
         int endPos = -1;
         std::vector<int> elifEndPos;
         // ~~~
+        nowPoliz->operations.push_back({0, Element::BEGIN_SCOPE});
         readSuite();
+        nowPoliz->operations.push_back({0, Element::END_SCOPE});
         // ~~~
         elifEndPos.push_back(nowPoliz->operations.size());
         nowPoliz->operations.push_back({0, Element::JMP});
@@ -1281,7 +1286,9 @@ private:
                                 nowToken->numPos);
             }
             getToken();
+            nowPoliz->operations.push_back({0, Element::BEGIN_SCOPE});
             readSuite();
+            nowPoliz->operations.push_back({0, Element::END_SCOPE});
             // ~~~
             elifEndPos.push_back(nowPoliz->operations.size());
             nowPoliz->operations.push_back({0, Element::JMP});
@@ -1302,7 +1309,9 @@ private:
             // ~~~
             nowPoliz->operations[stmtPos].posJump = nowPoliz->operations.size();
             // ~~~
+            nowPoliz->operations.push_back({0, Element::BEGIN_SCOPE});
             readSuite();
+            nowPoliz->operations.push_back({0, Element::END_SCOPE});
             popScope();
         }
         // ~~~
