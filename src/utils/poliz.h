@@ -17,7 +17,6 @@ public:
         UNAR_PLUS, UNAR_MINUS, UNAR_TILDA,
         POW, COPY,
         GET_VALUE, INDEX_VALUE,
-        GET_VALUES_FROM_PREV_STACK, // для вызовы функции. После def func кладём этот элемент c intValue =кол-ву аргументов, а потом copy, clear_stack для каждого аргумента
         DEF_FUNC, DEF_CLASS, // def func нужно передать аргументы
         CALL_FUNC, CREATE_CLASS,
         GET_FIELD, EVAL_METHOD,
@@ -26,18 +25,18 @@ public:
         CLEAR_STACK, DEL,
         CMP_EQUAL, CMP_NOT_EQUAL, CMP_LESS, CMP_MORE, CMP_MORE_EQUAL, CMP_LESS_EQUAL,
         END_SCOPE,
-        BEGIN_SCOPE,
+        BEGIN_SCOPE, // в intValue храним индекс в массиве otherScopes
         RETURN_VALUE,
-        PLUS_IMPLACE, MINUS_IMPLACE, POW_IMPLACE,
-        MULT_IMPLACE, DIV_IMPLACE, INT_DIV_IMPLACE, MOD_IMPLACE,
-        OR_BIT_IMPLACE, AND_BIT_IMPLACE,
-        XOR_IMPLACE, LEFT_SHIFT_IMPLACE,
-        RIGHT_SHIFT_IMPLACE,
+        PLUS_INPLACE, MINUS_INPLACE, POW_INPLACE,
+        MUL_INPLACE, DIV_INPLACE, INTDIV_INPLACE, MOD_INPLACE,
+        OR_BIT_INPLACE, AND_BIT_INPLACE,
+        XOR_INPLACE, LEFT_SHIFT_INPLACE,
+        RIGHT_SHIFT_INPLACE,
     } TYPE;
     int posJump = 0;
     int intValue = 0;
     double doubleValue = 0.0; // TODO можно переписать на объединение
-    std::string stringValue = ""; // сюда же имя функции
+    std::string stringValue = "";
 };
 
 

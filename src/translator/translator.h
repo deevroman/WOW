@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <set>
 #include <string>
+#include <algorithm>
 #include "../tokenizer/tokenizer.h"
 #include "../utils/poliz.h"
 
@@ -60,13 +61,13 @@ public:
 
     Poliz *translate() {
         // ~~~
-        poliz = nowPoliz = new Poliz; // TODO добавить зарезервированные функции  и функции простых типов
+        poliz = nowPoliz = new Poliz;
         // ~~~
         indexNowToken = 0;
         nowToken = &tokens[0];
         levels = {0};
-        std::vector<std::string> reservedFunctions = {"print", "input", "int", "str", "bool"};
-        std::vector<std::string> reservedClasses = {"list", "dict", "set"}; // TODO add
+        std::vector<std::string> reservedFunctions = {"print", "input", "int", "str", "bool", "len"};
+        std::vector<std::string> reservedClasses = {"list", "dict", "set"};
         scopes.push_back({});
         bigScopes.push_back({});
         for (const std::string &cur : reservedFunctions) {
@@ -150,7 +151,7 @@ private:
         return true;
     }
 
-    bool readCompOp(std::string * curOperator) {
+    bool readCompOp(std::string *curOperator) {
         if (isOperator("<") || isOperator(">")
             || isOperator("==") || isOperator(">=")
             || isOperator("<=") || isOperator("!=")) {
@@ -573,12 +574,20 @@ private:
             }
             else if (nowToken->type == Token::NUMBER) {
                 // ~~~
-                // TODO для даблов
                 // TODO longInt
-                nowPoliz->operations.push_back({0,
-                                                Element::GET_VALUE_INT,
-                                                0,
-                                                std::stoi(nowToken->value)});
+                if (std::find(nowToken->value.begin(), nowToken->value.end(), '.') == nowToken->value.end()) {
+                    nowPoliz->operations.push_back({0,
+                                                    Element::GET_VALUE_INT,
+                                                    0,
+                                                    std::stoi(nowToken->value)});
+                }
+                else {
+                    nowPoliz->operations.push_back({0,
+                                                    Element::GET_VALUE_DOUBLE,
+                                                    0,
+                                                    0,
+                                                    std::stod(nowToken->value)});
+                }
                 // ~~~
             }
             else if (nowToken->type == Token::STRING) {
@@ -693,22 +702,22 @@ private:
                                 nowToken->numPos);
             }
         }
-        if (nowOperator == "<"){
+        if (nowOperator == "<") {
             nowPoliz->operations.push_back({0, Element::CMP_LESS});
         }
-        if (nowOperator == ">"){
+        if (nowOperator == ">") {
             nowPoliz->operations.push_back({0, Element::CMP_MORE});
         }
-        if (nowOperator == "<="){
+        if (nowOperator == "<=") {
             nowPoliz->operations.push_back({0, Element::CMP_LESS_EQUAL});
         }
-        if (nowOperator == ">="){
+        if (nowOperator == ">=") {
             nowPoliz->operations.push_back({0, Element::CMP_MORE_EQUAL});
         }
-        if (nowOperator == "=="){
+        if (nowOperator == "==") {
             nowPoliz->operations.push_back({0, Element::CMP_EQUAL});
         }
-        if (nowOperator == "!="){
+        if (nowOperator == "!=") {
             nowPoliz->operations.push_back({0, Element::CMP_NOT_EQUAL});
         }
         return true;
@@ -887,38 +896,38 @@ private:
                 throw Exception("invalid test",
                                 nowToken->numLine,
                                 nowToken->numPos);
-            if (operation == "+="){
-                nowPoliz->operations.push_back({0, Element::PLUS_IMPLACE});
+            if (operation == "+=") {
+                nowPoliz->operations.push_back({0, Element::PLUS_INPLACE});
             }
-            else if(operation == "-="){
-                nowPoliz->operations.push_back({0, Element::MINUS_IMPLACE});
+            else if (operation == "-=") {
+                nowPoliz->operations.push_back({0, Element::MINUS_INPLACE});
             }
-            else if(operation == "*="){
-                nowPoliz->operations.push_back({0, Element::MULT_IMPLACE});
+            else if (operation == "*=") {
+                nowPoliz->operations.push_back({0, Element::MUL_INPLACE});
             }
-            else if(operation == "**="){
-                nowPoliz->operations.push_back({0, Element::POW_IMPLACE});
+            else if (operation == "**=") {
+                nowPoliz->operations.push_back({0, Element::POW_INPLACE});
             }
-            else if(operation == "/="){
-                nowPoliz->operations.push_back({0, Element::DIV_IMPLACE});
+            else if (operation == "/=") {
+                nowPoliz->operations.push_back({0, Element::DIV_INPLACE});
             }
-            else if(operation == "//="){
-                nowPoliz->operations.push_back({0, Element::INT_DIV_IMPLACE});
+            else if (operation == "//=") {
+                nowPoliz->operations.push_back({0, Element::INTDIV_INPLACE});
             }
-            else if(operation == "^="){
-                nowPoliz->operations.push_back({0, Element::XOR_IMPLACE});
+            else if (operation == "^=") {
+                nowPoliz->operations.push_back({0, Element::XOR_INPLACE});
             }
-            else if(operation == "&="){
-                nowPoliz->operations.push_back({0, Element::AND_BIT_IMPLACE});
+            else if (operation == "&=") {
+                nowPoliz->operations.push_back({0, Element::AND_BIT_INPLACE});
             }
-            else if(operation == "|="){
-                nowPoliz->operations.push_back({0, Element::OR_BIT_IMPLACE});
+            else if (operation == "|=") {
+                nowPoliz->operations.push_back({0, Element::OR_BIT_INPLACE});
             }
-            else if(operation == ">>="){
-                nowPoliz->operations.push_back({0, Element::RIGHT_SHIFT_IMPLACE});
+            else if (operation == ">>=") {
+                nowPoliz->operations.push_back({0, Element::RIGHT_SHIFT_INPLACE});
             }
-            else if(operation == "<<="){
-                nowPoliz->operations.push_back({0, Element::LEFT_SHIFT_IMPLACE});
+            else if (operation == "<<=") {
+                nowPoliz->operations.push_back({0, Element::LEFT_SHIFT_INPLACE});
             }
         }
         else {
@@ -948,7 +957,7 @@ private:
         return true;
     }
 
-    bool readAugassign(std::string & s) {
+    bool readAugassign(std::string &s) {
         if (isOperator("+=") || isOperator("-=")
             || isOperator("*=") || isOperator("/=")
             || isOperator("%=") || isOperator("**=")
@@ -1216,7 +1225,7 @@ private:
         if (withElse)
             endPos = elseSuiteBegin;
         nowPoliz->operations[stmtJmpPos].posJump = endPos;
-        while (!breakPos.empty() && breakPos.back() >= stmtJmpPos){
+        while (!breakPos.empty() && breakPos.back() >= stmtJmpPos) {
             nowPoliz->operations[breakPos.back()].posJump = endPos;
             breakPos.pop_back();
         }

@@ -7,13 +7,11 @@ public:
         INT, DOUBLE, BOOL, STRING, LIST, DICT, USER_CLASS, NONE
     } type;
     void *value;
-    wowobj(){}
-    wowobj(decltype(type) type, void* value = nullptr) : type(type), value(value){};
-    class User_Class {
-    public:
-        Poliz* poliz;
-        std::map<std::string, wowobj*> fields;
-    };
+
+    wowobj() {}
+
+    wowobj(decltype(type) type, void *value = nullptr) : type(type), value(value) {};
+
 };
 
 #endif //WOW_WOWOBJ_H
