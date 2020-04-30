@@ -1084,6 +1084,8 @@ private:
             throw Exception("expected NAME after def",
                             nowToken->numLine,
                             nowToken->numPos);
+        nowPoliz->operations.push_back({0, Element::DEF_FUNC, 0,
+                                        0, 0, nowToken->value});
         auto funcPoliz = new Poliz;
         mainPoliz->funcs[nowToken->value] = funcPoliz;
         nowPoliz = funcPoliz;
