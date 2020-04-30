@@ -28,7 +28,7 @@ public:
         BEGIN_SCOPE, // в intValue храним индекс в массиве otherScopes
         RETURN_VALUE,
         PLUS_INPLACE, MINUS_INPLACE, POW_INPLACE,
-        MULT_INPLACE, DIV_INPLACE, INT_DIV_INPLACE, MOD_INPLACE,
+        MUL_INPLACE, DIV_INPLACE, INTDIV_INPLACE, MOD_INPLACE,
         OR_BIT_INPLACE, AND_BIT_INPLACE,
         XOR_INPLACE, LEFT_SHIFT_INPLACE,
         RIGHT_SHIFT_INPLACE,
@@ -36,7 +36,7 @@ public:
     int posJump = 0;
     int intValue = 0;
     double doubleValue = 0.0; // TODO можно переписать на объединение
-    std::string stringValue = ""; // сюда же имя функции
+    std::string stringValue = "";
 };
 
 

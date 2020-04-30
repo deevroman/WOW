@@ -303,7 +303,7 @@ private:
                         curStack.push_back(tmpobj);
                     }
                     else {
-                        // TODO
+                        throw "invalid type for operation";
                     }
                     break;
                 }
@@ -314,8 +314,14 @@ private:
                         curStack.pop_back();
                         curStack.push_back(tmpobj);
                     }
+                    else if (getItemOfCurStack(0)->type == wowobj::DOUBLE) {
+                        double value = -*(static_cast<double *>(getItemOfCurStack()->value));
+                        auto tmpobj = new wowobj(wowobj::DOUBLE, new double(value));
+                        curStack.pop_back();
+                        curStack.push_back(tmpobj);
+                    }
                     else {
-                        // TODO
+                        throw "invalid type for operation";
                     }
                     break;
                 }
@@ -327,7 +333,7 @@ private:
                         curStack.push_back(tmpobj);
                     }
                     else {
-                        // TODO
+                        throw "invalid type for operation";
                     }
                     break;
                 }
@@ -794,6 +800,32 @@ private:
                     i = stackTrace.back().poliz->operations.size();
                     break;
                 }
+                case Element::DEL:
+                    break;
+                case Element::PLUS_INPLACE:
+                    break;
+                case Element::MINUS_INPLACE:
+                    break;
+                case Element::POW_INPLACE:
+                    break;
+                case Element::MUL_INPLACE:
+                    break;
+                case Element::DIV_INPLACE:
+                    break;
+                case Element::INTDIV_INPLACE:
+                    break;
+                case Element::MOD_INPLACE:
+                    break;
+                case Element::OR_BIT_INPLACE:
+                    break;
+                case Element::AND_BIT_INPLACE:
+                    break;
+                case Element::XOR_INPLACE:
+                    break;
+                case Element::LEFT_SHIFT_INPLACE:
+                    break;
+                case Element::RIGHT_SHIFT_INPLACE:
+                    break;
             }
         }
         if (i == stackTrace.back().poliz->operations.size() + 1) {
