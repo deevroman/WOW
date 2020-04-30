@@ -800,32 +800,203 @@ private:
                     i = stackTrace.back().poliz->operations.size();
                     break;
                 }
-                case Element::DEL:
+                case Element::DEL: {
+                    //todo
+                    curStack.pop_back();
                     break;
-                case Element::PLUS_INPLACE:
+                }
+                case Element::XOR_INPLACE: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) ^
+                                    *(static_cast<int *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        *static_cast<int*>(curStack.back()->value) = value;
+                    }
+                    else {
+                        throw "invalid type for operation";
+                    }
                     break;
-                case Element::MINUS_INPLACE:
+                }
+                case Element::OR_BIT_INPLACE: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) |
+                                                                                       *(static_cast<int *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        *static_cast<int*>(curStack.back()->value) = value;
+                    }
+                    else {
+                        throw "invalid type for operation";
+                    }
                     break;
-                case Element::POW_INPLACE:
+                }
+                case Element::AND_BIT_INPLACE: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) &
+                                                                                       *(static_cast<int *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        *static_cast<int*>(curStack.back()->value) = value;
+                    }
+                    else {
+                        throw "invalid type for operation";
+                    }
                     break;
-                case Element::MUL_INPLACE:
+                }
+                case Element::LEFT_SHIFT_INPLACE: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) <<
+                                                                                       *(static_cast<int *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        *static_cast<int*>(curStack.back()->value) = value;
+                    }
+                    else {
+                        throw "invalid type for operation";
+                    }
                     break;
-                case Element::DIV_INPLACE:
+                }
+                case Element::RIGHT_SHIFT_INPLACE: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) >>
+                                                                                       *(static_cast<int *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        *static_cast<int*>(curStack.back()->value) = value;
+                    }
+                    else {
+                        throw "invalid type for operation";
+                    }
                     break;
-                case Element::INTDIV_INPLACE:
+                }
+                case Element::PLUS_INPLACE: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) +
+                                    *(static_cast<int *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        *static_cast<int*>(curStack.back()->value) = value;
+                    }
+                    else if (getItemOfCurStack(1)->type == wowobj::DOUBLE
+                             && getItemOfCurStack(0)->type == wowobj::DOUBLE) {
+                        double value = *(static_cast<double *>(getItemOfCurStack(1)->value)) +
+                                       *(static_cast<double *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        *static_cast<double*>(curStack.back()->value) = value;
+                    }
+                    else if (getItemOfCurStack(1)->type == wowobj::STRING
+                             && getItemOfCurStack()->type == wowobj::STRING) {
+                        std::string value = (*(static_cast<std::string *>(getItemOfCurStack(1)->value)))
+                                            + (*(static_cast<std::string *>(getItemOfCurStack()->value)));
+                        curStack.pop_back();
+                        *static_cast<std::string*>(curStack.back()->value) = value;
+                    }
+                    else {
+                        throw "invalid type for operation";
+                    }
                     break;
-                case Element::MOD_INPLACE:
+                }
+                case Element::MINUS_INPLACE: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) -
+                                    *(static_cast<int *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        *static_cast<int*>(curStack.back()->value) = value;
+                    }
+                    else if (getItemOfCurStack(1)->type == wowobj::DOUBLE
+                             && getItemOfCurStack(0)->type == wowobj::DOUBLE) {
+                        double value = *(static_cast<double *>(getItemOfCurStack(1)->value)) -
+                                       *(static_cast<double *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        *static_cast<double*>(curStack.back()->value) = value;
+                    }
+                    else {
+                        throw "invalid type for operation";
+                    }
                     break;
-                case Element::OR_BIT_INPLACE:
+                }
+                case Element::MUL_INPLACE: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) *
+                                    *(static_cast<int *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        *static_cast<int*>(curStack.back()->value) = value;
+                    }
+                    else if (getItemOfCurStack(1)->type == wowobj::DOUBLE
+                             && getItemOfCurStack(0)->type == wowobj::DOUBLE) {
+                        double value = *(static_cast<double *>(getItemOfCurStack(1)->value)) *
+                                       *(static_cast<double *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        *static_cast<double*>(curStack.back()->value) = value;
+                    }
+                    else {
+                        throw "invalid type for operation";
+                    }
+                }
+                case Element::DIV_INPLACE: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        double value = (double) *(static_cast<int *>(getItemOfCurStack(1)->value)) /
+                                       *(static_cast<int *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        curStack.back()->type = wowobj::DOUBLE;
+                        *static_cast<double*>(curStack.back()->value) = value;
+                    }
+                    else if (getItemOfCurStack(1)->type == wowobj::DOUBLE
+                             && getItemOfCurStack(0)->type == wowobj::DOUBLE) {
+                        double value = *(static_cast<double *>(getItemOfCurStack(1)->value)) /
+                                       *(static_cast<double *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        curStack.back()->type = wowobj::DOUBLE;
+                        *static_cast<double*>(curStack.back()->value) = value;
+                    }
+                    else {
+                        throw "invalid type for operation";
+                    }
                     break;
-                case Element::AND_BIT_INPLACE:
+                }
+                case Element::MOD_INPLACE: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) %
+                                    *(static_cast<int *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        *static_cast<int*>(curStack.back()->value) = value;
+                    }
+                    else {
+                        throw "invalid type for operation";
+                    }
                     break;
-                case Element::XOR_INPLACE:
+                }
+                case Element::INTDIV_INPLACE: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) /
+                                    *(static_cast<int *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                        *static_cast<int*>(curStack.back()->value) = value;
+                    }
+                    else {
+                        throw "invalid type for operation";
+                    }
                     break;
-                case Element::LEFT_SHIFT_INPLACE:
+                }
+                case Element::POW_INPLACE: {
+                    if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        int value = pow(*(static_cast<int *>(getItemOfCurStack(1)->value)),
+                                        *(static_cast<int *>(getItemOfCurStack()->value)));
+                        curStack.pop_back();
+                        *static_cast<int*>(curStack.back()->value) = value;
+                    }
+                    else {
+                        throw "invalid type for operation";
+                    }
                     break;
-                case Element::RIGHT_SHIFT_INPLACE:
-                    break;
+                }
             }
         }
         if (i == stackTrace.back().poliz->operations.size() + 1) {

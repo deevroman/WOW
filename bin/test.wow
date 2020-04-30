@@ -1,4 +1,2 @@
-if False:
-    print(42)
-else:
-    print(48)
+i = 1
+print(i)
