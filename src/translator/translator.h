@@ -570,6 +570,8 @@ private:
     //                                        nowToken->numPos);*/
                 else {
                     nameInTest.push_back(*nowToken);
+                    nowPoliz->operations.push_back({0, Element::GET_VALUE});
+                    nowPoliz->operations[nowPoliz->operations.size()-1].stringValue = nowToken->value;
                 }
             }
             else if (nowToken->type == Token::NUMBER) {
