@@ -1,4 +1,4 @@
-if 2 == 2:
-    print('TRUE')
+if False:
+    print(42)
 else:
-    print('FALSE')
+    print(48)
