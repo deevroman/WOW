@@ -1084,6 +1084,9 @@ private:
             throw Exception("expected NAME after def",
                             nowToken->numLine,
                             nowToken->numPos);
+        int index = nowPoliz->operations.size();
+        nowPoliz->operations.push_back({0, Element::DEF_FUNC, 0,
+                                        0, 0, nowToken->value});
         auto funcPoliz = new Poliz;
         mainPoliz->funcs[nowToken->value] = funcPoliz;
         nowPoliz = funcPoliz;
@@ -1095,7 +1098,8 @@ private:
         bigScopes.back().functions = last.functions;
         scopes.push_back({Scope::FUNC, nowToken->value});
         getToken();
-        if (!readParameters())
+        int countParams = 0;
+        if (!readParameters(countParams))
             throw Exception("invalid function parameters",
                             nowToken->numLine,
                             nowToken->numPos);
@@ -1112,10 +1116,11 @@ private:
         popScope();
         popBigScope();
         nowPoliz = mainPoliz;
+        nowPoliz->operations[index].countParams = countParams;
         return true;
     }
 
-    bool readParameters() {
+    bool readParameters(int & countParams) {
         if (!isOperator("("))
             return false;
         getToken();
@@ -1123,7 +1128,8 @@ private:
             getToken();
             return true;
         }
-        if (!readFuncdefarglist())
+        ++countParams;
+        if (!readFuncdefarglist(countParams))
             throw Exception("invalid arglist",
                             nowToken->numLine,
                             nowToken->numPos);
@@ -1135,7 +1141,7 @@ private:
         return true;
     }
 
-    bool readFuncdefarglist() {
+    bool readFuncdefarglist(int & countParams) {
         if (nowToken->type != Token::NAME)
             throw Exception("expected name",
                             nowToken->numLine,
@@ -1149,6 +1155,7 @@ private:
         bigScopes.back().variables.insert({nowToken->value});
         getToken();
         while (isOperator(",")) {
+            ++countParams;
             getToken();
             if (nowToken->type != Token::NAME)
                 throw Exception("expected name",
