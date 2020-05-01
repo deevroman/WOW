@@ -171,7 +171,7 @@ private:
                         curStack.pop_back();
                         curStack.push_back(tmpobj);
                     }
-                    if (getItemOfCurStack(1)->type == wowobj::DOUBLE
+                    else if (getItemOfCurStack(1)->type == wowobj::DOUBLE
                         && getItemOfCurStack(0)->type == wowobj::DOUBLE) {
                         double value = *(static_cast<double *>(getItemOfCurStack(1)->value)) +
                                        *(static_cast<double *>(getItemOfCurStack()->value));

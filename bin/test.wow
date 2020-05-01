@@ -1,2 +1,3 @@
 i = 1
-print(i)
+b = 2
+print(i + b)

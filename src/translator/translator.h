@@ -1,5 +1,5 @@
-#ifndef WOW_SYNTAXCHECK_H
-#define WOW_SYNTAXCHECK_H
+#ifndef WOW_TRANSLATOR_H
+#define WOW_TRANSLATOR_H
 
 #include <vector>
 #include <unordered_set>
@@ -1513,4 +1513,4 @@ private:
     }
 };
 
-#endif //WOW_SYNTAXCHECK_H
+#endif //WOW_TRANSLATOR_H

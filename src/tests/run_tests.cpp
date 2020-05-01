@@ -1,5 +1,5 @@
 #include "tokenizer_tests/tokenizer_tests.h"
-#include "syntaxCheck_tests/syntaxCheck_tests.h"
+#include "translator_tests/translator_tests.h"
 #include <iostream>
 
 void tokenizeTests(){

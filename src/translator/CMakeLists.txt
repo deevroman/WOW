@@ -3,6 +3,6 @@ project(syntaxCheck)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(syntaxCheck run_syntaxCheck.cpp)
+add_executable(syntaxCheck run_Translator.cpp)
 
 SET(EXECUTABLE_OUTPUT_PATH "../../../bin")
