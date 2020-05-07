@@ -1,3 +1,4 @@
+/*
 #include <iostream>
 #include "tokenizer_tests/tokenizer_tests.h"
 #include "interpreter_tests/interpreter_tests.h"
@@ -86,5 +87,26 @@ int main() {
     tokenizeTests();
 //    interpreterTests();
     std::cout << "Ended tests";
+
+
+    return 0;
+}*/
+
+#include <iostream>
+#include <vector>
+#include <string>
+//#include "../../src/tokenizer/token.h"
+#include "../external/ThorsSerializer/ThorSerialize/Traits.h"
+#include "../external/ThorsSerializer/ThorSerialize/JsonThor.h"
+#include "../external/ThorsSerializer/ThorSerialize/SerUtil.h"
+
+int main() {
+//    std::vector<Token> kek;
+//    std::stringstream("ololo") >> ThorsAnvil::Serialize::jsonImport(kek);
+    std::vector<int> data{1, 2, 3, 4, 5, 6};
+
+    std::cout << ThorsAnvil::Serialize::jsonExport(data);
+    std::cin >> ThorsAnvil::Serialize::jsonImport(data);
+
     return 0;
 }

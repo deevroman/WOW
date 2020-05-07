@@ -1,3 +1,5 @@
+external install: `git clone --single-branch --branch header-only https://github.com/Loki-Astari/ThorsSerializer.git`
+
 Пример кода
 ```
 # comment

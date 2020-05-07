@@ -21,8 +21,8 @@ public:
     }
 
 private:
-    int COUNT_TESTS_P;
-    int COUNT_TESTS_N;
+    int COUNT_TESTS_P{};
+    int COUNT_TESTS_N{};
 
     int COUNT_FAILED_TESTS_P = 0;
     int COUNT_FAILED_TESTS_N = 0;
@@ -33,35 +33,33 @@ private:
     }
 
 public:
-    int getCountTestsP() const {
+    [[nodiscard]] int getCountTestsP() const {
         return COUNT_TESTS_P;
     }
 
-    int getCountTestsN() const {
+    [[nodiscard]] int getCountTestsN() const {
         return COUNT_TESTS_N;
     }
 
-    int getCountTests() const {
+    [[nodiscard]] int getCountTests() const {
         return COUNT_TESTS_P + COUNT_TESTS_N;
     }
 
-    int getCountFailedTestsP() const {
+    [[nodiscard]] int getCountFailedTestsP() const {
         return COUNT_FAILED_TESTS_P;
     }
 
-    int getCountFailedTestsN() const {
+    [[nodiscard]] int getCountFailedTestsN() const {
         return COUNT_FAILED_TESTS_N;
     }
 
-    int getCountFailedTests() const {
+    [[nodiscard]] int getCountFailedTests() const {
         return COUNT_FAILED_TESTS_P + COUNT_FAILED_TESTS_N;
     }
 
 
 private:
     void run_tests() {
-        using ThorsAnvil::Serialize::jsonImport;
-
         COUNT_FAILED_TESTS_P = 0;
         for (int i = 1; i <= COUNT_TESTS_P; i++) {
             std::string input = readFile("../tests/tokenizer_tests/positives/test_" + std::to_string(i) + ".input");
@@ -71,8 +69,8 @@ private:
                 result = tokenizer.tokenize();
                 std::string goodOutput = readFile(
                         "../tests/tokenizer_tests/positives/test_" + std::to_string(i) + ".output");
-                std::vector<Token> goodResult;
-                std::stringstream(goodOutput) >> jsonImport(goodResult);
+                auto goodResult = new std::vector<Token>();
+                std::stringstream(goodOutput) >> ThorsAnvil::Serialize::jsonImport(*goodResult);
                 if (result == goodResult) {
                     std::cout << "Positive test #" << i << '\n'
                               << "OK\n";
