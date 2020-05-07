@@ -35,5 +35,5 @@ cmake-build-debug
 .idea
 .vscode
 kek/
-/src/translator/.floo
-/src/translator/.flooignore
+.floo
+.flooignore

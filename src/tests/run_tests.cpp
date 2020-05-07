@@ -1,8 +1,9 @@
-#include "tokenizer_tests/tokenizer_tests.h"
-#include "translator_tests/translator_tests.h"
 #include <iostream>
+#include "tokenizer_tests/tokenizer_tests.h"
+#include "interpreter_tests/interpreter_tests.h"
 
-void tokenizeTests(){
+
+void tokenizeTests() {
     std::cout << "Running tokenizer_tests:\n";
     TokenizerTests tokenTests;
     tokenTests.run();
@@ -11,8 +12,8 @@ void tokenizeTests(){
     if (tokenTests.getCountFailedTestsP() != 0) {
         std::cout << "\x1b[31m";
     }
-    std::cout << "Positive:\n";
-    std::cout << tokenTests.getCountTestsP() - tokenTests.getCountFailedTestsP() << "/"
+    std::cout << "Positive:\n"
+              << tokenTests.getCountTestsP() - tokenTests.getCountFailedTestsP() << "/"
               << tokenTests.getCountTestsP()
               << "\n";
     if (tokenTests.getCountFailedTestsP() != 0) {
@@ -22,8 +23,8 @@ void tokenizeTests(){
     if (tokenTests.getCountFailedTestsN() != 0) {
         std::cout << "\x1b[31m";
     }
-    std::cout << "Negative:\n";
-    std::cout << tokenTests.getCountTestsN() - tokenTests.getCountFailedTestsN() << "/" << tokenTests.getCountTestsN()
+    std::cout << "Negative:\n"
+              << tokenTests.getCountTestsN() - tokenTests.getCountFailedTestsN() << "/" << tokenTests.getCountTestsN()
               << "\n";
     if (tokenTests.getCountFailedTestsN() != 0) {
         std::cout << "\x1b[0m";
@@ -31,58 +32,59 @@ void tokenizeTests(){
 
     if (tokenTests.getCountFailedTests() != 0) {
         std::cout << "\x1b[31m";
-    } else {
+    }
+    else {
         std::cout << "\x1b[32m";
     }
-    std::cout << "All:\n";
-    std::cout << tokenTests.getCountTests() - tokenTests.getCountFailedTests() << "/" << tokenTests.getCountTests()
-              << "\n";
-    std::cout << "\x1b[0m";
+    std::cout << "All:\n"
+              << tokenTests.getCountTests() - tokenTests.getCountFailedTests() << "/" << tokenTests.getCountTests()
+              << "\n"
+              << "\x1b[0m";
 }
 
 
-void syntaxCheckTests(){
-    std::cout << "Running translator tests:\n";
-    SyntaxCheckTests syntaxCheckTests;
-    syntaxCheckTests.run();
-
-    std::cout << "Ended translator tests\n";
-    if (syntaxCheckTests.getCountFailedTestsP() != 0) {
-        std::cout << "\x1b[31m";
-    }
-    std::cout << "Positive:\n";
-    std::cout << syntaxCheckTests.getCountTestsP() - syntaxCheckTests.getCountFailedTestsP() << "/"
-              << syntaxCheckTests.getCountTestsP()
-              << "\n";
-    if (syntaxCheckTests.getCountFailedTestsP() != 0) {
-        std::cout << "\x1b[0m";
-    }
-
-    if (syntaxCheckTests.getCountFailedTestsN() != 0) {
-        std::cout << "\x1b[31m";
-    }
-    std::cout << "Negative:\n";
-    std::cout << syntaxCheckTests.getCountTestsN() - syntaxCheckTests.getCountFailedTestsN() << "/" << syntaxCheckTests.getCountTestsN()
-              << "\n";
-    if (syntaxCheckTests.getCountFailedTestsN() != 0) {
-        std::cout << "\x1b[0m";
-    }
-
-    if (syntaxCheckTests.getCountFailedTests() != 0) {
-        std::cout << "\x1b[31m";
-    } else {
-        std::cout << "\x1b[32m";
-    }
-    std::cout << "All:\n";
-    std::cout << syntaxCheckTests.getCountTests() - syntaxCheckTests.getCountFailedTests() << "/" << syntaxCheckTests.getCountTests()
-              << "\n";
-    std::cout << "\x1b[0m";
-}
+//void interpreterTests(){
+//    std::cout << "Running translator tests:\n";
+//    InterpreterTests interpreterTests;
+//    interpreterTests.run();
+//
+//    std::cout << "Ended translator tests\n";
+//    if (interpreterTests.getCountFailedTestsP() != 0) {
+//        std::cout << "\x1b[31m";
+//    }
+//    std::cout << "Positive:\n";
+//    std::cout << interpreterTests.getCountTestsP() - interpreterTests.getCountFailedTestsP() << "/"
+//              << interpreterTests.getCountTestsP()
+//              << "\n";
+//    if (interpreterTests.getCountFailedTestsP() != 0) {
+//        std::cout << "\x1b[0m";
+//    }
+//
+//    if (interpreterTests.getCountFailedTestsN() != 0) {
+//        std::cout << "\x1b[31m";
+//    }
+//    std::cout << "Negative:\n";
+//    std::cout << interpreterTests.getCountTestsN() - interpreterTests.getCountFailedTestsN() << "/" << interpreterTests.getCountTestsN()
+//              << "\n";
+//    if (interpreterTests.getCountFailedTestsN() != 0) {
+//        std::cout << "\x1b[0m";
+//    }
+//
+//    if (interpreterTests.getCountFailedTests() != 0) {
+//        std::cout << "\x1b[31m";
+//    } else {
+//        std::cout << "\x1b[32m";
+//    }
+//    std::cout << "All:\n";
+//    std::cout << interpreterTests.getCountTests() - interpreterTests.getCountFailedTests() << "/" << interpreterTests.getCountTests()
+//              << "\n";
+//    std::cout << "\x1b[0m";
+//}
 
 int main() {
     std::cout << "Start tests.\n";
     tokenizeTests();
-    syntaxCheckTests();
+//    interpreterTests();
     std::cout << "Ended tests";
     return 0;
 }

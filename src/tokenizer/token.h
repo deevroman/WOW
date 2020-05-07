@@ -27,7 +27,7 @@ struct Token {
 };
 
 ThorsAnvil_MakeEnum(Token::TypeToken, KEYWORD, NAME, STRING,
-                    NUMBER, BEGIN_LINE, BEGIN_BLOCK, OPERATOR);
+                    NUMBER, BEGIN_LINE, BEGIN_BLOCK, OPERATOR, ENDMARKER);
 ThorsAnvil_MakeTrait(Token, type, numLine, numPos, value);
 
 #endif //WOW_TOKEN_H
