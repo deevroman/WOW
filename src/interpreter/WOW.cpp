@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include "../fread/fread.h"
 #include "interpreter.h"
 
 int main(int argc, char *argv[]) {
@@ -8,8 +9,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Usage: ./WOW <wowFilePath>";
         return 0;
     }
-
-    Runner(readFile(std::string(argv[1])));
+    Runner runner(readFile(std::string(argv[1])));
 
     return 0;
 }

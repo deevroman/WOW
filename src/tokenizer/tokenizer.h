@@ -1,7 +1,7 @@
 #ifndef WOW_TOKENIZER_H
 #define WOW_TOKENIZER_H
 
-#include "../exception/exception.h"
+#include "../utils/exception.h"
 #include "token.h"
 #include <vector>
 #include <string>

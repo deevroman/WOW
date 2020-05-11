@@ -37,3 +37,4 @@ cmake-build-debug
 kek/
 .floo
 .flooignore
+.DS_Store

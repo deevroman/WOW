@@ -6,9 +6,9 @@
 #include "../../fread/fread.h"
 #include "../../tokenizer/tokenizer.h"
 
-#include "../../../external/ThorsSerializer/ThorSerialize/Traits.h"
-#include "../../../external/ThorsSerializer/ThorSerialize/JsonThor.h"
-#include "../../../external/ThorsSerializer/ThorSerialize/SerUtil.h"
+#include "../../external/ThorsSerializer/ThorSerialize/Traits.h"
+#include "../../external/ThorsSerializer/ThorSerialize/JsonThor.h"
+#include "../../external/ThorsSerializer/ThorSerialize/SerUtil.h"
 
 class TokenizerTests {
 public:

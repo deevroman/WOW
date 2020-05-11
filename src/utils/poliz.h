@@ -15,7 +15,7 @@ public:
         AND_BIT, SHIFT_LEFT_BIN, SHIFT_RIGHT_BIN,
         PLUS, MINUS, MUL, DIV, MOD, INTDIV,
         UNAR_PLUS, UNAR_MINUS, UNAR_TILDA,
-        POW, COPY,
+        POW, COPY, INIT_PARAM,
         GET_VALUE, INDEX_VALUE,
         DEF_FUNC, DEF_CLASS, // def func нужно передать аргументы
         CALL_FUNC, CREATE_CLASS,
@@ -37,6 +37,7 @@ public:
     int intValue = 0;
     double doubleValue = 0.0; // TODO можно переписать на объединение
     std::string stringValue = "";
+    int numLine, numPos;
 };
 
 
