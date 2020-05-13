@@ -426,8 +426,8 @@ private:
                     break;
                 }
                 case Element::DEF_CLASS: {
-                    // todo
-//                    bigScopes.back().classes[curOp.stringValue] = scopes.back().classes[curOp.stringValue] = curLevel.poliz->classes[curOp.stringValue];
+                    bigScopes.back().classes[curOp.stringValue].first = scopes.back().classes[curOp.stringValue].first = curLevel.poliz->classes[curOp.stringValue];
+                    bigScopes.back().classes[curOp.stringValue].second = scopes.back().classes[curOp.stringValue].second = true;
                     break;
                 }
                 case Element::CALL_FUNC: {
@@ -536,7 +536,7 @@ private:
                     break;
                 }
                 case Element::CREATE_CLASS: {
-                    bigScopes.push_back({{}, {}, {}, scope::CLASS});
+                    bigScopes.push_back({scopes.back().funcs, {}, {}, scope::CLASS});
                     scopes.push_back({});
                     auto fields = runLevel();
                     fields["__name__"] = new wowobj(wowobj::STRING, getItemOfCurStack()->value);
