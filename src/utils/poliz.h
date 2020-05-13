@@ -15,7 +15,7 @@ public:
         AND_BIT, SHIFT_LEFT_BIN, SHIFT_RIGHT_BIN,
         PLUS, MINUS, MUL, DIV, MOD, INTDIV,
         UNAR_PLUS, UNAR_MINUS, UNAR_TILDA,
-        POW, COPY,
+        POW, COPY, INIT_PARAM,
         GET_VALUE, INDEX_VALUE,
         DEF_FUNC, DEF_CLASS, // def func нужно передать аргументы
         CALL_FUNC, CREATE_CLASS,
@@ -31,12 +31,13 @@ public:
         MUL_INPLACE, DIV_INPLACE, INTDIV_INPLACE, MOD_INPLACE,
         OR_BIT_INPLACE, AND_BIT_INPLACE,
         XOR_INPLACE, LEFT_SHIFT_INPLACE,
-        RIGHT_SHIFT_INPLACE,
+        RIGHT_SHIFT_INPLACE, MAKE_LIST
     } TYPE;
     int posJump = 0;
     int intValue = 0;
     double doubleValue = 0.0; // TODO можно переписать на объединение
     std::string stringValue = "";
+    int numLine, numPos;
 };
 
 

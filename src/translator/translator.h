@@ -1,5 +1,5 @@
-#ifndef WOW_SYNTAXCHECK_H
-#define WOW_SYNTAXCHECK_H
+#ifndef WOW_TRANSLATOR_H
+#define WOW_TRANSLATOR_H
 
 #include <vector>
 #include <unordered_set>
@@ -94,12 +94,18 @@ public:
     }
 
 private:
-    //tmp
+
     std::vector<Token> nameInTest;
 
     std::vector<int> levels;
     int indexNowToken{};
     Token *nowToken;
+
+    void addElement(Element elem) {
+        nowPoliz->operations.push_back(elem);
+        nowPoliz->operations.back().numLine = nowToken->numLine;
+        nowPoliz->operations.back().numPos = nowToken->numPos;
+    }
 
     bool readBeginLine(int needMore = false) {
         if (nowToken->type != Token::BEGIN_LINE)
@@ -141,7 +147,7 @@ private:
                                     nowToken->numPos);
                 }
                 // ~~~
-                nowPoliz->operations.push_back({0, Element::OR});
+                addElement({0, Element::OR});
                 // ~~~
             }
             else {
@@ -174,7 +180,7 @@ private:
                                     nowToken->numPos);
                 }
                 // ~~~
-                nowPoliz->operations.push_back({0, Element::OR_BIT});
+                addElement({0, Element::OR_BIT});
                 // ~~~
 
             }
@@ -197,7 +203,7 @@ private:
                                     nowToken->numPos);
                 }
                 // ~~~
-                nowPoliz->operations.push_back({0, Element::XOR});
+                addElement({0, Element::XOR});
                 // ~~~
             }
             else {
@@ -219,7 +225,7 @@ private:
                                     nowToken->numPos);
                 }
                 // ~~~
-                nowPoliz->operations.push_back({0, Element::AND_BIT});
+                addElement({0, Element::AND_BIT});
                 // ~~~
             }
             else {
@@ -241,7 +247,7 @@ private:
                                     nowToken->numPos);
                 }
                 // ~~~
-                nowPoliz->operations.push_back({0, Element::SHIFT_LEFT_BIN});
+                addElement({0, Element::SHIFT_LEFT_BIN});
                 // ~~~
                 continue;
             }
@@ -253,7 +259,7 @@ private:
                                     nowToken->numPos);
                 }
                 // ~~~
-                nowPoliz->operations.push_back({0, Element::SHIFT_RIGHT_BIN});
+                addElement({0, Element::SHIFT_RIGHT_BIN});
                 // ~~~
                 continue;
             }
@@ -280,10 +286,10 @@ private:
                 }
                 // ~~~
                 if (nowOperator == "+") {
-                    nowPoliz->operations.push_back({0, Element::PLUS});
+                    addElement({0, Element::PLUS}); // fixme по-хорошему
                 }
                 else {
-                    nowPoliz->operations.push_back({0, Element::MINUS});
+                    addElement({0, Element::MINUS});
                 }
                 // ~~~
             }
@@ -311,16 +317,16 @@ private:
                 }
                 // ~~~
                 if (nowOperator == "*") {
-                    nowPoliz->operations.push_back({0, Element::MUL});
+                    addElement({0, Element::MUL});
                 }
                 else if (nowOperator == "/") {
-                    nowPoliz->operations.push_back({0, Element::DIV});
+                    addElement({0, Element::DIV});
                 }
                 else if (nowOperator == "//") {
-                    nowPoliz->operations.push_back({0, Element::INTDIV});
+                    addElement({0, Element::INTDIV});
                 }
                 else if (nowOperator == "%") {
-                    nowPoliz->operations.push_back({0, Element::MOD});
+                    addElement({0, Element::MOD});
                 }
                 // ~~~
             }
@@ -347,11 +353,11 @@ private:
                 }
                 // ~~~
                 if (nowOperator == "-")
-                    nowPoliz->operations.push_back({0, Element::UNAR_MINUS});
+                    addElement({0, Element::UNAR_MINUS});
                 if (nowOperator == "+")
-                    nowPoliz->operations.push_back({0, Element::UNAR_PLUS});
+                    addElement({0, Element::UNAR_PLUS});
                 if (nowOperator == "~")
-                    nowPoliz->operations.push_back({0, Element::UNAR_TILDA});
+                    addElement({0, Element::UNAR_TILDA});
                 // ~~~
                 return true;
             }
@@ -376,7 +382,7 @@ private:
                                     nowToken->numPos);
                 }
                 // ~~~
-                nowPoliz->operations.push_back({0, Element::POW});
+                addElement({0, Element::POW});
                 // ~~~
             }
             else {
@@ -431,6 +437,7 @@ private:
     bool readNameExpr() {
         if (isOperator("[")) {
             getToken();
+            int cntElement = 0;
             if (!readTest()) {
                 if (isOperator("]")) {
                     getToken();
@@ -438,14 +445,17 @@ private:
                     return true;
                 }
             }
+            cntElement++;
             if (isOperator(",")) {
                 while (isOperator(",")) {
+                    cntElement++;
                     getToken();
                     if (!readTest()) {
                         throw Exception("expected testExpr",
                                         nowToken->numLine, nowToken->numPos);
                     }
                 }
+                addElement({cntElement, Element::MAKE_LIST});
             }
             else if (isKeyword("for")) {
                 getToken();
@@ -498,14 +508,14 @@ private:
                     }
                     else {
                         // ~~~
-                        nowPoliz->operations.push_back({
-                                                               -1,
-                                                               Element::CALL_FUNC,
-                                                               0,
-                                                               0,
-                                                               0.0,
-                                                               nowToken->value
-                                                       });
+                        addElement({
+                                           -1,
+                                           Element::CALL_FUNC,
+                                           0,
+                                           0,
+                                           0.0,
+                                           nowToken->value
+                                   });
                         // ~~~
                         /*
                         if (bigScopes.back().type == Scope::FUNC) {
@@ -542,6 +552,7 @@ private:
                             next(bigScopes.rbegin())->classes.find(
                                     {bigScopes.back().value})->second.parentClasses.insert(
                                     nowToken->value);
+                            addElement({-1, Element::CREATE_CLASS});
                         }
                         else if (!isClassFullDefined(name)) {
                             throw Exception("semantic error: " + nowToken->value + " call undefined as function",
@@ -570,53 +581,53 @@ private:
     //                                        nowToken->numPos);*/
                 else {
                     nameInTest.push_back(*nowToken);
-                    nowPoliz->operations.push_back({0, Element::GET_VALUE});
-                    nowPoliz->operations[nowPoliz->operations.size()-1].stringValue = nowToken->value;
+                    addElement({0, Element::GET_VALUE});
+                    nowPoliz->operations[nowPoliz->operations.size() - 1].stringValue = nowToken->value;
                 }
             }
             else if (nowToken->type == Token::NUMBER) {
                 // ~~~
                 // TODO longInt
                 if (std::find(nowToken->value.begin(), nowToken->value.end(), '.') == nowToken->value.end()) {
-                    nowPoliz->operations.push_back({0,
-                                                    Element::GET_VALUE_INT,
-                                                    0,
-                                                    std::stoi(nowToken->value)});
+                    addElement({0,
+                                Element::GET_VALUE_INT,
+                                0,
+                                std::stoi(nowToken->value)});
                 }
                 else {
-                    nowPoliz->operations.push_back({0,
-                                                    Element::GET_VALUE_DOUBLE,
-                                                    0,
-                                                    0,
-                                                    std::stod(nowToken->value)});
+                    addElement({0,
+                                Element::GET_VALUE_DOUBLE,
+                                0,
+                                0,
+                                std::stod(nowToken->value)});
                 }
                 // ~~~
             }
             else if (nowToken->type == Token::STRING) {
                 // ~~~
-                nowPoliz->operations.push_back({0,
-                                                Element::GET_VALUE_STR,
-                                                0,
-                                                0,
-                                                0.0,
-                                                nowToken->value
-                                               });
+                addElement({0,
+                            Element::GET_VALUE_STR,
+                            0,
+                            0,
+                            0.0,
+                            nowToken->value
+                           });
                 // ~~~
             }
             else if (isKeyword("None")) {
                 // ~~~
-                nowPoliz->operations.push_back({0,
-                                                Element::GET_VALUE_NONE
-                                               });
+                addElement({0,
+                            Element::GET_VALUE_NONE
+                           });
                 // ~~~
             }
             else if (isKeyword("True") || isKeyword("False")) {
                 // ~~~
-                nowPoliz->operations.push_back({0,
-                                                Element::GET_VALUE_BOOL,
-                                                0,
-                                                isKeyword("True")
-                                               });
+                addElement({0,
+                            Element::GET_VALUE_BOOL,
+                            0,
+                            isKeyword("True")
+                           });
                 // ~~~
             }
             getToken();
@@ -636,7 +647,7 @@ private:
             if (isOperator(")")) {
                 getToken();
                 backup.countParams = countArgs;
-                nowPoliz->operations.push_back(backup);
+                addElement(backup);
                 return true;
             }
             else
@@ -649,6 +660,7 @@ private:
                 throw Exception("invalid trailer",
                                 nowToken->numLine, nowToken->numPos);
             }
+            addElement({-1, Element::INDEX_VALUE});
             if (isOperator("]")) {
                 getToken();
                 return true;
@@ -664,7 +676,16 @@ private:
                                 nowToken->numLine, nowToken->numPos);
             }
             else {
+                auto name = nowToken->value;
                 getToken();
+                if(isOperator("(")){
+                    addElement({-1, Element::EVAL_METHOD, 0, 0, 0.0, name});
+                } else {
+                    addElement({-1, Element::GET_FIELD, 0, 0, 0.0, name});
+                }
+                if(nowToken->type == Token::BEGIN_LINE) {
+                    addElement({-1, Element::CLEAR_STACK});
+                }
                 return true;
             }
         }
@@ -705,22 +726,22 @@ private:
             }
         }
         if (nowOperator == "<") {
-            nowPoliz->operations.push_back({0, Element::CMP_LESS});
+            addElement({0, Element::CMP_LESS});
         }
         if (nowOperator == ">") {
-            nowPoliz->operations.push_back({0, Element::CMP_MORE});
+            addElement({0, Element::CMP_MORE});
         }
         if (nowOperator == "<=") {
-            nowPoliz->operations.push_back({0, Element::CMP_LESS_EQUAL});
+            addElement({0, Element::CMP_LESS_EQUAL});
         }
         if (nowOperator == ">=") {
-            nowPoliz->operations.push_back({0, Element::CMP_MORE_EQUAL});
+            addElement({0, Element::CMP_MORE_EQUAL});
         }
         if (nowOperator == "==") {
-            nowPoliz->operations.push_back({0, Element::CMP_EQUAL});
+            addElement({0, Element::CMP_EQUAL});
         }
         if (nowOperator == "!=") {
-            nowPoliz->operations.push_back({0, Element::CMP_NOT_EQUAL});
+            addElement({0, Element::CMP_NOT_EQUAL});
         }
         return true;
     }
@@ -734,7 +755,7 @@ private:
                                 nowToken->numPos);
             }
             // ~~~
-            nowPoliz->operations.push_back({0, Element::NOT});
+            addElement({0, Element::NOT});
             // ~~~
         }
         else {
@@ -757,7 +778,7 @@ private:
                                     nowToken->numPos);
                 }
                 // ~~~
-                nowPoliz->operations.push_back({0, Element::AND});
+                addElement({0, Element::AND});
                 // ~~~
             }
             else {
@@ -779,7 +800,7 @@ private:
                                 nowToken->numLine,
                                 nowToken->numPos);
             }
-            nowPoliz->operations.push_back({0, Element::DEL});
+            addElement({0, Element::DEL});
             return true;
         }
         return false;
@@ -828,7 +849,7 @@ private:
                                 nowToken->numPos);
             }
             breakPos.push_back(nowPoliz->operations.size());
-            nowPoliz->operations.push_back({0, Element::JMP});
+            addElement({0, Element::JMP});
             getToken();
             return true;
         }
@@ -899,37 +920,37 @@ private:
                                 nowToken->numLine,
                                 nowToken->numPos);
             if (operation == "+=") {
-                nowPoliz->operations.push_back({0, Element::PLUS_INPLACE});
+                addElement({0, Element::PLUS_INPLACE});
             }
             else if (operation == "-=") {
-                nowPoliz->operations.push_back({0, Element::MINUS_INPLACE});
+                addElement({0, Element::MINUS_INPLACE});
             }
             else if (operation == "*=") {
-                nowPoliz->operations.push_back({0, Element::MUL_INPLACE});
+                addElement({0, Element::MUL_INPLACE});
             }
             else if (operation == "**=") {
-                nowPoliz->operations.push_back({0, Element::POW_INPLACE});
+                addElement({0, Element::POW_INPLACE});
             }
             else if (operation == "/=") {
-                nowPoliz->operations.push_back({0, Element::DIV_INPLACE});
+                addElement({0, Element::DIV_INPLACE});
             }
             else if (operation == "//=") {
-                nowPoliz->operations.push_back({0, Element::INTDIV_INPLACE});
+                addElement({0, Element::INTDIV_INPLACE});
             }
             else if (operation == "^=") {
-                nowPoliz->operations.push_back({0, Element::XOR_INPLACE});
+                addElement({0, Element::XOR_INPLACE});
             }
             else if (operation == "&=") {
-                nowPoliz->operations.push_back({0, Element::AND_BIT_INPLACE});
+                addElement({0, Element::AND_BIT_INPLACE});
             }
             else if (operation == "|=") {
-                nowPoliz->operations.push_back({0, Element::OR_BIT_INPLACE});
+                addElement({0, Element::OR_BIT_INPLACE});
             }
             else if (operation == ">>=") {
-                nowPoliz->operations.push_back({0, Element::RIGHT_SHIFT_INPLACE});
+                addElement({0, Element::RIGHT_SHIFT_INPLACE});
             }
             else if (operation == "<<=") {
-                nowPoliz->operations.push_back({0, Element::LEFT_SHIFT_INPLACE});
+                addElement({0, Element::LEFT_SHIFT_INPLACE});
             }
         }
         else {
@@ -944,8 +965,8 @@ private:
                                     nowToken->numLine,
                                     nowToken->numPos);
                 }
-                nowPoliz->operations.push_back({0, Element::COPY});
-                nowPoliz->operations.push_back({0, Element::CLEAR_STACK});
+                addElement({0, Element::COPY});
+                addElement({0, Element::CLEAR_STACK});
                 isMove = false;
                 if (isNextTokenOperator("=") && pos + 1 == indexNowToken && tokens[pos].type == Token::NAME) {
                     isMove = true;
@@ -982,7 +1003,7 @@ private:
             }
             getToken();
             continuePos.push_back(nowPoliz->operations.size());
-            nowPoliz->operations.push_back({0, Element::JMP});
+            addElement({0, Element::JMP});
             return true;
         }
         return false;
@@ -997,8 +1018,9 @@ private:
             }
             getToken();
             readTest();
+            checkDefinedTestNames();
             // ~~~
-            nowPoliz->operations.push_back({0, Element::RETURN_VALUE});
+            addElement({0, Element::RETURN_VALUE});
             // ~~~
             return true;
         }
@@ -1087,11 +1109,12 @@ private:
                             nowToken->numLine,
                             nowToken->numPos);
         int index = nowPoliz->operations.size();
-        nowPoliz->operations.push_back({0, Element::DEF_FUNC, 0,
-                                        0, 0, nowToken->value});
+        addElement({0, Element::DEF_FUNC, 0,
+                    0, 0, nowToken->value});
         auto funcPoliz = new Poliz;
         mainPoliz->funcs[nowToken->value] = funcPoliz;
         nowPoliz = funcPoliz;
+        nowPoliz->funcs[nowToken->value] = nowPoliz;
 
         initFunc(*nowToken);
         Scope last = bigScopes.back();
@@ -1122,7 +1145,7 @@ private:
         return true;
     }
 
-    bool readParameters(int & countParams) {
+    bool readParameters(int &countParams) {
         if (!isOperator("("))
             return false;
         getToken();
@@ -1143,7 +1166,7 @@ private:
         return true;
     }
 
-    bool readFuncdefarglist(int & countParams) {
+    bool readFuncdefarglist(int &countParams) {
         if (nowToken->type != Token::NAME)
             throw Exception("expected name",
                             nowToken->numLine,
@@ -1153,8 +1176,11 @@ private:
                             nowToken->numLine,
                             nowToken->numPos);
         }
+        std::vector<Element> params;
         scopes.back().variables.insert({nowToken->value});
         bigScopes.back().variables.insert({nowToken->value});
+        initVar(indexNowToken);
+        params.push_back({0, Element::INIT_PARAM, 0, 0, 0.0, nowToken->value});
         getToken();
         while (isOperator(",")) {
             ++countParams;
@@ -1168,9 +1194,12 @@ private:
                                 nowToken->numLine,
                                 nowToken->numPos);
             }
-            scopes.back().variables.insert({nowToken->value});
-            bigScopes.back().variables.insert({nowToken->value});
+            initVar(indexNowToken);
+            params.push_back({0, Element::INIT_PARAM, 0, 0, 0.0, nowToken->value});
             getToken();
+        }
+        for (int i = params.size() - 1; i >= 0; i--) {
+            addElement(params[i]);
         }
         return true;
     }
@@ -1187,7 +1216,7 @@ private:
             return false;
         getToken();
         // ~~~
-        nowPoliz->operations.push_back({0, Element::BEGIN_SCOPE});
+        addElement({0, Element::BEGIN_SCOPE});
         int statementBeginPos = nowPoliz->operations.size();
         // ~~~
         scopes.push_back({Scope::SIMPLE, ""});
@@ -1203,21 +1232,21 @@ private:
         getToken();
         // ~~~
         int suiteBeginPos = nowPoliz->operations.size();
-        nowPoliz->operations.push_back({0, Element::NEGATIVE_JMP, 0});
+        addElement({0, Element::NEGATIVE_JMP, 0});
         int stmtJmpPos = nowPoliz->operations.size() - 1;
         bool withElse = false;
         // ~~~
         readSuite();
         // ~~~
-        nowPoliz->operations.push_back({0, Element::JMP, statementBeginPos});
+        addElement({0, Element::JMP, statementBeginPos});
         int elseSuiteBegin = 0;
         // ~~~
-        nowPoliz->operations.push_back({0, Element::END_SCOPE});
+        addElement({0, Element::END_SCOPE});
         if (isEqualLevel() && isNextTokenKey("else")) {
             withElse = true;
             readBeginLine();
             getToken();
-            nowPoliz->operations.push_back({0, Element::BEGIN_SCOPE});
+            addElement({0, Element::BEGIN_SCOPE});
             scopes.push_back({});
             if (!isBeginBlock(":"))
                 throw Exception("expected : after else",
@@ -1227,7 +1256,7 @@ private:
             elseSuiteBegin = nowPoliz->operations.size();
             readSuite();
             popScope();
-            nowPoliz->operations.push_back({0, Element::END_SCOPE});
+            addElement({0, Element::END_SCOPE});
         }
         // ~~~
         int endPos = nowPoliz->operations.size();
@@ -1332,16 +1361,16 @@ private:
         getToken();
         // ~~~
         int stmtPos = nowPoliz->operations.size();
-        nowPoliz->operations.push_back({0, Element::NEGATIVE_JMP});
+        addElement({0, Element::NEGATIVE_JMP});
         int endPos = -1;
         std::vector<int> elifEndPos;
         // ~~~
-        nowPoliz->operations.push_back({0, Element::BEGIN_SCOPE});
+        addElement({0, Element::BEGIN_SCOPE});
         readSuite();
-        nowPoliz->operations.push_back({0, Element::END_SCOPE});
+        addElement({0, Element::END_SCOPE});
         // ~~~
         elifEndPos.push_back(nowPoliz->operations.size());
-        nowPoliz->operations.push_back({0, Element::JMP});
+        addElement({0, Element::JMP});
         // ~~~
         popScope();
         while (isEqualLevel() && isNextTokenKey("elif")) {
@@ -1358,7 +1387,7 @@ private:
             }
             // ~~~
             stmtPos = nowPoliz->operations.size();
-            nowPoliz->operations.push_back({0, Element::NEGATIVE_JMP});
+            addElement({0, Element::NEGATIVE_JMP});
             // ~~~
             if (!isBeginBlock(":")) {
                 throw Exception("invalid elif condition",
@@ -1366,12 +1395,12 @@ private:
                                 nowToken->numPos);
             }
             getToken();
-            nowPoliz->operations.push_back({0, Element::BEGIN_SCOPE});
+            addElement({0, Element::BEGIN_SCOPE});
             readSuite();
-            nowPoliz->operations.push_back({0, Element::END_SCOPE});
+            addElement({0, Element::END_SCOPE});
             // ~~~
             elifEndPos.push_back(nowPoliz->operations.size());
-            nowPoliz->operations.push_back({0, Element::JMP});
+            addElement({0, Element::JMP});
             // ~~~
             popScope();
         }
@@ -1389,9 +1418,9 @@ private:
             // ~~~
             nowPoliz->operations[stmtPos].posJump = nowPoliz->operations.size();
             // ~~~
-            nowPoliz->operations.push_back({0, Element::BEGIN_SCOPE});
+            addElement({0, Element::BEGIN_SCOPE});
             readSuite();
-            nowPoliz->operations.push_back({0, Element::END_SCOPE});
+            addElement({0, Element::END_SCOPE});
             popScope();
         }
         // ~~~
@@ -1486,6 +1515,11 @@ private:
                 && tokens[indexNowToken + 1].value == name);
     }
 
+    bool isNextTokenBeginLine(std::string name) {
+        return (indexNowToken + 1 < tokens.size()
+                && tokens[indexNowToken + 1].type == Token::BEGIN_LINE);
+    }
+
     bool isEqualLevel() {
         if (nowToken->type == Token::ENDMARKER)
             return levels.back() == 0;
@@ -1513,4 +1547,4 @@ private:
     }
 };
 
-#endif //WOW_SYNTAXCHECK_H
+#endif //WOW_TRANSLATOR_H

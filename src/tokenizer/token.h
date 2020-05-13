@@ -1,7 +1,7 @@
 #ifndef WOW_TOKEN_H
 #define WOW_TOKEN_H
 
-#include "../../external/ThorsSerializer/ThorSerialize/Traits.h"
+#include "../external/ThorsSerializer/ThorSerialize/Traits.h"
 
 struct Token {
     enum TypeToken {
@@ -12,7 +12,9 @@ struct Token {
     TypeToken type;
     int numLine, numPos;
     std::string value;
-    Token(){}
+
+    Token() {}
+
     Token(TypeToken type, int numLine, int numPos, std::string value) :
             type(type), numLine(numLine), numPos(numPos), value(value) {}
 
@@ -27,7 +29,7 @@ struct Token {
 };
 
 ThorsAnvil_MakeEnum(Token::TypeToken, KEYWORD, NAME, STRING,
-                    NUMBER, BEGIN_LINE, BEGIN_BLOCK, OPERATOR);
+                    NUMBER, BEGIN_LINE, BEGIN_BLOCK, OPERATOR, ENDMARKER);
 ThorsAnvil_MakeTrait(Token, type, numLine, numPos, value);
 
 #endif //WOW_TOKEN_H

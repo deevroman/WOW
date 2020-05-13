@@ -1,7 +1,3 @@
-//
-// Created by Деев Роман on 04.01.2020.
-//
-
 #ifndef WOW_FREAD_H
 #define WOW_FREAD_H
 

@@ -1,0 +1,37 @@
+ [ 
+		{ 
+			"type": "BEGIN_LINE", 
+			"numLine": 0, 
+			"numPos": 0, 
+			"value": "0"
+		}, 
+		{ 
+			"type": "NAME", 
+			"numLine": 0, 
+			"numPos": 0, 
+			"value": "a"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 0, 
+			"numPos": 2, 
+			"value": "+="
+		}, 
+		{ 
+			"type": "NUMBER", 
+			"numLine": 0, 
+			"numPos": 5, 
+			"value": "4"
+		}, 
+		{ 
+			"type": "OPERATOR", 
+			"numLine": 0, 
+			"numPos": 7, 
+			"value": "+="
+		}, 
+		{ 
+			"type": "NUMBER", 
+			"numLine": 0, 
+			"numPos": 10, 
+			"value": "3"
+		}]

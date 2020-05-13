@@ -1,7 +1,7 @@
 #ifndef WOW_TOKENIZER_H
 #define WOW_TOKENIZER_H
 
-#include "../exception/exception.h"
+#include "../utils/exception.h"
 #include "token.h"
 #include <vector>
 #include <string>
@@ -116,12 +116,14 @@ private:
             if (input[pos] == '.') {
                 if (cntPoints == 0) {
                     cntPoints++;
-                } else {
+                }
+                else {
                     throw Exception("Invalid float number format");
                 }
-                if(isEnd(pos+1)){
+                if (isEnd(pos + 1)) {
                     throw Exception("Invalid float number format");
-                } else if (input[pos+1] < '0' && input[pos+1] > '9'){
+                }
+                else if (input[pos + 1] < '0' && input[pos + 1] > '9') {
                     throw Exception("Invalid float number format");
                 }
             }
@@ -143,32 +145,39 @@ private:
             if (input[pos] == '\\') {
                 if (isEnd(pos + 1)) {
                     throw Exception("Invalid EOF");
-                } else if (input[pos + 1] == '\'') {
+                }
+                else if (input[pos + 1] == '\'') {
                     str += '\'';
                     pos += 2;
                     posInLine += 2;
-                } else if (input[pos + 1] == '\\') {
+                }
+                else if (input[pos + 1] == '\\') {
                     str += '\\';
                     pos += 2;
                     posInLine += 2;
-                } else if (input[pos + 1] == '\n') {
+                }
+                else if (input[pos + 1] == '\n') {
                     line++;
                     pos += 2;
                     posInLine = 0;
-                } else {
+                }
+                else {
                     str += '\\';
                 }
-            } else if (input[pos] == '\n') {
+            }
+            else if (input[pos] == '\n') {
                 line++;
                 pos++;
                 posInLine = 0;
                 str += '\n';
-            } else if (input[pos] == '\'') {
+            }
+            else if (input[pos] == '\'') {
                 pos += 1;
                 posInLine += 1;
                 ended = true;
                 break;
-            } else {
+            }
+            else {
                 str += input[pos];
                 pos++;
                 posInLine++;
@@ -259,41 +268,51 @@ private:
             if (input[pos] == '\n') {
                 pos++;
                 break;
-            } else if (input[pos] == '#') {
+            }
+            else if (input[pos] == '#') {
                 readComment(pos);
-            } else if (isBeginOperator(pos)) {
+            }
+            else if (isBeginOperator(pos)) {
                 int startPosInLine = posInLine;
                 std::string op = readOperator(pos, posInLine);
                 ans.push_back(Token(Token::OPERATOR, line, startPosInLine, op));
-            } else if (input[pos] >= '0' && input[pos] <= '9') {
+            }
+            else if (input[pos] >= '0' && input[pos] <= '9') {
                 int startPosInLine = posInLine;
                 std::string num = readNumber(pos, posInLine);
                 ans.push_back(Token(Token::NUMBER, line, startPosInLine, num));
-            } else if (input[pos] == '\'') {
+            }
+            else if (input[pos] == '\'') {
                 int startPosInLine = posInLine;
                 int startLine = line;
                 std::string str = readString(pos, posInLine, line);
                 ans.push_back(Token(Token::STRING, startLine, startPosInLine, str));
-            } else if (input[pos] == ' ') {
+            }
+            else if (input[pos] == ' ') {
                 readSpaces(pos, posInLine);
-            } else if (isKeyword(pos)) {
+            }
+            else if (isKeyword(pos)) {
                 int startPosInLine = posInLine;
                 std::string keyword = readKeyword(pos, posInLine);
                 ans.push_back(Token(Token::KEYWORD, line, startPosInLine, keyword));
-            } else if ((input[pos] >= 'a' && input[pos] <= 'z')
-                       || (input[pos] >= 'A' && input[pos] <= 'Z') || input[pos] == '_') {
+            }
+            else if ((input[pos] >= 'a' && input[pos] <= 'z')
+                     || (input[pos] >= 'A' && input[pos] <= 'Z') || input[pos] == '_') {
                 int startPosInLine = posInLine;
                 std::string name = readName(pos, posInLine);
                 ans.push_back(Token(Token::NAME, line, startPosInLine, name));
-            } else if (input[pos] == ':') {
+            }
+            else if (input[pos] == ':') {
                 ans.push_back(Token(Token::BEGIN_BLOCK, line, posInLine, ":"));
                 pos++;
                 posInLine++;
-            } else if (input[pos] == '\\' && !isEnd(pos + 1) && input[pos + 1] == '\n') {
+            }
+            else if (input[pos] == '\\' && !isEnd(pos + 1) && input[pos + 1] == '\n') {
                 pos += 2;
                 line++;
                 posInLine = 0;
-            } else {
+            }
+            else {
                 throw Exception("Invalid syntax");
             }
         }
