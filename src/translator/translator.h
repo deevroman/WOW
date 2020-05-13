@@ -682,6 +682,9 @@ private:
                 } else {
                     addElement({-1, Element::GET_FIELD, 0, 0, 0.0, name});
                 }
+                if(nowToken->type == Token::BEGIN_LINE) {
+                    addElement({-1, Element::CLEAR_STACK});
+                }
                 return true;
             }
         }
@@ -1509,6 +1512,11 @@ private:
         return (indexNowToken + 1 < tokens.size()
                 && tokens[indexNowToken + 1].type == Token::OPERATOR
                 && tokens[indexNowToken + 1].value == name);
+    }
+
+    bool isNextTokenBeginLine(std::string name) {
+        return (indexNowToken + 1 < tokens.size()
+                && tokens[indexNowToken + 1].type == Token::BEGIN_LINE);
     }
 
     bool isEqualLevel() {

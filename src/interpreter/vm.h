@@ -409,6 +409,8 @@ private:
                         if (getItemOfCurStack(1)->type == wowobj::LIST) {
                             if (ind < static_cast<std::vector<wowobj *> *>(getItemOfCurStack(1)->value)->size()) {
                                 auto tmp = (*static_cast<std::vector<wowobj *> *>(getItemOfCurStack(1)->value))[ind];
+                                curStack.pop_back();
+                                curStack.pop_back();
                                 curStack.push_back(tmp);
                             }
                             else {
@@ -561,9 +563,8 @@ private:
                 case Element::EVAL_METHOD: {
                     if (curOp.stringValue == "append") {
                         if (getItemOfCurStack(1)->type == wowobj::LIST) {
-                            static_cast<std::vector<wowobj *> *>(getItemOfCurStack()->value)->push_back(
-                                    static_cast<wowobj *>(getItemOfCurStack(1)->value));
-                            curStack.pop_back();
+                            (*static_cast<std::vector<wowobj *> *>(getItemOfCurStack(1)->value)).push_back(
+                                    getItemOfCurStack(0));
                             curStack.pop_back();
                         }
                         else {
