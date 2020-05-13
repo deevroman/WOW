@@ -552,6 +552,7 @@ private:
                             next(bigScopes.rbegin())->classes.find(
                                     {bigScopes.back().value})->second.parentClasses.insert(
                                     nowToken->value);
+                            addElement({-1, Element::CREATE_CLASS});
                         }
                         else if (!isClassFullDefined(name)) {
                             throw Exception("semantic error: " + nowToken->value + " call undefined as function",

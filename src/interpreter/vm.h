@@ -11,6 +11,33 @@
 #include "../utils/wowobj.h"
 #include "../utils/exception.h"
 
+#define COMPARE(OPERATION) \
+if (getItemOfCurStack(1)->type == getItemOfCurStack()->type && getItemOfCurStack(1)->type == wowobj::INT) { \
+    bool tmp = *static_cast<int *>(getItemOfCurStack(1)->value) \
+               OPERATION *static_cast<int *>(getItemOfCurStack()->value); \
+    curStack.pop_back(); \
+    curStack.pop_back(); \
+    curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp))); \
+} \
+else if (getItemOfCurStack(1)->type == getItemOfCurStack()->type && getItemOfCurStack(1)->type == wowobj::DOUBLE) { \
+    bool tmp = *static_cast<double *>(getItemOfCurStack(1)->value) \
+               OPERATION *static_cast<double *>(getItemOfCurStack()->value); \
+    curStack.pop_back(); \
+    curStack.pop_back(); \
+    curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp))); \
+} \
+else if (getItemOfCurStack(1)->type == getItemOfCurStack()->type && getItemOfCurStack(1)->type == wowobj::STRING) { \
+    bool tmp = *static_cast<std::string *>(getItemOfCurStack(1)->value) \
+               OPERATION *static_cast<std::string *>(getItemOfCurStack()->value); \
+    curStack.pop_back(); \
+    curStack.pop_back(); \
+    curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp))); \
+} \
+else { \
+    throw Exception("no compare vars", curOp.numLine, curOp.numPos); \
+}
+
+
 class VM {
 private:
     struct scope {
@@ -537,7 +564,7 @@ private:
                 }
                 case Element::CREATE_CLASS: {
                     bigScopes.push_back({scopes.back().funcs, {}, {}, scope::CLASS});
-                    scopes.push_back({});
+                    scopes.push_back({{}, {}, {}, scope::CLASS});
                     auto fields = runLevel();
                     fields["__name__"] = new wowobj(wowobj::STRING, getItemOfCurStack()->value);
                     curStack.pop_back();
@@ -737,123 +764,19 @@ private:
                     break;
                 }
                 case Element::CMP_LESS: {
-                    if (getItemOfCurStack(1)->type == getItemOfCurStack()->type
-                        && getItemOfCurStack(1)->type == wowobj::INT) {
-                        bool tmp = *static_cast<int *>(getItemOfCurStack(1)->value)
-                                   < *static_cast<int *>(getItemOfCurStack()->value);
-                        curStack.pop_back();
-                        curStack.pop_back();
-                        curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
-                    }
-                    else if (getItemOfCurStack(1)->type == getItemOfCurStack()->type
-                             && getItemOfCurStack(1)->type == wowobj::DOUBLE) {
-                        bool tmp = *static_cast<double *>(getItemOfCurStack(1)->value)
-                                   < *static_cast<double *>(getItemOfCurStack()->value);
-                        curStack.pop_back();
-                        curStack.pop_back();
-                        curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
-                    }
-                    else if (getItemOfCurStack(1)->type == getItemOfCurStack()->type
-                             && getItemOfCurStack(1)->type == wowobj::STRING) {
-                        bool tmp = *static_cast<std::string *>(getItemOfCurStack(1)->value)
-                                   < *static_cast<std::string *>(getItemOfCurStack()->value);
-                        curStack.pop_back();
-                        curStack.pop_back();
-                        curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
-                    }
-                    else {
-                        throw Exception("no compare vars", curOp.numLine, curOp.numPos);
-                    }
+                    COMPARE(<);
                     break;
                 }
                 case Element::CMP_MORE: {
-                    if (getItemOfCurStack(1)->type == getItemOfCurStack()->type
-                        && getItemOfCurStack(1)->type == wowobj::INT) {
-                        bool tmp = *static_cast<int *>(getItemOfCurStack(1)->value)
-                                   > *static_cast<int *>(getItemOfCurStack()->value);
-                        curStack.pop_back();
-                        curStack.pop_back();
-                        curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
-                    }
-                    else if (getItemOfCurStack(1)->type == getItemOfCurStack()->type
-                             && getItemOfCurStack(1)->type == wowobj::DOUBLE) {
-                        bool tmp = *static_cast<double *>(getItemOfCurStack(1)->value)
-                                   > *static_cast<double *>(getItemOfCurStack()->value);
-                        curStack.pop_back();
-                        curStack.pop_back();
-                        curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
-                    }
-                    else if (getItemOfCurStack(1)->type == getItemOfCurStack()->type
-                             && getItemOfCurStack(1)->type == wowobj::STRING) {
-                        bool tmp = *static_cast<std::string *>(getItemOfCurStack(1)->value)
-                                   > *static_cast<std::string *>(getItemOfCurStack()->value);
-                        curStack.pop_back();
-                        curStack.pop_back();
-                        curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
-                    }
-                    else {
-                        throw Exception("no compare vars", curOp.numLine, curOp.numPos);
-                    }
+                    COMPARE(>)
                     break;
                 }
                 case Element::CMP_MORE_EQUAL: {
-                    if (getItemOfCurStack(1)->type == getItemOfCurStack()->type
-                        && getItemOfCurStack(1)->type == wowobj::INT) {
-                        bool tmp = *static_cast<int *>(getItemOfCurStack(1)->value)
-                                   >= *static_cast<int *>(getItemOfCurStack()->value);
-                        curStack.pop_back();
-                        curStack.pop_back();
-                        curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
-                    }
-                    else if (getItemOfCurStack(1)->type == getItemOfCurStack()->type
-                             && getItemOfCurStack(1)->type == wowobj::DOUBLE) {
-                        bool tmp = *static_cast<double *>(getItemOfCurStack(1)->value)
-                                   >= *static_cast<double *>(getItemOfCurStack()->value);
-                        curStack.pop_back();
-                        curStack.pop_back();
-                        curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
-                    }
-                    else if (getItemOfCurStack(1)->type == getItemOfCurStack()->type
-                             && getItemOfCurStack(1)->type == wowobj::STRING) {
-                        bool tmp = *static_cast<std::string *>(getItemOfCurStack(1)->value)
-                                   >= *static_cast<std::string *>(getItemOfCurStack()->value);
-                        curStack.pop_back();
-                        curStack.pop_back();
-                        curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
-                    }
-                    else {
-                        throw Exception("no compare vars", curOp.numLine, curOp.numPos);
-                    }
+                    COMPARE(>=)
                     break;
                 }
                 case Element::CMP_LESS_EQUAL: {
-                    if (getItemOfCurStack(1)->type == getItemOfCurStack()->type
-                        && getItemOfCurStack(1)->type == wowobj::INT) {
-                        bool tmp = *static_cast<int *>(getItemOfCurStack(1)->value)
-                                   <= *static_cast<int *>(getItemOfCurStack()->value);
-                        curStack.pop_back();
-                        curStack.pop_back();
-                        curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
-                    }
-                    else if (getItemOfCurStack(1)->type == getItemOfCurStack()->type
-                             && getItemOfCurStack(1)->type == wowobj::DOUBLE) {
-                        bool tmp = *static_cast<double *>(getItemOfCurStack(1)->value)
-                                   <= *static_cast<double *>(getItemOfCurStack()->value);
-                        curStack.pop_back();
-                        curStack.pop_back();
-                        curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
-                    }
-                    else if (getItemOfCurStack(1)->type == getItemOfCurStack()->type
-                             && getItemOfCurStack(1)->type == wowobj::STRING) {
-                        bool tmp = *static_cast<std::string *>(getItemOfCurStack(1)->value)
-                                   <= *static_cast<std::string *>(getItemOfCurStack()->value);
-                        curStack.pop_back();
-                        curStack.pop_back();
-                        curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
-                    }
-                    else {
-                        throw Exception("no compare vars", curOp.numLine, curOp.numPos);
-                    }
+                    COMPARE(<=)
                     break;
                 }
                 case Element::BEGIN_SCOPE: {
