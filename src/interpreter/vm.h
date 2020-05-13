@@ -14,8 +14,8 @@
 class VM {
 private:
     struct scope {
-        std::map<std::string, Poliz *> funcs;
-        std::map<std::string, Poliz *> classes;
+        std::map<std::string, std::pair<Poliz *, bool>> funcs;
+        std::map<std::string, std::pair<Poliz *, bool>> classes;
         std::map<std::string, wowobj *> vars;
         enum {
             SIMPLE, FUNC, CLASS
@@ -243,6 +243,7 @@ private:
                     else {
                         throw Exception("invalid type for operation", curOp.numLine, curOp.numPos);
                     }
+                    break;
                 }
                 case Element::DIV: {
                     if (getItemOfCurStack(1)->type == wowobj::INT
@@ -374,6 +375,15 @@ private:
                         getItemOfCurStack(1)->type = getItemOfCurStack()->type;
                         curStack.pop_back();
                     }
+                    else if (getItemOfCurStack()->type == wowobj::LIST) {
+                        getItemOfCurStack(1)->type = wowobj::LIST;
+                        getItemOfCurStack(1)->value = new std::vector<wowobj *>(
+                                *static_cast<std::vector<wowobj *> *>(getItemOfCurStack()->value));
+                        curStack.pop_back();
+                    }
+                    else {
+                        // todo
+                    }
                     break;
                 }
                 case Element::INIT_PARAM: {
@@ -397,18 +407,25 @@ private:
                     if (getItemOfCurStack()->type == wowobj::INT) {
                         int ind = *static_cast<int *>(getItemOfCurStack()->value);
                         if (getItemOfCurStack(1)->type == wowobj::LIST) {
-                            auto tmp = (*static_cast<std::vector<wowobj *> *>(getItemOfCurStack(1)->value))[ind];
-                            curStack.push_back(tmp);
+                            if (ind < static_cast<std::vector<wowobj *> *>(getItemOfCurStack(1)->value)->size()) {
+                                auto tmp = (*static_cast<std::vector<wowobj *> *>(getItemOfCurStack(1)->value))[ind];
+                                curStack.push_back(tmp);
+                            }
+                            else {
+                                throw Exception("index error", curOp.numLine, curOp.numPos);
+                            }
                         }
                     }
                     break;
                 }
                 case Element::DEF_FUNC: {
-                    bigScopes.back().funcs[curOp.stringValue] = scopes.back().funcs[curOp.stringValue] = curLevel.poliz->funcs[curOp.stringValue];
+                    bigScopes.back().funcs[curOp.stringValue].first = scopes.back().funcs[curOp.stringValue].first = curLevel.poliz->funcs[curOp.stringValue];
+                    bigScopes.back().funcs[curOp.stringValue].second = scopes.back().funcs[curOp.stringValue].second = true;
                     break;
                 }
                 case Element::DEF_CLASS: {
-                    bigScopes.back().classes[curOp.stringValue] = scopes.back().classes[curOp.stringValue] = curLevel.poliz->classes[curOp.stringValue];
+                    // todo
+//                    bigScopes.back().classes[curOp.stringValue] = scopes.back().classes[curOp.stringValue] = curLevel.poliz->classes[curOp.stringValue];
                     break;
                 }
                 case Element::CALL_FUNC: {
@@ -436,6 +453,11 @@ private:
                         }
                         else if (arg->type == wowobj::BOOL) {
                             *outputStream << (*(static_cast<bool *>(arg->value)) ? "True" : "False");
+                            curStack.pop_back();
+                            curStack.push_back(new wowobj(wowobj::NONE));
+                        }
+                        else if (arg->type == wowobj::NONE) {
+                            *outputStream << "None";
                             curStack.pop_back();
                             curStack.push_back(new wowobj(wowobj::NONE));
                         }
@@ -496,10 +518,13 @@ private:
                     }
                     else {
                         if (bigScopes.back().funcs.count(curOp.stringValue)) {
-                            stackTrace.push_back({curOp.stringValue, bigScopes.back().funcs[curOp.stringValue]});
+                            stackTrace.push_back({curOp.stringValue, bigScopes.back().funcs[curOp.stringValue].first});
                             bigScopes.push_back(scopes.back());
                             bigScopes.back().type = scope::FUNC;
                             scopes.push_back({scopes.back().funcs, {}, {}, scope::FUNC}); // todo
+                            for (auto &now : scopes.back().funcs) {
+                                now.second.second = false;
+                            }
                             runLevel();
                         }
                         else {
@@ -533,8 +558,35 @@ private:
                     }
                     break;
                 }
-                case Element::EVAL_METHOD:
+                case Element::EVAL_METHOD: {
+                    if (curOp.stringValue == "append") {
+                        if (getItemOfCurStack(1)->type == wowobj::LIST) {
+                            static_cast<std::vector<wowobj *> *>(getItemOfCurStack()->value)->push_back(
+                                    static_cast<wowobj *>(getItemOfCurStack(1)->value));
+                            curStack.pop_back();
+                            curStack.pop_back();
+                        }
+                        else {
+                            throw Exception("invalid method", curOp.numLine, curOp.numPos);
+                        }
+                    }
+                    else if (curOp.stringValue == "pop") {
+                        if (getItemOfCurStack()->type == wowobj::LIST) {
+                            if (static_cast<std::vector<wowobj *> *>(getItemOfCurStack()->value)->empty()) {
+                                throw Exception("pop from empty list", curOp.numLine, curOp.numPos);
+                            }
+                            static_cast<std::vector<wowobj *> *>(getItemOfCurStack()->value)->pop_back();
+                            curStack.pop_back();
+                        }
+                        else {
+                            throw Exception("invalid method", curOp.numLine, curOp.numPos);
+                        }
+                    }
+                    else {
+                        // todo
+                    }
                     break;
+                }
                 case Element::GET_VALUE_INT: {
                     void *tmpInt = new int(curOp.intValue);
                     curStack.push_back(new wowobj(wowobj::INT, tmpInt));
@@ -569,12 +621,14 @@ private:
                             i = curOp.posJump - 1;
                             continue;
                         }
+                        curStack.pop_back();
                     }
                     else if (getItemOfCurStack()->type == wowobj::INT) {
                         if (*(static_cast<int *>(getItemOfCurStack()->value))) {
                             i = curOp.posJump - 1;
                             continue;
                         }
+                        curStack.pop_back();
                     }
                     else {
                         throw Exception("invalid type for comp", curOp.numLine, curOp.numPos);
@@ -587,12 +641,14 @@ private:
                             i = curOp.posJump - 1;
                             continue;
                         }
+                        curStack.pop_back();
                     }
                     else if (getItemOfCurStack()->type == wowobj::INT) {
                         if (!*(static_cast<int *>(getItemOfCurStack()->value))) {
                             i = curOp.posJump - 1;
                             continue;
                         }
+                        curStack.pop_back();
                     }
                     else {
                         throw Exception("invalid type for comp", curOp.numLine, curOp.numPos);
@@ -675,7 +731,7 @@ private:
                         curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
                     }
                     else {
-                        throw "no compare vars";
+                        throw Exception("no compare vars", curOp.numLine, curOp.numPos);
                     }
                     break;
                 }
@@ -705,7 +761,7 @@ private:
                         curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
                     }
                     else {
-                        throw "no compare vars";
+                        throw Exception("no compare vars", curOp.numLine, curOp.numPos);
                     }
                     break;
                 }
@@ -735,7 +791,7 @@ private:
                         curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
                     }
                     else {
-                        throw "no compare vars";
+                        throw Exception("no compare vars", curOp.numLine, curOp.numPos);
                     }
                     break;
                 }
@@ -765,7 +821,7 @@ private:
                         curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
                     }
                     else {
-                        throw "no compare vars";
+                        throw Exception("no compare vars", curOp.numLine, curOp.numPos);
                     }
                     break;
                 }
@@ -795,12 +851,15 @@ private:
                         curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp)));
                     }
                     else {
-                        throw "no compare vars";
+                        throw Exception("no compare vars", curOp.numLine, curOp.numPos);
                     }
                     break;
                 }
                 case Element::BEGIN_SCOPE: {
-                    scopes.emplace_back();
+                    scopes.push_back({scopes.back().funcs});
+                    for (auto &now : scopes.back().funcs) {
+                        now.second.second = false;
+                    }
                     break;
                 }
                 case Element::END_SCOPE: {
@@ -808,16 +867,20 @@ private:
                         bigScopes.back().vars.erase(now.first);
                     }
                     for (const auto &now : scopes.back().funcs) {
-                        bigScopes.back().funcs.erase(now.first);
+                        if (now.second.second == 1) {
+                            bigScopes.back().funcs.erase(now.first);
+                        }
                     }
                     for (const auto &now : scopes.back().classes) {
-                        bigScopes.back().classes.erase(now.first);
+                        if (now.second.second == 1) {
+                            bigScopes.back().classes.erase(now.first);
+                        }
                     }
                     scopes.pop_back();
                 }
                 case Element::RETURN_VALUE: {
 //                    curStack.push_back({getItemOfCurStack()});
-                    i = stackTrace.back().poliz->operations.size();
+                    i = stackTrace.back().poliz->operations.size() + 1; // чтобы не совпало с jmp
                     break;
                 }
                 case Element::DEL: {
@@ -1017,9 +1080,22 @@ private:
                     }
                     break;
                 }
+                case Element::MAKE_LIST: {
+                    auto tmp = new wowobj(wowobj::LIST,
+                                          static_cast<void *>(new std::vector<wowobj *>));
+                    static_cast<std::vector<wowobj *> *>(tmp->value)->reserve(curOp.countParams);
+                    for (int j = 0; j < curOp.countParams; j++) {
+                        static_cast<std::vector<wowobj *> *>(tmp->value)->push_back(getItemOfCurStack());
+                        curStack.pop_back();
+                    }
+                    std::reverse(static_cast<std::vector<wowobj *> *>(tmp->value)->begin(),
+                                 static_cast<std::vector<wowobj *> *>(tmp->value)->end());
+                    curStack.push_back(tmp);
+                    break;
+                }
             }
         }
-        if (i != stackTrace.back().poliz->operations.size() + 1) {
+        if (i != stackTrace.back().poliz->operations.size() + 1 + 1) {
             curStack.push_back(new wowobj(wowobj::NONE));
         }
 
@@ -1034,6 +1110,7 @@ private:
         }
         auto returnValue = scopes.back().vars;
         scopes.pop_back();
+        bigScopes.pop_back();
         stackTrace.pop_back();
         return returnValue;
     }

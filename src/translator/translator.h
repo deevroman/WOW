@@ -437,6 +437,7 @@ private:
     bool readNameExpr() {
         if (isOperator("[")) {
             getToken();
+            int cntElement = 0;
             if (!readTest()) {
                 if (isOperator("]")) {
                     getToken();
@@ -444,14 +445,17 @@ private:
                     return true;
                 }
             }
+            cntElement++;
             if (isOperator(",")) {
                 while (isOperator(",")) {
+                    cntElement++;
                     getToken();
                     if (!readTest()) {
                         throw Exception("expected testExpr",
                                         nowToken->numLine, nowToken->numPos);
                     }
                 }
+                addElement({cntElement, Element::MAKE_LIST});
             }
             else if (isKeyword("for")) {
                 getToken();
@@ -655,6 +659,7 @@ private:
                 throw Exception("invalid trailer",
                                 nowToken->numLine, nowToken->numPos);
             }
+            addElement({-1, Element::INDEX_VALUE});
             if (isOperator("]")) {
                 getToken();
                 return true;
@@ -670,7 +675,13 @@ private:
                                 nowToken->numLine, nowToken->numPos);
             }
             else {
+                auto name = nowToken->value;
                 getToken();
+                if(isOperator("(")){
+                    addElement({-1, Element::EVAL_METHOD, 0, 0, 0.0, name});
+                } else {
+                    addElement({-1, Element::GET_FIELD, 0, 0, 0.0, name});
+                }
                 return true;
             }
         }
