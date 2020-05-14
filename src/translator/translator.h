@@ -66,7 +66,7 @@ public:
         indexNowToken = 0;
         nowToken = &tokens[0];
         levels = {0};
-        std::vector<std::string> reservedFunctions = {"print", "input", "int", "str", "bool", "len"};
+        std::vector<std::string> reservedFunctions = {"print", "input", "int", "str", "bool", "len", "max", "min"};
         std::vector<std::string> reservedClasses = {"list", "dict", "set"};
         scopes.push_back({});
         bigScopes.push_back({});
