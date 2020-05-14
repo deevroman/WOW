@@ -5,11 +5,11 @@
 #include <string>
 #include <algorithm>
 
-std::vector<std::string> split(std::string str) {
+std::vector<std::string> split(std::string str, char delimeter = '\n') {
     std::vector<std::string> ans;
     int last = 0;
     while (last < str.size()) {
-        int now = std::find(str.begin() + last, str.end(), '\n') - str.begin();
+        int now = std::find(str.begin() + last, str.end(), delimeter) - str.begin();
         ans.push_back(str.substr(last, now - last));
         last = now + 1;
     }
