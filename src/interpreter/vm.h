@@ -529,6 +529,32 @@ private:
                             throw Exception("not numbery type", curOp.numLine, curOp.numPos);
                         }
                     }
+                    else if (curOp.stringValue == "max") {
+                        if (getItemOfCurStack(1)->type == wowobj::INT
+                            && getItemOfCurStack(0)->type == wowobj::INT) {
+                            int value = std::max(*(static_cast<int *>(getItemOfCurStack(1)->value)),
+                                        *(static_cast<int *>(getItemOfCurStack()->value)));
+                            auto tmpobj = new wowobj(wowobj::INT, new int(value));
+                            curStack.pop_back();
+                            curStack.pop_back();
+                            curStack.push_back(tmpobj);
+                        } else {
+                            throw Exception("invalid args", curOp.numLine, curOp.numPos);
+                        }
+                    }
+                    else if (curOp.stringValue == "min") {
+                        if (getItemOfCurStack(1)->type == wowobj::INT
+                            && getItemOfCurStack(0)->type == wowobj::INT) {
+                            int value = std::min(*(static_cast<int *>(getItemOfCurStack(1)->value)),
+                                        *(static_cast<int *>(getItemOfCurStack()->value)));
+                            auto tmpobj = new wowobj(wowobj::INT, new int(value));
+                            curStack.pop_back();
+                            curStack.pop_back();
+                            curStack.push_back(tmpobj);
+                        } else {
+                            throw Exception("invalid args", curOp.numLine, curOp.numPos);
+                        }
+                    }
                     else if (curOp.stringValue == "bool") {
                         auto arg = getItemOfCurStack();
                         if (arg->type == wowobj::INT) {

@@ -161,6 +161,10 @@ private:
                     pos += 2;
                     posInLine = 0;
                 }
+                else if (input[pos + 1] == 'n') {
+                    str += '\n';
+                    pos += 2;
+                }
                 else {
                     str += '\\';
                 }
