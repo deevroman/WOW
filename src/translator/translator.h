@@ -456,7 +456,6 @@ private:
                                         nowToken->numLine, nowToken->numPos);
                     }
                 }
-                addElement({cntElement, Element::MAKE_LIST});
             }
             else if (isKeyword("for")) {
                 getToken();
@@ -1507,6 +1506,7 @@ private:
         if (!isKeyword("class"))
             return false;
         getToken();
+        auto mainPoliz = nowPoliz;
         if (isDefines(nowToken->value))
             throw Exception("semantic error: redefinition " + nowToken->value,
                             nowToken->numLine,
@@ -1515,6 +1515,14 @@ private:
             throw Exception("expected class name",
                             nowToken->numLine,
                             nowToken->numPos);
+        int index = nowPoliz->operations.size();
+        addElement({0, Element::DEF_CLASS, 0,
+                    0, 0, nowToken->value});
+        auto classPoliz = new Poliz;
+        mainPoliz->funcs[nowToken->value] = classPoliz;
+        nowPoliz = classPoliz;
+        nowPoliz->classes[nowToken->value] = nowPoliz;
+
         initClass(*nowToken);
         Scope last = bigScopes.back();
         bigScopes.push_back({Scope::CLASS, nowToken->value, 0, 0});
@@ -1522,6 +1530,7 @@ private:
         bigScopes.back().functions = last.functions;
         scopes.push_back({Scope::CLASS, nowToken->value});
         getToken();
+        int countParams = 0;
         if (!isBeginBlock(":"))
             throw Exception("expected : invalid classdef",
                             nowToken->numLine,
@@ -1535,6 +1544,8 @@ private:
         }
         popScope();
         popBigScope();
+        nowPoliz = mainPoliz;
+        nowPoliz->operations[index].countParams = 0;
         return true;
     }
 
