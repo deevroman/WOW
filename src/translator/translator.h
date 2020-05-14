@@ -441,6 +441,7 @@ private:
             if (!readTest()) {
                 if (isOperator("]")) {
                     getToken();
+                    addElement({0, Element::MAKE_LIST});
                     while (readTrailer());
                     return true;
                 }
@@ -476,6 +477,7 @@ private:
             if (!isOperator("]"))
                 throw Exception("expected testExpr",
                                 nowToken->numLine, nowToken->numPos);
+            addElement({cntElement, Element::MAKE_LIST});
             getToken();
             while (readTrailer());
             return true;
@@ -1315,7 +1317,7 @@ private:
 
             addElement({0, Element::GET_VALUE, 0, 0, 0, nameLen});
             addElement({0, Element::GET_VALUE, 0, 0, 0, nameArray});
-            addElement({0, Element::EVAL_METHOD, 0, 0, 0, "len"});
+            addElement({0, Element::CALL_FUNC, 0, 0, 0, "len"});
             addElement({0, Element::COPY});
 
             addElement({0, Element::GET_VALUE, 0, 0, 0, nameIter});
