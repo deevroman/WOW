@@ -17,21 +17,21 @@ if (getItemOfCurStack(1)->type == getItemOfCurStack()->type && getItemOfCurStack
                OPERATION *static_cast<int *>(getItemOfCurStack()->value); \
     curStack.pop_back(); \
     curStack.pop_back(); \
-    curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp))); \
+    curStack.push_back(new wowobj(wowobj::BOOL, static_cast<void*>(new bool(tmp)))); \
 } \
 else if (getItemOfCurStack(1)->type == getItemOfCurStack()->type && getItemOfCurStack(1)->type == wowobj::DOUBLE) { \
     bool tmp = *static_cast<double *>(getItemOfCurStack(1)->value) \
                OPERATION *static_cast<double *>(getItemOfCurStack()->value); \
     curStack.pop_back(); \
     curStack.pop_back(); \
-    curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp))); \
+    curStack.push_back(new wowobj(wowobj::BOOL, static_cast<void*>(new bool(tmp)))); \
 } \
 else if (getItemOfCurStack(1)->type == getItemOfCurStack()->type && getItemOfCurStack(1)->type == wowobj::STRING) { \
     bool tmp = *static_cast<std::string *>(getItemOfCurStack(1)->value) \
                OPERATION *static_cast<std::string *>(getItemOfCurStack()->value); \
     curStack.pop_back(); \
     curStack.pop_back(); \
-    curStack.push_back(new wowobj(wowobj::BOOL, new bool(tmp))); \
+    curStack.push_back(new wowobj(wowobj::BOOL, static_cast<void*>(new bool(tmp)))); \
 } \
 else { \
     throw Exception("no compare vars", curOp.numLine, curOp.numPos); \
@@ -82,6 +82,16 @@ private:
                         curStack.pop_back();
                         curStack.push_back(tmpobj);
                     }
+
+                    else if (getItemOfCurStack(1)->type == wowobj::INT
+                             && getItemOfCurStack(0)->type == wowobj::INT) {
+                        bool value = *(static_cast<int *>(getItemOfCurStack(1)->value)) or
+                                     *(static_cast<int *>(getItemOfCurStack()->value));
+                        auto tmpobj = new wowobj(wowobj::BOOL, new bool(value));
+                        curStack.pop_back();
+                        curStack.pop_back();
+                        curStack.push_back(tmpobj);
+                    }
                     else {
                         throw Exception("invalid type for operation", curOp.numLine, curOp.numPos);
                     }
@@ -92,6 +102,15 @@ private:
                         && getItemOfCurStack(0)->type == wowobj::BOOL) {
                         bool value = *(static_cast<bool *>(getItemOfCurStack(1)->value)) and
                                      *(static_cast<bool *>(getItemOfCurStack()->value));
+                        auto tmpobj = new wowobj(wowobj::BOOL, new bool(value));
+                        curStack.pop_back();
+                        curStack.pop_back();
+                        curStack.push_back(tmpobj);
+                    }
+                    else if (getItemOfCurStack(1)->type == wowobj::INT
+                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                        bool value = *(static_cast<int *>(getItemOfCurStack(1)->value)) and
+                                     *(static_cast<int *>(getItemOfCurStack()->value));
                         auto tmpobj = new wowobj(wowobj::BOOL, new bool(value));
                         curStack.pop_back();
                         curStack.pop_back();
@@ -510,6 +529,20 @@ private:
                             throw Exception("not numbery type", curOp.numLine, curOp.numPos);
                         }
                     }
+                    else if (curOp.stringValue == "bool") {
+                        auto arg = getItemOfCurStack();
+                        if (arg->type == wowobj::INT) {
+                            bool *tmp = new bool((*(static_cast<int *>(arg->value))) != 0);
+                            curStack.pop_back();
+                            curStack.push_back(new wowobj(wowobj::BOOL, static_cast<void *>(tmp)));
+                        }
+                        else if (arg->type == wowobj::BOOL) {
+
+                        }
+                        else {
+                            throw Exception("not booly type", curOp.numLine, curOp.numPos);
+                        }
+                    }
                     else if (curOp.stringValue == "str") {
                         auto arg = getItemOfCurStack();
                         if (arg->type == wowobj::INT) {
@@ -610,8 +643,22 @@ private:
                             throw Exception("invalid method", curOp.numLine, curOp.numPos);
                         }
                     }
+                    else if (curOp.stringValue == "split") {
+                        if (getItemOfCurStack()->type == wowobj::STRING) {
+                            auto tmp = split(*static_cast<std::string *>(getItemOfCurStack()->value), ' ');
+                            auto tmp2 = new std::vector<wowobj *>;
+                            for (auto &now : tmp) {
+                                tmp2->push_back(new wowobj(wowobj::STRING, static_cast<void *> (new std::string(now))));
+                            }
+                            curStack.pop_back();
+                            curStack.push_back(new wowobj(wowobj::LIST, static_cast<void*>(tmp2)));
+                        }
+                        else {
+                            throw Exception("invalid method", curOp.numLine, curOp.numPos);
+                        }
+                    }
                     else {
-                        // todo
+                        throw Exception("invalid method", curOp.numLine, curOp.numPos);
                     }
                     break;
                 }
@@ -1050,7 +1097,8 @@ public:
 
     VM() {}
 
-    VM(std::istream *inputStream, std::ostream *outputStream) : inputStream(inputStream), outputStream(outputStream) {}
+    VM(std::istream *inputStream, std::ostream *outputStream) : inputStream(inputStream), outputStream(
+            outputStream) {}
 };
 
 #endif //WOW_VM_H

@@ -5,6 +5,9 @@
 #include <string>
 #include <unordered_map>
 
+#include "../external/ThorsSerializer/ThorSerialize/Traits.h"
+
+
 class Element {
 public:
     int countParams = 0; // TODO возможно можно перенести
@@ -48,5 +51,6 @@ public:
     std::vector<Poliz *> otherScopes;
     std::vector<Element> operations;
 };
+
 
 #endif //WOW_POLIZ_H
