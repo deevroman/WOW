@@ -962,7 +962,7 @@ private:
                     initVar(pos);
                 }
                 getToken();
-                posвв = indexNowToken;
+                pos = indexNowToken;
                 if (!readTest()) {
                     throw Exception("invalid test expr",
                                     nowToken->numLine,
