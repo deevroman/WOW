@@ -305,9 +305,10 @@ private:
                              && getItemOfCurStack(0)->type == wowobj::DOUBLE) {
                         double value = *(static_cast<double *>(getItemOfCurStack(1)->value)) /
                                        *(static_cast<double *>(getItemOfCurStack()->value));
-                        auto tmpobj = new wowobj(wowobj::INT, new double(value));
+                        auto tmpobj = new wowobj(wowobj::DOUBLE, new double(value));
                         curStack.pop_back();
                         curStack.pop_back();
+                        curStack.push_back(tmpobj);
                         curStack.push_back(tmpobj);
                     }
                     else {
@@ -524,6 +525,26 @@ private:
                             int *tmp = new int((int) *(static_cast<double *>(arg->value)));
                             curStack.pop_back();
                             curStack.push_back(new wowobj(wowobj::INT, static_cast<void *>(tmp)));
+                        }
+                        else {
+                            throw Exception("not numbery type", curOp.numLine, curOp.numPos);
+                        }
+                    }
+                    else if (curOp.stringValue == "double") {
+                        auto arg = getItemOfCurStack();
+                        if (arg->type == wowobj::STRING) {
+                            auto *tmp = new double(std::stod(*(static_cast<std::string *>(arg->value))));
+                            curStack.pop_back();
+                            curStack.push_back(new wowobj(wowobj::DOUBLE, static_cast<void *>(tmp)));
+                        }
+                        else if (arg->type == wowobj::INT) {
+                            auto *tmp = new double((double) *(static_cast<int *>(arg->value)));
+                            curStack.pop_back();
+                            curStack.push_back(new wowobj(wowobj::DOUBLE, static_cast<void *>(tmp)));
+                        } else if (arg->type == wowobj::DOUBLE) {
+                            auto *tmp = new double((double) *(static_cast<double *>(arg->value)));
+                            curStack.pop_back();
+                            curStack.push_back(new wowobj(wowobj::DOUBLE, static_cast<void *>(tmp)));
                         }
                         else {
                             throw Exception("not numbery type", curOp.numLine, curOp.numPos);

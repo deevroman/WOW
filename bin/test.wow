@@ -1,9 +1,13 @@
-a = [1, 2]
-for i in a:
-    print(i)
-    print(' ')
-print('\n')
-a.append(48)
-for i in a:
-    print(i)
-    print(' ')
+def bin(a, b):
+    if b < 0:
+        return 1 / double(bin(a, -b))
+    if b == 0:
+        return 1
+    if b == 1:
+        return a
+    if b % 2:
+        return bin(a, b-1) * a
+    else:
+        return bin(a, b // 2)**2
+
+print(bin(2, -4))
