@@ -952,6 +952,9 @@ private:
             else if (operation == "<<=") {
                 addElement({0, Element::LEFT_SHIFT_INPLACE});
             }
+            else if (operation == "%=") {
+                addElement({0, Element::MOD_INPLACE});
+            }
         }
         else {
             while (isOperator("=")) {
@@ -959,7 +962,7 @@ private:
                     initVar(pos);
                 }
                 getToken();
-                pos = indexNowToken;
+                posвв = indexNowToken;
                 if (!readTest()) {
                     throw Exception("invalid test expr",
                                     nowToken->numLine,
@@ -1279,12 +1282,20 @@ private:
         if (nowToken->value != "for")
             return false;
         getToken();
+        // ~~~
+        addElement({0, Element::BEGIN_SCOPE});
+        int badJmpPos = 0;
+        // ~~~
         scopes.push_back({Scope::SIMPLE, ""});
         bigScopes.back().countCycle++;
         if (nowToken->NAME != Token::NAME)
             throw Exception("expected name after for",
                             nowToken->numLine,
                             nowToken->numPos);
+        std::string name = nowToken->value;
+        std::string nameLen = "__len" + std::to_string(bigScopes.back().countCycle);
+        std::string nameIter = "__iter" + std::to_string(bigScopes.back().countCycle);
+        std::string nameArray = "__array" + std::to_string(bigScopes.back().countCycle);
         initVar(indexNowToken);
         getToken();
         if (!isKeyword("in"))
@@ -1292,32 +1303,83 @@ private:
                             nowToken->numLine,
                             nowToken->numPos);
         getToken();
+        // ~~~
+            addElement({0, Element::GET_VALUE, 0, 0, 0, nameArray});
+        // ~~~
         if (!readTest() && checkDefinedTestNames())
             throw Exception("invalid for condition",
                             nowToken->numLine,
                             nowToken->numPos);
+        // ~~~
+            addElement({0, Element::COPY});
+
+            addElement({0, Element::GET_VALUE, 0, 0, 0, nameLen});
+            addElement({0, Element::GET_VALUE, 0, 0, 0, nameArray});
+            addElement({0, Element::EVAL_METHOD, 0, 0, 0, "len"});
+            addElement({0, Element::COPY});
+
+            addElement({0, Element::GET_VALUE, 0, 0, 0, nameIter});
+            addElement({0, Element::GET_VALUE_INT});
+            addElement({0, Element::COPY});
+        // ~~~
         if (!isBeginBlock(":"))
             throw Exception("expected : after for statement",
                             nowToken->numLine,
                             nowToken->numPos);
         getToken();
+        // ~~~
+            int stmtBeginPos = nowPoliz->operations.size();
+            addElement({0, Element::GET_VALUE, 0, 0, 0, nameIter});
+            addElement({0, Element::GET_VALUE, 0, 0, 0, nameLen});
+            addElement({0, Element::CMP_LESS});
+            int jmpToEnd = nowPoliz->operations.size();
+            addElement({0, Element::NEGATIVE_JMP});
+        // ~~~
+
+        // ~~~
+            addElement({0, Element::GET_VALUE, 0, 0, 0, name});
+            addElement({0, Element::GET_VALUE, 0, 0, 0, nameArray});
+            addElement({0, Element::GET_VALUE, 0, 0, 0, nameIter});
+            addElement({0, Element::INDEX_VALUE});
+            addElement({0, Element::COPY});
+        // ~~~
         if (!readSuite())
             throw Exception("invalid for suite",
                             nowToken->numLine,
                             nowToken->numPos);
+
         popScope();
+        // ~~~
+            addElement({0, Element::GET_VALUE, 0, 0, 0, nameIter});
+            addElement({0, Element::GET_VALUE_INT, 0, 1});
+            addElement({0, Element::PLUS_INPLACE});
+            addElement({0, Element::JMP, stmtBeginPos});
+        int withElse = false;
+        addElement({0, Element::END_SCOPE});
+        // ~~~
         if (isEqualLevel() && isNextTokenKey("else")) {
             readBeginLine();
             getToken();
+            // ~~~
+                withElse = true;
+                addElement({0, Element::BEGIN_SCOPE});
+            // ~~~
             scopes.push_back({});
             if (!isBeginBlock(":"))
                 throw Exception("expected : after else",
                                 nowToken->numLine,
                                 nowToken->numPos);
             getToken();
+            badJmpPos = nowPoliz->operations.size();
             readSuite();
             popScope();
+            // ~~~
+            addElement({0, Element::END_SCOPE});
+            // ~~~
         }
+        if (!withElse)
+            badJmpPos = nowPoliz->operations.size();
+        nowPoliz->operations[jmpToEnd].posJump = badJmpPos;
         bigScopes.back().countCycle--;
         return true;
     }
