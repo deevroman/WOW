@@ -108,7 +108,7 @@ private:
                         curStack.push_back(tmpobj);
                     }
                     else if (getItemOfCurStack(1)->type == wowobj::INT
-                        && getItemOfCurStack(0)->type == wowobj::INT) {
+                             && getItemOfCurStack(0)->type == wowobj::INT) {
                         bool value = *(static_cast<int *>(getItemOfCurStack(1)->value)) and
                                      *(static_cast<int *>(getItemOfCurStack()->value));
                         auto tmpobj = new wowobj(wowobj::BOOL, new bool(value));
@@ -596,16 +596,16 @@ private:
                     break;
                 }
                 case Element::CREATE_CLASS: {
-                    bigScopes.push_back({scopes.back().funcs, {}, {}, scope::CLASS});
+                    stackTrace.push_back({curOp.stringValue, bigScopes.back().classes[curOp.stringValue].first});
+                    bigScopes.push_back({scopes.back().funcs, scopes.back().classes, {}, scope::CLASS});
                     scopes.push_back({{}, {}, {}, scope::CLASS});
                     auto fields = runLevel();
                     fields["__name__"] = new wowobj(wowobj::STRING, getItemOfCurStack()->value);
                     curStack.pop_back();
-                    curStack.push_back(
-                            new wowobj(wowobj::USER_CLASS,
-                                       static_cast<void *>(new wowobj(wowobj::USER_CLASS,
-                                                                      static_cast<void *>(new std::map<std::string, wowobj *>(
-                                                                              fields))))));
+                    curStack.push_back(new wowobj(wowobj::USER_CLASS,
+
+                                                  static_cast<void *>(new std::map<std::string, wowobj *>(
+                                                          fields))));
 
                     break;
                 }
@@ -621,41 +621,41 @@ private:
                     break;
                 }
                 case Element::EVAL_METHOD: {
-                    if (curOp.stringValue == "append") {
-                        if (getItemOfCurStack(1)->type == wowobj::LIST) {
-                            (*static_cast<std::vector<wowobj *> *>(getItemOfCurStack(1)->value)).push_back(
-                                    getItemOfCurStack(0));
-                            curStack.pop_back();
-                        }
-                        else {
-                            throw Exception("invalid method", curOp.numLine, curOp.numPos);
-                        }
+                    if (curOp.stringValue == "append" && getItemOfCurStack(1)->type == wowobj::LIST) {
+                        (*static_cast<std::vector<wowobj *> *>(getItemOfCurStack(1)->value)).push_back(
+                                getItemOfCurStack(0));
+                        curStack.pop_back();
                     }
-                    else if (curOp.stringValue == "pop") {
-                        if (getItemOfCurStack()->type == wowobj::LIST) {
-                            if (static_cast<std::vector<wowobj *> *>(getItemOfCurStack()->value)->empty()) {
-                                throw Exception("pop from empty list", curOp.numLine, curOp.numPos);
-                            }
-                            static_cast<std::vector<wowobj *> *>(getItemOfCurStack()->value)->pop_back();
-                            curStack.pop_back();
+                    else if (curOp.stringValue == "pop" && getItemOfCurStack()->type == wowobj::LIST) {
+                        if (static_cast<std::vector<wowobj *> *>(getItemOfCurStack()->value)->empty()) {
+                            throw Exception("pop from empty list", curOp.numLine, curOp.numPos);
                         }
-                        else {
-                            throw Exception("invalid method", curOp.numLine, curOp.numPos);
-                        }
+                        static_cast<std::vector<wowobj *> *>(getItemOfCurStack()->value)->pop_back();
+                        curStack.pop_back();
                     }
-                    else if (curOp.stringValue == "split") {
-                        if (getItemOfCurStack()->type == wowobj::STRING) {
-                            auto tmp = split(*static_cast<std::string *>(getItemOfCurStack()->value), ' ');
-                            auto tmp2 = new std::vector<wowobj *>;
-                            for (auto &now : tmp) {
-                                tmp2->push_back(new wowobj(wowobj::STRING, static_cast<void *> (new std::string(now))));
-                            }
-                            curStack.pop_back();
-                            curStack.push_back(new wowobj(wowobj::LIST, static_cast<void*>(tmp2)));
+                    else if (curOp.stringValue == "split" && getItemOfCurStack()->type == wowobj::STRING) {
+                        auto tmp = split(*static_cast<std::string *>(getItemOfCurStack()->value), ' ');
+                        auto tmp2 = new std::vector<wowobj *>;
+                        for (auto &now : tmp) {
+                            tmp2->push_back(new wowobj(wowobj::STRING, static_cast<void *> (new std::string(now))));
                         }
-                        else {
-                            throw Exception("invalid method", curOp.numLine, curOp.numPos);
+                        curStack.pop_back();
+                        curStack.push_back(new wowobj(wowobj::LIST, static_cast<void *>(tmp2)));
+                    }
+                    else if (getItemOfCurStack()->type == wowobj::USER_CLASS) {
+                        auto tid = static_cast<std::map<std::string, wowobj*>*>(getItemOfCurStack(curOp.countParams)->value);
+                        stackTrace.push_back({curOp.stringValue, bigScopes.back().funcs[curOp.stringValue].first});
+
+                        bigScopes.push_back({{}, {}, *tid});
+                        for (const auto& now : bigScopes.back().classes[curOp.stringValue].first->funcs){
+                            bigScopes.back().funcs[now.first] = {now.second, false};
                         }
+                        bigScopes.back().type = scope::FUNC;
+                        scopes.push_back({scopes.back().funcs, {}, {}, scope::FUNC}); // todo
+                        for (auto &now : scopes.back().funcs) {
+                            now.second.second = false;
+                        }
+                        runLevel();
                     }
                     else {
                         throw Exception("invalid method", curOp.numLine, curOp.numPos);

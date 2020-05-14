@@ -559,6 +559,8 @@ private:
                             throw Exception("semantic error: " + nowToken->value + " call undefined as function",
                                             nowToken->numLine,
                                             nowToken->numPos);
+                        } else{
+                            addElement({-1, Element::CREATE_CLASS});
                         }
                     }
                 }

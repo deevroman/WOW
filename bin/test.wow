@@ -1,0 +1,5 @@
+class kek:
+    a = 42
+
+b = kek()
+print(b.a)
