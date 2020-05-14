@@ -848,6 +848,7 @@ private:
                         }
                     }
                     scopes.pop_back();
+                    break;
                 }
                 case Element::RETURN_VALUE: {
 //                    curStack.push_back({getItemOfCurStack()});
