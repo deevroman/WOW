@@ -7,4 +7,5 @@ include_directories("../external/ThorsSerializer/")
 
 add_executable(run_tests run_tests.cpp)
 
-SET( EXECUTABLE_OUTPUT_PATH "../../../bin")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")

@@ -541,7 +541,8 @@ private:
                             auto *tmp = new double((double) *(static_cast<int *>(arg->value)));
                             curStack.pop_back();
                             curStack.push_back(new wowobj(wowobj::DOUBLE, static_cast<void *>(tmp)));
-                        } else if (arg->type == wowobj::DOUBLE) {
+                        }
+                        else if (arg->type == wowobj::DOUBLE) {
                             auto *tmp = new double((double) *(static_cast<double *>(arg->value)));
                             curStack.pop_back();
                             curStack.push_back(new wowobj(wowobj::DOUBLE, static_cast<void *>(tmp)));
@@ -554,12 +555,13 @@ private:
                         if (getItemOfCurStack(1)->type == wowobj::INT
                             && getItemOfCurStack(0)->type == wowobj::INT) {
                             int value = std::max(*(static_cast<int *>(getItemOfCurStack(1)->value)),
-                                        *(static_cast<int *>(getItemOfCurStack()->value)));
+                                                 *(static_cast<int *>(getItemOfCurStack()->value)));
                             auto tmpobj = new wowobj(wowobj::INT, new int(value));
                             curStack.pop_back();
                             curStack.pop_back();
                             curStack.push_back(tmpobj);
-                        } else {
+                        }
+                        else {
                             throw Exception("invalid args", curOp.numLine, curOp.numPos);
                         }
                     }
@@ -567,12 +569,13 @@ private:
                         if (getItemOfCurStack(1)->type == wowobj::INT
                             && getItemOfCurStack(0)->type == wowobj::INT) {
                             int value = std::min(*(static_cast<int *>(getItemOfCurStack(1)->value)),
-                                        *(static_cast<int *>(getItemOfCurStack()->value)));
+                                                 *(static_cast<int *>(getItemOfCurStack()->value)));
                             auto tmpobj = new wowobj(wowobj::INT, new int(value));
                             curStack.pop_back();
                             curStack.pop_back();
                             curStack.push_back(tmpobj);
-                        } else {
+                        }
+                        else {
                             throw Exception("invalid args", curOp.numLine, curOp.numPos);
                         }
                     }
@@ -690,11 +693,12 @@ private:
                         curStack.push_back(new wowobj(wowobj::LIST, static_cast<void *>(tmp2)));
                     }
                     else if (getItemOfCurStack()->type == wowobj::USER_CLASS) {
-                        auto tid = static_cast<std::map<std::string, wowobj*>*>(getItemOfCurStack(curOp.countParams)->value);
+                        auto tid = static_cast<std::map<std::string, wowobj *> *>(getItemOfCurStack(
+                                curOp.countParams)->value);
                         stackTrace.push_back({curOp.stringValue, bigScopes.back().funcs[curOp.stringValue].first});
 
                         bigScopes.push_back({{}, {}, *tid});
-                        for (const auto& now : bigScopes.back().classes[curOp.stringValue].first->funcs){
+                        for (const auto &now : bigScopes.back().classes[curOp.stringValue].first->funcs) {
                             bigScopes.back().funcs[now.first] = {now.second, false};
                         }
                         bigScopes.back().type = scope::FUNC;
@@ -741,6 +745,7 @@ private:
                     if (getItemOfCurStack()->type == wowobj::BOOL) {
                         if (*(static_cast<bool *>(getItemOfCurStack()->value))) {
                             i = curOp.posJump - 1;
+                            curStack.pop_back();
                             continue;
                         }
                         curStack.pop_back();
@@ -748,6 +753,7 @@ private:
                     else if (getItemOfCurStack()->type == wowobj::INT) {
                         if (*(static_cast<int *>(getItemOfCurStack()->value))) {
                             i = curOp.posJump - 1;
+                            curStack.pop_back();
                             continue;
                         }
                         curStack.pop_back();
@@ -761,6 +767,7 @@ private:
                     if (getItemOfCurStack()->type == wowobj::BOOL) {
                         if (!*(static_cast<bool *>(getItemOfCurStack()->value))) {
                             i = curOp.posJump - 1;
+                            curStack.pop_back();
                             continue;
                         }
                         curStack.pop_back();
@@ -768,6 +775,7 @@ private:
                     else if (getItemOfCurStack()->type == wowobj::INT) {
                         if (!*(static_cast<int *>(getItemOfCurStack()->value))) {
                             i = curOp.posJump - 1;
+                            curStack.pop_back();
                             continue;
                         }
                         curStack.pop_back();

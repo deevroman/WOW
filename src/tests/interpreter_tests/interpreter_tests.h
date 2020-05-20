@@ -4,6 +4,7 @@
 #include "../../interpreter/interpreter.h"
 #include "../../fread/fread.h"
 #include <iostream>
+#include <string>
 
 
 class InterpreterTests {
@@ -23,7 +24,7 @@ private:
     int COUNT_FAILED_TESTS_P = 0;
     int COUNT_FAILED_TESTS_N = 0;
 
-    const std::string prefixPath = "../tests/interpreter_tests/";
+    const std::string prefixPath = "../tests_files/interpreter_tests/";
 
     void loadCountTests() {
         COUNT_TESTS_P = stoi(readFile(prefixPath + "positives/countTests"));
@@ -60,44 +61,37 @@ private:
 
         COUNT_FAILED_TESTS_P = 0;
         for (int i = 1; i <= COUNT_TESTS_P; i++) {
+            std::string code = readFile(prefixPath + "positives/test_" + std::to_string(i) + ".code");
             std::string input = readFile(prefixPath + "positives/test_" + std::to_string(i) + ".input");
-            try {
-                Runner runner(input);
-                std::cout << "Positive test #" << i << '\n';
-                std::cout << "OK\n";
-            } catch (...) {
-                std::cout << "Positive test #" << i << '\n';
-                std::cout << "\x1b[31mFailed:\x1b[0m\n";
+            std::string output = readFile(prefixPath + "positives/test_" + std::to_string(i) + ".output");
+            auto scriptInput = std::stringstream(input);
+            auto scriptOutput = std::stringstream();
+            auto scriptErrors = std::stringstream();
+            Runner runner(code, &scriptInput, &scriptOutput, &scriptOutput);
+            if (scriptOutput.str() == output && scriptErrors.str().empty()) {
+                std::cout << "Test #" << i << ": OK\n";
+            }
+            else {
+                std::cout << "Test #" << i << ": Failed\n";
                 COUNT_FAILED_TESTS_P++;
             }
         }
         COUNT_FAILED_TESTS_N = 0;
         for (int i = 1; i <= COUNT_TESTS_N; i++) {
+            std::string code = readFile(prefixPath + "negatives/test_" + std::to_string(i) + ".code");
             std::string input = readFile(prefixPath + "negatives/test_" + std::to_string(i) + ".input");
-            Tokenizer tokenizer(input);
-            std::vector<Token> result = tokenizer.tokenize();
-            Translator translator(result);
-            try {
-                translator.translate();
-                std::cout << "Negative test #" << i << '\n';
-                std::cout << "\x1b[31mFailed:\x1b[0m\n";
-                std::cout << "\x1b[31mNot crashed\x1b[0m\n";
+            std::string output = readFile(prefixPath + "negatives/test_" + std::to_string(i) + ".output");
+            std::string errors = readFile(prefixPath + "negatives/test_" + std::to_string(i) + ".errors");
+            auto scriptInput = std::stringstream(input);
+            auto scriptOutput = std::stringstream();
+            auto scriptErrors = std::stringstream();
+            Runner runner(code, &scriptInput, &scriptOutput, &scriptOutput);
+            if (scriptOutput.str() == output && scriptErrors.str() == errors) {
+                std::cout << "Test #" << i << ": OK\n";
+            }
+            else {
+                std::cout << "Test #" << i << ": Failed\n";
                 COUNT_FAILED_TESTS_N++;
-            } catch (std::string e) {
-                std::string goodOutput = readFile(
-                        prefixPath + "positives/test_" + std::to_string(i) + ".output");
-                if (true) { // FIXME пофиксить кода оформим нормально сообщения об ошибках
-                    std::cout << "Negative test #" << i << '\n';
-                    std::cout << "OK\n";
-                }
-                else {
-                    std::cout << "Negative test #" << i << '\n';
-                    std::cout << "\x1b[31mFailed:\x1b[0m\n";
-                    std::cout << "\x1b[31mWrong exception\x1b[0m\n";
-                }
-            } catch (...) {
-                std::cout << "Negative test #" << i << '\n';
-                std::cout << "Failed. Unknown error\n";
             }
         }
     }

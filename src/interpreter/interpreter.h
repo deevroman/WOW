@@ -10,15 +10,16 @@
 class Runner {
 public:
     Runner(std::string code, std::istream *inputStream = &std::cin,
-           std::ostream *outputStream = &std::cout) {
+           std::ostream *outputStream = &std::cout,
+           std::ostream *errorStream = &std::cerr) {
         Tokenizer tokenizer(code);
         auto linesOfCode = split(code);
         std::vector<Token> tokens;
         try {
             tokens = tokenizer.tokenize();
         } catch (std::string e) {
-            std::cout << "Not parsed\n";
-            std::cerr << e;
+            *errorStream << "Not parsed\n"
+                         << e;
             return;
         }
         Poliz *wowByteCode;
@@ -26,17 +27,17 @@ public:
             Translator translator(tokens);
             wowByteCode = translator.translate();
         } catch (std::string e) {
-            std::cerr << "Not translated\n"
-                      << e;
+            *errorStream << "Not translated\n"
+                         << e;
             return;
         }
         try {
             VM vm(inputStream, outputStream);
             vm.run(wowByteCode);
         } catch (Exception e) {
-            std::cerr << "Runtime error\n"
-                      << e.message << "\n"
-                      << e.line << ": " << linesOfCode[e.line - 1] << "\n";
+            *errorStream << "Runtime error\n"
+                         << e.message << "\n"
+                         << e.line << ": " << linesOfCode[e.line - 1] << "\n";
         }
     }
 
