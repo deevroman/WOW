@@ -4,8 +4,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
-
-#include "../external/ThorsSerializer/ThorSerialize/Traits.h"
+#include <map>
 
 
 class Element {

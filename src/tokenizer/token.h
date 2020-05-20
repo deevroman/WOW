@@ -1,8 +1,6 @@
 #ifndef WOW_TOKEN_H
 #define WOW_TOKEN_H
 
-#include "../external/ThorsSerializer/ThorSerialize/Traits.h"
-
 struct Token {
     enum TypeToken {
         KEYWORD, NAME, STRING,
@@ -25,11 +23,7 @@ struct Token {
                && value == oth.value;
     }
 
-    friend class ThorsAnvil::Serialize::Traits<Token>;
 };
 
-ThorsAnvil_MakeEnum(Token::TypeToken, KEYWORD, NAME, STRING,
-                    NUMBER, BEGIN_LINE, BEGIN_BLOCK, OPERATOR, ENDMARKER);
-ThorsAnvil_MakeTrait(Token, type, numLine, numPos, value);
 
 #endif //WOW_TOKEN_H
