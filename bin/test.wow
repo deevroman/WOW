@@ -1,5 +1,9 @@
-class foo:
-    bar = 2
+def gcd(a, b):
+    while a and b:
+        if a > b:
+            a %= b
+        else:
+            b %= a
+    return a + b
 
-x = foo()
-print(x.bar)
+print(gcd(48, 148))

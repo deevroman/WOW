@@ -1,7 +1,0 @@
-a = 49.0
-while True:
-    a[9].kek(0, 0)
-    continue
-    break
-else:
-    print(4, 4)
