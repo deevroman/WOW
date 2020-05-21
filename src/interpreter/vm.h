@@ -404,32 +404,49 @@ private:
                     break;
                 }
                 case Element::COPY: {
-                    if (getItemOfCurStack()->type == wowobj::INT
-                        || getItemOfCurStack()->type == wowobj::DOUBLE
-                        || getItemOfCurStack()->type == wowobj::STRING) {
-                        if (getItemOfCurStack()->type == wowobj::INT) {
-                            getItemOfCurStack(1)->value = static_cast<void *>(new int(
-                                    *static_cast<int *>(getItemOfCurStack()->value)));
-                        }
-                        else if (getItemOfCurStack()->type == wowobj::STRING) {
-                            getItemOfCurStack(1)->value = static_cast<void *>(new std::string(
-                                    *static_cast<std::string *>(getItemOfCurStack()->value)));
-                        }
-                        else if (getItemOfCurStack()->type == wowobj::DOUBLE) {
-                            getItemOfCurStack(1)->value = static_cast<void *>(new double(
-                                    *static_cast<double *>(getItemOfCurStack()->value)));
-                        }
-                        getItemOfCurStack(1)->type = getItemOfCurStack()->type;
-                        curStack.pop_back();
-                    }
-                    else if (getItemOfCurStack()->type == wowobj::LIST) {
-                        getItemOfCurStack(1)->type = wowobj::LIST;
-                        getItemOfCurStack(1)->value = new std::vector<wowobj *>(
-                                *static_cast<std::vector<wowobj *> *>(getItemOfCurStack()->value));
-                        curStack.pop_back();
-                    }
-                    else {
-                        // todo
+                    switch (getItemOfCurStack()->type) {
+                        case wowobj::INT:
+                        case wowobj::STRING:
+                        case wowobj::DOUBLE:
+                        case wowobj::BOOL:
+                        case wowobj::NONE:
+                            if (getItemOfCurStack()->type == wowobj::INT) {
+                                getItemOfCurStack(1)->value = static_cast<void *>(new int(
+                                        *static_cast<int *>(getItemOfCurStack()->value)));
+                            }
+                            else if (getItemOfCurStack()->type == wowobj::STRING) {
+                                getItemOfCurStack(1)->value = static_cast<void *>(new std::string(
+                                        *static_cast<std::string *>(getItemOfCurStack()->value)));
+                            }
+                            else if (getItemOfCurStack()->type == wowobj::DOUBLE) {
+                                getItemOfCurStack(1)->value = static_cast<void *>(new double(
+                                        *static_cast<double *>(getItemOfCurStack()->value)));
+                            }
+                            else if (getItemOfCurStack()->type == wowobj::BOOL) {
+                                getItemOfCurStack(1)->value = static_cast<void *>(new bool(
+                                        *static_cast<double *>(getItemOfCurStack()->value)));
+                            }
+                            else if (getItemOfCurStack()->type == wowobj::NONE) {
+                                // nothing
+                            }
+                            getItemOfCurStack(1)->type = getItemOfCurStack()->type;
+                            curStack.pop_back();
+                            break;
+                        case wowobj::LIST:
+                            getItemOfCurStack(1)->type = wowobj::LIST;
+                            getItemOfCurStack(1)->value = new std::vector<wowobj *>(
+                                    *static_cast<std::vector<wowobj *> *>(getItemOfCurStack()->value));
+                            curStack.pop_back();
+                            break;
+                        case wowobj::USER_CLASS:
+                            getItemOfCurStack(1)->type = wowobj::USER_CLASS;
+                            getItemOfCurStack(1)->value = new std::map<std::string, wowobj *>(
+                                    *static_cast<std::map<std::string, wowobj *> *>(getItemOfCurStack()->value));
+                            curStack.pop_back();
+                            break;
+                        case wowobj::DICT:
+                            //todo
+                            break;
                     }
                     break;
                 }
@@ -653,17 +670,16 @@ private:
                     fields["__name__"] = new wowobj(wowobj::STRING, getItemOfCurStack()->value);
                     curStack.pop_back();
                     curStack.push_back(new wowobj(wowobj::USER_CLASS,
-
                                                   static_cast<void *>(new std::map<std::string, wowobj *>(
                                                           fields))));
 
                     break;
                 }
                 case Element::GET_FIELD: {
-                    auto tmp = *static_cast<std::map<std::string, wowobj *> *>(getItemOfCurStack(1)->value);
-                    if (tmp.count(*static_cast<std::string *>(getItemOfCurStack()->value))) {
+                    auto tmp = *static_cast<std::map<std::string, wowobj *> *>(getItemOfCurStack()->value);
+                    if (tmp.count(curOp.stringValue)) {
                         curStack.pop_back();
-                        curStack.push_back(tmp[*static_cast<std::string *>(getItemOfCurStack()->value)]);
+                        curStack.push_back(tmp[curOp.stringValue]);
                     }
                     else {
                         throw Exception("undefined field of class", curOp.numLine, curOp.numPos);

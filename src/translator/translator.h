@@ -553,14 +553,14 @@ private:
                             next(bigScopes.rbegin())->classes.find(
                                     {bigScopes.back().value})->second.parentClasses.insert(
                                     nowToken->value);
-                            addElement({-1, Element::CREATE_CLASS});
+                            addElement({-1, Element::CREATE_CLASS, 0, 0, 0.0, nowToken->value});
                         }
                         else if (!isClassFullDefined(name)) {
                             throw Exception("semantic error: " + nowToken->value + " call undefined as function",
                                             nowToken->numLine,
                                             nowToken->numPos);
                         } else{
-                            addElement({-1, Element::CREATE_CLASS});
+                            addElement({-1, Element::CREATE_CLASS, 0, 0, 0.0, nowToken->value});
                         }
                     }
                 }
@@ -1521,7 +1521,7 @@ private:
         addElement({0, Element::DEF_CLASS, 0,
                     0, 0, nowToken->value});
         auto classPoliz = new Poliz;
-        mainPoliz->funcs[nowToken->value] = classPoliz;
+        mainPoliz->classes[nowToken->value] = classPoliz;
         nowPoliz = classPoliz;
         nowPoliz->classes[nowToken->value] = nowPoliz;
 

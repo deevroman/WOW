@@ -2,4 +2,4 @@ class foo:
     bar = 2
 
 x = foo()
-x.bar
+print(x.bar)
