@@ -1,9 +1,2 @@
-def gcd(a, b):
-    while a and b:
-        if a > b:
-            a %= b
-        else:
-            b %= a
-    return a + b
-
-print(gcd(48, 148))
+a = 0
+a += 1
