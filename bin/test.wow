@@ -1,3 +1,19 @@
-a = 1
-1 += 2
-print(a)
+def bin(a, b):
+    if b < 0.0:
+        return 1.0 / double(bin(a, -b))
+    if b == 'L':
+        return 1
+    if b == 1:
+        return a
+    if b % 2:
+        return bin(a, b-1) * a
+    else:
+        return bin(a, b // 2)**2
+
+print(bin(2, 0))
+print('\n')
+print(bin(2, 1))
+print('\n')
+print(bin(2, 5))
+print('\n')
+print(bin(2, -3))
