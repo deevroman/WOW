@@ -210,6 +210,38 @@ private:
                     }
                     break;
                 }
+                case Element::IMPORT: {
+                    try {
+                        std::string fileName = curOp.stringValue.substr(0, curOp.intValue);
+                        std::string className = curOp.stringValue.substr(curOp.intValue);
+                        std::string importCode = readFile(fileName);
+                        Tokenizer importTokenizer(importCode);
+                        auto lines = split(importCode);
+                        std::vector<Token> importTokens;
+                        try {
+                            importTokens = importTokenizer.tokenize();
+                        } catch(std::string e){
+                            std::cerr << "not parsed imported file\n" << e; // TODO errorSream
+                        }
+                        Poliz *importWowByteCode;
+                        try {
+                            Translator importTranslator(importTokens);
+                            importWowByteCode = importTranslator.translate();
+                        } catch (std::string e) {
+                            std::cerr << "Not translated imported file\n"  // TODO errorSream
+                                         << e;
+                        }
+                        if (bigScopes.back().classes.count(className)){
+                            throw std::string("invalid import, class already exist"); // TODO strnum
+                        }
+                        bigScopes.back().classes[className].first = scopes.back().classes[className].first = importWowByteCode;
+                        bigScopes.back().classes[className].second = scopes.back().classes[className].second = true;
+                    }
+                    catch (std::string e) {
+
+                    }
+                    break;
+                }
                 case Element::PLUS: {
                     if (getItemOfCurStack(1)->type == wowobj::INT
                         && getItemOfCurStack(0)->type == wowobj::INT) {

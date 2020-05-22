@@ -1,0 +1,3 @@
+class IN:
+    HUIN = 228
+h = IN()

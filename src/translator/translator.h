@@ -564,7 +564,11 @@ private:
                         else {
                             addElement({-1, Element::CREATE_CLASS, 0, 0, 0.0, nowToken->value});
                         }
+                    } else{
+                        addElement({0, Element::GET_VALUE});
+                        nowPoliz->operations[nowPoliz->operations.size() - 1].stringValue = nowToken->value;
                     }
+
                 }
                     /*else if (!isDefines(name) && isNextTokenOperator("(")) {
                         if (bigScopes.back().type == Scope::FUNC) {
@@ -833,6 +837,7 @@ private:
                     getToken();
                     if (nowToken->type == Token::NAME) {
                         classname = nowToken->value;
+                        initClass(*nowToken);
                         getToken();
                     }
                     else {
@@ -842,8 +847,14 @@ private:
                     }
                 }
             }
+            std::string uclassname = "__" + classname;
             addElement({0, Element::IMPORT, 0,
-                        static_cast<int>(filename.size()), 0, filename + classname});
+                        static_cast<int>(filename.size()), 0, filename + uclassname});
+            addElement({0, Element::GET_VALUE, 0,
+                        0, 0, classname});
+            addElement({0, Element::CREATE_CLASS, 0,
+                        0, 0, uclassname});
+            addElement({0, Element::COPY});
             return true;
         }
         return false;
