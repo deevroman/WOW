@@ -33,7 +33,8 @@ public:
         MUL_INPLACE, DIV_INPLACE, INTDIV_INPLACE, MOD_INPLACE,
         OR_BIT_INPLACE, AND_BIT_INPLACE,
         XOR_INPLACE, LEFT_SHIFT_INPLACE,
-        RIGHT_SHIFT_INPLACE, MAKE_LIST
+        RIGHT_SHIFT_INPLACE, MAKE_LIST,
+        IMPORT
     } TYPE;
     int posJump = 0;
     int intValue = 0;

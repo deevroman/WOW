@@ -66,7 +66,8 @@ public:
         indexNowToken = 0;
         nowToken = &tokens[0];
         levels = {0};
-        std::vector<std::string> reservedFunctions = {"print", "input", "int", "str", "bool", "len", "max", "min", "double"};
+        std::vector<std::string> reservedFunctions = {"print", "input", "int", "str", "bool", "len", "max", "min",
+                                                      "double"};
         std::vector<std::string> reservedClasses = {"list", "dict", "set"};
         scopes.push_back({});
         bigScopes.push_back({});
@@ -559,7 +560,8 @@ private:
                             throw Exception("semantic error: " + nowToken->value + " call undefined as function",
                                             nowToken->numLine,
                                             nowToken->numPos);
-                        } else{
+                        }
+                        else {
                             addElement({-1, Element::CREATE_CLASS, 0, 0, 0.0, nowToken->value});
                         }
                     }
@@ -681,13 +683,11 @@ private:
             else {
                 auto name = nowToken->value;
                 getToken();
-                if(isOperator("(")){
+                if (isOperator("(")) {
                     addElement({-1, Element::EVAL_METHOD, 0, 0, 0.0, name});
-                } else {
-                    addElement({-1, Element::GET_FIELD, 0, 0, 0.0, name});
                 }
-                if(nowToken->type == Token::BEGIN_LINE) {
-                    addElement({-1, Element::CLEAR_STACK});
+                else {
+                    addElement({-1, Element::GET_FIELD, 0, 0, 0.0, name});
                 }
                 return true;
             }
@@ -825,11 +825,14 @@ private:
                                 nowToken->numLine,
                                 nowToken->numPos);
             }
+            std::string filename = nowToken->value;
+            std::string classname = filename;
             getToken();
             if (!isEnd()) {
                 if (isKeyword("as")) {
                     getToken();
                     if (nowToken->type == Token::NAME) {
+                        classname = nowToken->value;
                         getToken();
                     }
                     else {
@@ -839,6 +842,8 @@ private:
                     }
                 }
             }
+            addElement({0, Element::IMPORT, 0,
+                        static_cast<int>(filename.size()), 0, filename + classname});
             return true;
         }
         return false;
@@ -958,6 +963,7 @@ private:
             else if (operation == "%=") {
                 addElement({0, Element::MOD_INPLACE});
             }
+            // clear stack is a trash
         }
         else {
             while (isOperator("=")) {
@@ -1307,23 +1313,23 @@ private:
                             nowToken->numPos);
         getToken();
         // ~~~
-            addElement({0, Element::GET_VALUE, 0, 0, 0, nameArray});
+        addElement({0, Element::GET_VALUE, 0, 0, 0, nameArray});
         // ~~~
         if (!readTest() && checkDefinedTestNames())
             throw Exception("invalid for condition",
                             nowToken->numLine,
                             nowToken->numPos);
         // ~~~
-            addElement({0, Element::COPY});
+        addElement({0, Element::COPY});
 
-            addElement({0, Element::GET_VALUE, 0, 0, 0, nameLen});
-            addElement({0, Element::GET_VALUE, 0, 0, 0, nameArray});
-            addElement({0, Element::CALL_FUNC, 0, 0, 0, "len"});
-            addElement({0, Element::COPY});
+        addElement({0, Element::GET_VALUE, 0, 0, 0, nameLen});
+        addElement({0, Element::GET_VALUE, 0, 0, 0, nameArray});
+        addElement({0, Element::CALL_FUNC, 0, 0, 0, "len"});
+        addElement({0, Element::COPY});
 
-            addElement({0, Element::GET_VALUE, 0, 0, 0, nameIter});
-            addElement({0, Element::GET_VALUE_INT});
-            addElement({0, Element::COPY});
+        addElement({0, Element::GET_VALUE, 0, 0, 0, nameIter});
+        addElement({0, Element::GET_VALUE_INT});
+        addElement({0, Element::COPY});
         // ~~~
         if (!isBeginBlock(":"))
             throw Exception("expected : after for statement",
@@ -1331,20 +1337,20 @@ private:
                             nowToken->numPos);
         getToken();
         // ~~~
-            int stmtBeginPos = nowPoliz->operations.size();
-            addElement({0, Element::GET_VALUE, 0, 0, 0, nameIter});
-            addElement({0, Element::GET_VALUE, 0, 0, 0, nameLen});
-            addElement({0, Element::CMP_LESS});
-            int jmpToEnd = nowPoliz->operations.size();
-            addElement({0, Element::NEGATIVE_JMP});
+        int stmtBeginPos = nowPoliz->operations.size();
+        addElement({0, Element::GET_VALUE, 0, 0, 0, nameIter});
+        addElement({0, Element::GET_VALUE, 0, 0, 0, nameLen});
+        addElement({0, Element::CMP_LESS});
+        int jmpToEnd = nowPoliz->operations.size();
+        addElement({0, Element::NEGATIVE_JMP});
         // ~~~
 
         // ~~~
-            addElement({0, Element::GET_VALUE, 0, 0, 0, name});
-            addElement({0, Element::GET_VALUE, 0, 0, 0, nameArray});
-            addElement({0, Element::GET_VALUE, 0, 0, 0, nameIter});
-            addElement({0, Element::INDEX_VALUE});
-            addElement({0, Element::COPY});
+        addElement({0, Element::GET_VALUE, 0, 0, 0, name});
+        addElement({0, Element::GET_VALUE, 0, 0, 0, nameArray});
+        addElement({0, Element::GET_VALUE, 0, 0, 0, nameIter});
+        addElement({0, Element::INDEX_VALUE});
+        addElement({0, Element::COPY});
         // ~~~
         if (!readSuite())
             throw Exception("invalid for suite",
@@ -1353,10 +1359,10 @@ private:
 
         popScope();
         // ~~~
-            addElement({0, Element::GET_VALUE, 0, 0, 0, nameIter});
-            addElement({0, Element::GET_VALUE_INT, 0, 1});
-            addElement({0, Element::PLUS_INPLACE});
-            addElement({0, Element::JMP, stmtBeginPos});
+        addElement({0, Element::GET_VALUE, 0, 0, 0, nameIter});
+        addElement({0, Element::GET_VALUE_INT, 0, 1});
+        addElement({0, Element::PLUS_INPLACE});
+        addElement({0, Element::JMP, stmtBeginPos});
         int withElse = false;
         addElement({0, Element::END_SCOPE});
         // ~~~
@@ -1364,8 +1370,8 @@ private:
             readBeginLine();
             getToken();
             // ~~~
-                withElse = true;
-                addElement({0, Element::BEGIN_SCOPE});
+            withElse = true;
+            addElement({0, Element::BEGIN_SCOPE});
             // ~~~
             scopes.push_back({});
             if (!isBeginBlock(":"))

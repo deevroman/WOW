@@ -5,6 +5,7 @@
 #include "token.h"
 #include <vector>
 #include <string>
+#include <algorithm>
 
 
 class Tokenizer {
