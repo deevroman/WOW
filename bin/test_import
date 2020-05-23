@@ -1,3 +1,5 @@
 class IN:
-    HUIN = 228
+    a = 228
+    def lol():
+        return a
 h = IN()
