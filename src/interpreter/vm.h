@@ -450,7 +450,7 @@ private:
                             }
                             else if (getItemOfCurStack()->type == wowobj::BOOL) {
                                 getItemOfCurStack(1)->value = static_cast<void *>(new bool(
-                                        *static_cast<double *>(getItemOfCurStack()->value)));
+                                        *static_cast<bool *>(getItemOfCurStack()->value)));
                             }
                             else if (getItemOfCurStack()->type == wowobj::NONE) {
                                 // nothing

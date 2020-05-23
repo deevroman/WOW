@@ -48,7 +48,6 @@ class Poliz {
 public:
     std::map<std::string, Poliz *> funcs;
     std::map<std::string, Poliz *> classes;
-    std::vector<Poliz *> otherScopes;
     std::vector<Element> operations;
 };
 
