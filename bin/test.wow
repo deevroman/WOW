@@ -1,3 +1,4 @@
 import test_import as kek
 
 print(kek.h.lol())
+print(kek.h.lol())

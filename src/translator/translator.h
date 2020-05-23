@@ -1144,6 +1144,7 @@ private:
         bigScopes.push_back({Scope::FUNC, nowToken->value, 0, 1});
         bigScopes.back().classes = last.classes;
         bigScopes.back().functions = last.functions;
+        bigScopes.back().variables = last.variables;
         scopes.push_back({Scope::FUNC, nowToken->value});
         getToken();
         int countParams = 0;

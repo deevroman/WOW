@@ -466,8 +466,8 @@ private:
                             break;
                         case wowobj::USER_CLASS:
                             getItemOfCurStack(1)->type = wowobj::USER_CLASS;
-                            getItemOfCurStack(1)->value = new std::map<std::string, wowobj *>(
-                                    *static_cast<std::map<std::string, wowobj *> *>(getItemOfCurStack()->value));
+                            getItemOfCurStack(1)->value = new std::pair<Poliz *, std::map<std::string, wowobj *>>(
+                                    *static_cast<std::pair<Poliz *, std::map<std::string, wowobj *>> *>(getItemOfCurStack()->value));
                             curStack.pop_back();
                             break;
                         case wowobj::DICT:
@@ -693,19 +693,20 @@ private:
                     bigScopes.push_back({scopes.back().funcs, scopes.back().classes, {}, scope::CLASS});
                     scopes.push_back({{}, {}, {}, scope::CLASS});
                     auto fields = runLevel();
-                    fields["__name__"] = new wowobj(wowobj::STRING, getItemOfCurStack()->value);
+                    fields["__name__"] = new wowobj(wowobj::STRING, new std::string(curOp.stringValue));
                     curStack.pop_back();
                     curStack.push_back(new wowobj(wowobj::USER_CLASS,
-                                                  static_cast<void *>(new std::map<std::string, wowobj *>(
-                                                          fields))));
+                                                  static_cast<void *>(new std::pair<Poliz *, std::map<std::string, wowobj *>>(
+                                                          {bigScopes.back().classes[curOp.stringValue].first,
+                                                           fields}))));
 
                     break;
                 }
                 case Element::GET_FIELD: {
-                    auto tmp = *static_cast<std::map<std::string, wowobj *> *>(getItemOfCurStack()->value);
-                    if (tmp.count(curOp.stringValue)) {
+                    auto tmp = *static_cast<std::pair<Poliz *, std::map<std::string, wowobj *>> *>(getItemOfCurStack()->value);
+                    if (tmp.second.count(curOp.stringValue)) {
                         curStack.pop_back();
-                        curStack.push_back(tmp[curOp.stringValue]);
+                        curStack.push_back(tmp.second[curOp.stringValue]);
                     }
                     else {
                         throw Exception("undefined field of class", curOp.numLine, curOp.numPos);
@@ -735,12 +736,12 @@ private:
                         curStack.push_back(new wowobj(wowobj::LIST, static_cast<void *>(tmp2)));
                     }
                     else if (getItemOfCurStack()->type == wowobj::USER_CLASS) {
-                        auto tid = static_cast<std::map<std::string, wowobj *> *>(getItemOfCurStack(
+                        auto tid = static_cast<std::pair<Poliz *, std::map<std::string, wowobj *>> *>(getItemOfCurStack(
                                 curOp.countParams)->value);
-                        stackTrace.push_back({curOp.stringValue, bigScopes.back().funcs[curOp.stringValue].first});
-
-                        bigScopes.push_back({{}, {}, *tid});
-                        for (const auto &now : bigScopes.back().classes[curOp.stringValue].first->funcs) {
+                        stackTrace.push_back({curOp.stringValue, tid->first->funcs[curOp.stringValue]});
+                        auto className = static_cast<std::string *>(tid->second["__name__"]->value);
+                        bigScopes.push_back({{}, {}, tid->second});
+                        for (const auto &now : tid->first->funcs) {
                             bigScopes.back().funcs[now.first] = {now.second, false};
                         }
                         bigScopes.back().type = scope::FUNC;
@@ -748,6 +749,7 @@ private:
                         for (auto &now : scopes.back().funcs) {
                             now.second.second = false;
                         }
+                        curStack.pop_back();
                         runLevel();
                     }
                     else {
