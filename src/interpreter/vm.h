@@ -10,6 +10,7 @@
 #include "../utils/poliz.h"
 #include "../utils/wowobj.h"
 #include "../utils/exception.h"
+#include "../fread/fread.h"
 
 #define COMPARE(OPERATION) \
 if (getItemOfCurStack(1)->type == getItemOfCurStack()->type && getItemOfCurStack(1)->type == wowobj::INT) { \
@@ -1035,24 +1036,24 @@ private:
                         int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) +
                                     *(static_cast<int *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<int *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else if (getItemOfCurStack(1)->type == wowobj::DOUBLE
                              && getItemOfCurStack(0)->type == wowobj::DOUBLE) {
                         double value = *(static_cast<double *>(getItemOfCurStack(1)->value)) +
                                        *(static_cast<double *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<double *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else if (getItemOfCurStack(1)->type == wowobj::STRING
                              && getItemOfCurStack()->type == wowobj::STRING) {
                         std::string value = (*(static_cast<std::string *>(getItemOfCurStack(1)->value)))
                                             + (*(static_cast<std::string *>(getItemOfCurStack()->value)));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<std::string *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else {
                         throw Exception("invalid type for operation", curOp.numLine, curOp.numPos);
@@ -1065,16 +1066,16 @@ private:
                         int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) -
                                     *(static_cast<int *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<int *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else if (getItemOfCurStack(1)->type == wowobj::DOUBLE
                              && getItemOfCurStack(0)->type == wowobj::DOUBLE) {
                         double value = *(static_cast<double *>(getItemOfCurStack(1)->value)) -
                                        *(static_cast<double *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<double *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else {
                         throw Exception("invalid type for operation", curOp.numLine, curOp.numPos);
@@ -1087,16 +1088,16 @@ private:
                         int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) *
                                     *(static_cast<int *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<int *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else if (getItemOfCurStack(1)->type == wowobj::DOUBLE
                              && getItemOfCurStack(0)->type == wowobj::DOUBLE) {
                         double value = *(static_cast<double *>(getItemOfCurStack(1)->value)) *
                                        *(static_cast<double *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<double *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else {
                         throw Exception("invalid type for operation", curOp.numLine, curOp.numPos);
@@ -1108,18 +1109,18 @@ private:
                         double value = (double) *(static_cast<int *>(getItemOfCurStack(1)->value)) /
                                        *(static_cast<int *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         curStack.back()->type = wowobj::DOUBLE;
                         *static_cast<double *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else if (getItemOfCurStack(1)->type == wowobj::DOUBLE
                              && getItemOfCurStack(0)->type == wowobj::DOUBLE) {
                         double value = *(static_cast<double *>(getItemOfCurStack(1)->value)) /
                                        *(static_cast<double *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         curStack.back()->type = wowobj::DOUBLE;
                         *static_cast<double *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else {
                         throw Exception("invalid type for operation", curOp.numLine, curOp.numPos);
@@ -1132,8 +1133,8 @@ private:
                         int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) %
                                     *(static_cast<int *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<int *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else {
                         throw Exception("invalid type for operation", curOp.numLine, curOp.numPos);
@@ -1146,8 +1147,8 @@ private:
                         int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) /
                                     *(static_cast<int *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<int *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else {
                         throw Exception("invalid type for operation", curOp.numLine, curOp.numPos);
@@ -1160,8 +1161,8 @@ private:
                         int value = pow(*(static_cast<int *>(getItemOfCurStack(1)->value)),
                                         *(static_cast<int *>(getItemOfCurStack()->value)));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<int *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else {
                         throw Exception("invalid type for operation", curOp.numLine, curOp.numPos);
