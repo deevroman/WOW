@@ -966,8 +966,8 @@ private:
                         int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) ^
                                     *(static_cast<int *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<int *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else {
                         throw Exception("invalid type for operation", curOp.numLine, curOp.numPos);
@@ -980,8 +980,8 @@ private:
                         int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) |
                                     *(static_cast<int *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<int *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else {
                         throw Exception("invalid type for operation", curOp.numLine, curOp.numPos);
@@ -994,8 +994,8 @@ private:
                         int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) &
                                     *(static_cast<int *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<int *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else {
                         throw Exception("invalid type for operation", curOp.numLine, curOp.numPos);
@@ -1008,8 +1008,8 @@ private:
                         int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) <<
                                                                                        *(static_cast<int *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<int *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else {
                         throw Exception("invalid type for operation", curOp.numLine, curOp.numPos);
@@ -1022,8 +1022,8 @@ private:
                         int value = *(static_cast<int *>(getItemOfCurStack(1)->value)) >>
                                                                                        *(static_cast<int *>(getItemOfCurStack()->value));
                         curStack.pop_back();
-                        curStack.pop_back();
                         *static_cast<int *>(curStack.back()->value) = value;
+                        curStack.pop_back();
                     }
                     else {
                         throw Exception("invalid type for operation", curOp.numLine, curOp.numPos);
