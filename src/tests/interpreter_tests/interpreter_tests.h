@@ -2,7 +2,7 @@
 #define WOW_INTERPRETER_TESTS_H
 
 #include "../../interpreter/interpreter.h"
-#include "../../fread/fread.h"
+#include "../../utils/fread.h"
 #include <iostream>
 #include <string>
 

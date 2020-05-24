@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <vector>
-#include "../../fread/fread.h"
+#include "../../utils/fread.h"
 #include "../../tokenizer/tokenizer.h"
 
 #include "../../external/ThorsSerializer/ThorSerialize/Traits.h"

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include "../fread/fread.h"
+#include "../utils/fread.h"
 #include "tokenizer.h"
 #include <fstream>
 

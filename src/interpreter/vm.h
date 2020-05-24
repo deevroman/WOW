@@ -10,7 +10,7 @@
 #include "../utils/poliz.h"
 #include "../utils/wowobj.h"
 #include "../utils/exception.h"
-#include "../fread/fread.h"
+#include "../utils/fread.h"
 
 #define COMPARE(OPERATION) \
 if (getItemOfCurStack(1)->type == getItemOfCurStack()->type && getItemOfCurStack(1)->type == wowobj::INT) { \

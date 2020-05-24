@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "../fread/fread.h"
+#include "../utils/fread.h"
 #include "interpreter.h"
 
 int main(int argc, char *argv[]) {

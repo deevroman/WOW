@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../fread/fread.h"
+#include "../utils/fread.h"
 #include "../tokenizer/tokenizer.h"
 #include "../translator/translator.h"
 
