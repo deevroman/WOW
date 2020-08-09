@@ -507,6 +507,8 @@ private:
                             else {
                                 throw Exception("index error", curOp.numLine, curOp.numPos);
                             }
+                        } else {
+                            throw Exception("no indexing variable", curOp.numLine, curOp.numPos);
                         }
                     }
                     break;

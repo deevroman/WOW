@@ -1,5 +1,2 @@
-a = [[1, 2, 3], [14, 15, 16]]
-for i in a:
-    for j in i:
-        print(j)
-        print(' ')
+s = 'lol'
+print(s[1])

@@ -1,6 +1,0 @@
-[submodule "src/external/ThorsSerializer"]
-	path = src/external/ThorsSerializer
-	url = https://github.com/Loki-Astari/ThorsSerializer.git
-[submodule "src/external/header-only"]
-	path = src/external/header-only
-	url = https://github.com/Loki-Astari/ThorsSerializer.git
