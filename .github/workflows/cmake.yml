@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        artifact: ["bin/WOW"]
+        artifact: ["WOW"]
     steps:
     - uses: actions/checkout@v2
 
@@ -40,7 +40,7 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v1
       with:
-        path: ./${{ matrix.artifact }}
+        path: ./bin/${{ matrix.artifact }}
         name: ${{ matrix.artifact }}
 
     - name: Upload release asset
