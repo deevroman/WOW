@@ -16,8 +16,15 @@ jobs:
     # well on Windows or Mac.  You can convert this to a matrix build if you need
     # cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ubuntu-latest
-
+    # runs-on: ubuntu-latest
+    
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        artifact: ["bin/WOW"]
     steps:
     - uses: actions/checkout@v2
 
@@ -30,6 +37,23 @@ jobs:
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} ${{github.workspace}}/src
 
+    - name: Upload
+      uses: actions/upload-artifact@v1
+      with:
+        path: ./${{ matrix.artifact }}
+        name: ${{ matrix.artifact }}
+
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./${{ matrix.artifact }}
+        asset_name: ${{ matrix.artifact }}
+        asset_content_type: application/bin
+        
+        
 #     - name: Test
 #       working-directory: ${{github.workspace}}/build
 #       # Execute tests defined by the CMake configuration.  
