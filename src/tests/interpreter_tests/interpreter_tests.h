@@ -24,7 +24,7 @@ private:
     int COUNT_FAILED_TESTS_P = 0;
     int COUNT_FAILED_TESTS_N = 0;
 
-    const std::string prefixPath = "../tests_files/interpreter_tests/";
+    const std::string prefixPath = "tests_files/interpreter_tests/";
 
     void loadCountTests() {
         COUNT_TESTS_P = stoi(readFile(prefixPath + "positives/countTests"));
