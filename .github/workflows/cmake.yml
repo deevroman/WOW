@@ -26,7 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        artifact: ["WOW"]
+        artifact: ["${{ matrix.os }}_WOW"]
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
@@ -48,7 +48,7 @@ jobs:
         prerelease: true
         title: "Development Build"
         files: |
-          bin/WOW
+          bin/${{ matrix.artifact }}
       
 #     - name: Create Release
 #       id: create_release
