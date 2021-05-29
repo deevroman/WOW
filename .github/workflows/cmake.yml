@@ -2,7 +2,7 @@ name: CMake
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master,  deevroman-cmake-1 ]
     tags:
       - 'v*'
   pull_request:
