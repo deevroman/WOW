@@ -76,7 +76,7 @@ private:
                 case Element::OR: {
                     if (getItemOfCurStack(1)->type == wowobj::BOOL
                         && getItemOfCurStack(0)->type == wowobj::BOOL) {
-                        bool value = *(static_cast<bool *>(getItemOfCurStack(1)->value)) or
+                        bool value = *(static_cast<bool *>(getItemOfCurStack(1)->value)) ||
                                      *(static_cast<bool *>(getItemOfCurStack()->value));
                         auto tmpobj = new wowobj(wowobj::BOOL, new bool(value));
                         curStack.pop_back();
@@ -86,7 +86,7 @@ private:
 
                     else if (getItemOfCurStack(1)->type == wowobj::INT
                              && getItemOfCurStack(0)->type == wowobj::INT) {
-                        bool value = *(static_cast<int *>(getItemOfCurStack(1)->value)) or
+                        bool value = *(static_cast<int *>(getItemOfCurStack(1)->value)) ||
                                      *(static_cast<int *>(getItemOfCurStack()->value));
                         auto tmpobj = new wowobj(wowobj::BOOL, new bool(value));
                         curStack.pop_back();
@@ -101,7 +101,7 @@ private:
                 case Element::AND: {
                     if (getItemOfCurStack(1)->type == wowobj::BOOL
                         && getItemOfCurStack(0)->type == wowobj::BOOL) {
-                        bool value = *(static_cast<bool *>(getItemOfCurStack(1)->value)) and
+                        bool value = *(static_cast<bool *>(getItemOfCurStack(1)->value)) &&
                                      *(static_cast<bool *>(getItemOfCurStack()->value));
                         auto tmpobj = new wowobj(wowobj::BOOL, new bool(value));
                         curStack.pop_back();
@@ -110,7 +110,7 @@ private:
                     }
                     else if (getItemOfCurStack(1)->type == wowobj::INT
                              && getItemOfCurStack(0)->type == wowobj::INT) {
-                        bool value = *(static_cast<int *>(getItemOfCurStack(1)->value)) and
+                        bool value = *(static_cast<int *>(getItemOfCurStack(1)->value)) &&
                                      *(static_cast<int *>(getItemOfCurStack()->value));
                         auto tmpobj = new wowobj(wowobj::BOOL, new bool(value));
                         curStack.pop_back();
