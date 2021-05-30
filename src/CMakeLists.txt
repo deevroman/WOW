@@ -12,4 +12,4 @@ add_executable(WOW
         interpreter/interpreter.h
         utils/str_split.h)
 
-SET(EXECUTABLE_OUTPUT_PATH "../bin")
+SET(EXECUTABLE_OUTPUT_PATH "../bin/${CMAKE_SYSTEM}")
