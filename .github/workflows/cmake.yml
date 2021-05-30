@@ -56,7 +56,9 @@ jobs:
         prerelease: true
         title: "Development Build"
         files: |
-          *-wow*
+          ubuntu-latest-wow
+          macos-latest-wow
+          windows-latest-wow
     
         
 #     - name: Test
