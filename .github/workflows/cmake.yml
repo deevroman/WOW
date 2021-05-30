@@ -40,7 +40,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.os }}-wow
-        path: bin/*/*
+        path: bin/*
         retention-days: 1
   create_release:
     name: "Prelease"
