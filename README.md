@@ -1,6 +1,5 @@
 # WOW
-WOW programming language. Cross-platform, python
-
+WOW programming language.
 
 #### [Download for your OS](https://github.com/deevroman/WOW/releases)
 
