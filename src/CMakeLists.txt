@@ -12,5 +12,5 @@ add_executable(WOW
         interpreter/interpreter.h
         utils/str_split.h)
 
-set(EXECUTABLE_OUTPUT_PATH "../bin/${CMAKE_SYSTEM}")
+set(EXECUTABLE_OUTPUT_PATH "../bin")
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}_${CMAKE_SYSTEM}")
