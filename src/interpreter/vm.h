@@ -125,7 +125,7 @@ private:
                 case Element::NOT: {
                     if (getItemOfCurStack(1)->type == wowobj::BOOL
                         && getItemOfCurStack(0)->type == wowobj::BOOL) {
-                        bool value = not*(static_cast<bool *>(getItemOfCurStack()->value));
+                        bool value = !*(static_cast<bool *>(getItemOfCurStack()->value));
                         auto tmpobj = new wowobj(wowobj::BOOL, new bool(value));
                         curStack.pop_back();
                         curStack.pop_back();
