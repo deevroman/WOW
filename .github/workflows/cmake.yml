@@ -40,7 +40,6 @@ jobs:
     - name: Build
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} ${{github.workspace}}/src
-      
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -48,7 +47,7 @@ jobs:
         prerelease: true
         title: "Development Build"
         files: |
-          bin/*
+          bin/${{ matrix.os }}
       
 #     - name: Create Release
 #       id: create_release
