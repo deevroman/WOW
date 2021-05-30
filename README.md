@@ -1,19 +1,18 @@
 # WOW
-WOW is wow programming language.
-
-Authors: @0andrejj0, @deevroman
+WOW programming language. Cross-platform, python
 
 
-### How build
+#### [Download for your OS](https://github.com/deevroman/WOW/releases)
+
+#### Build from source
 
 ```
 git clone https://github.com/deevroman/WOW.git
-cd WOW
-cmake CMakeLists.txt && make
+cd WOW/build
+cmake ../ && make
 ```
 
-
-### Hello, World!
+#### Code example
 
 __hello.wow__
 
