@@ -20,3 +20,7 @@ __hello.wow__
 __Run__
 
 ```./WOW hello.wow```
+
+
+Authors: [@0andrejj0](https://github.com/0andrejj0), [@deevroman](https://github.com/deevroman)
+
