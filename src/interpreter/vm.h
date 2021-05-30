@@ -139,7 +139,7 @@ private:
                 case Element::XOR: {
                     if (getItemOfCurStack(1)->type == wowobj::BOOL
                         && getItemOfCurStack(0)->type == wowobj::BOOL) {
-                        bool value = *(static_cast<bool *>(getItemOfCurStack(1)->value)) xor
+                        bool value = *(static_cast<bool *>(getItemOfCurStack(1)->value)) ^
                                      *(static_cast<bool *>(getItemOfCurStack()->value));
                         auto tmpobj = new wowobj(wowobj::BOOL, new bool(value));
                         curStack.pop_back();
